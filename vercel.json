@@ -1,0 +1,10 @@
+{
+  "buildCommand": "prisma generate && (prisma db push --accept-data-loss || echo 'Database push failed, continuing build...') && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["hkg1"],
+  "env": {
+    "PRISMA_GENERATE_DATAPROXY": "true"
+  }
+}
+

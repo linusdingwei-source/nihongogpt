@@ -1,0 +1,223 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  credits       Float     @default(0) // 支持小数计费，100次调用=1credit
+  isAnonymous   Boolean   @default(false) // 是否为临时匿名用户
+  anonymousId   String?   @unique // 临时用户 ID（用于 localStorage/cookie 识别）
+  role          String    @default("user") // 用户角色: user, admin
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  cards         Card[]
+  decks         Deck[]
+  sources       Source[]
+  sourceFolders SourceFolder[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([isAnonymous])
+  @@index([anonymousId])
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeId      String   @unique
+  amount        Int      // Amount in cents
+  credits       Int      // Credits purchased
+  status        String   // pending, completed, failed
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   // email or IP address
+  type      String   // email or ip
+  count     Int      @default(1)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([key, type])
+  @@index([expiresAt])
+}
+
+model Deck {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String   // 牌组名称
+  cards     Card[]   // 关联的卡片
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name]) // 每个用户的牌组名称唯一
+  @@index([userId])
+}
+
+model Card {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deckId        String?
+  deck          Deck?    @relation(fields: [deckId], references: [id], onDelete: SetNull)
+  
+  // 卡片内容
+  frontContent  String   // 日文原文
+  backContent   String   @db.Text // HTML 格式的分析内容（翻译、解释等）
+  cardType      String   @default("问答题（附翻转卡片）")
+  category      String   @default("CARD") // CARD, NOTE
+  
+  // 音频相关
+  audioUrl      String?  // 音频文件 URL（存储在云存储或本地）
+  audioFilename String?  // 音频文件名
+  timestamps    Json?    // 时间戳数据（字符级对齐）
+  kanaText      String?  // 用于 TTS 的假名文本
+  
+  // 间隔重复学习字段 (SM-2 算法)
+  nextReviewAt  DateTime? // 下次复习时间
+  interval      Int       @default(0) // 当前间隔（天数）
+  easeFactor    Float     @default(2.5) // 难度因子
+  reviewCount   Int       @default(0) // 复习次数
+  lastReviewedAt DateTime? // 上次复习时间
+  
+  // 元数据
+  deckName      String   @default("default") // 牌组名称（冗余字段，用于快速查询）
+  tags          String[] // 标签数组
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  sourceId      String?
+  source        Source?  @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  pageNumber    Int?     // PDF page number (1-indexed) for page-level association
+  
+  @@index([userId])
+  @@index([deckName])
+  @@index([deckId])
+  @@index([createdAt])
+  @@index([nextReviewAt]) // 索引用于查询待复习卡片
+}
+
+model Source {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 目录关联
+  folderId    String?  // 所属目录ID，null表示根目录
+  folder      SourceFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  
+  // 父资源关联（用于PDF页面图片与原始PDF的关联）
+  parentSourceId String?  // 父资源ID
+  parentSource   Source?  @relation("SourceHierarchy", fields: [parentSourceId], references: [id], onDelete: Cascade)
+  childSources   Source[] @relation("SourceHierarchy")
+  
+  // 来源信息
+  name        String   // 来源名称（用户可编辑）
+  type        String   @default("text") // 来源类型: text, file, url, etc.
+  content     String?  @db.Text // 文本内容（如果是文本类型）
+  contentUrl  String?  // 内容存储 URL（存储在 Vercel Blob 或其他云存储）
+  fileUrl     String?  // 文件 URL（如果是文件类型）
+  fileName    String?  // 文件名
+  pageNumber  Int?     // PDF页码（用于页面图片）
+  
+  cards       Card[]
+  
+  // 元数据
+  mimeType    String?  // MIME 类型
+  size        Int?     // 文件大小（字节）
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@index([folderId])
+  @@index([parentSourceId])
+  @@index([createdAt])
+}
+
+model SourceFolder {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String   // 目录名称
+  parentId    String?  // 父目录ID，null表示根目录
+  parent      SourceFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    SourceFolder[] @relation("FolderHierarchy")
+  
+  sources     Source[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, name, parentId]) // 同一目录下名称唯一
+  @@index([userId])
+  @@index([parentId])
+}

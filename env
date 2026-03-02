@@ -1,0 +1,38 @@
+# Database - Supabase
+# Connection pooling (for application queries)
+DATABASE_URL="postgresql://postgres.qkvgeuallarmbcfjzkko:Fydw%40715@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# 直接连接（用于迁移）- 使用正确的主机名和用户名
+DIRECT_URL="postgresql://postgres:Fydw%40715@db.qkvgeuallarmbcfjzkko.supabase.co:5432/postgres"
+# Direct connection (for migrations)
+# DIRECT_URL="postgresql://postgres.qkvgeuallarmbcfjzkko:Fydw%40715@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
+# NextAuth
+AUTH_SECRET="your-secret-key-here-generate-with-openssl-rand-base64-32"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# Email (SMTP)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASSWORD="your-app-password"
+SMTP_FROM="your-email@gmail.com"
+
+# Stripe 支付
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+STRIPE_PRICE_ID_STARTER="price_..."
+STRIPE_PRICE_ID_PRO="price_..."
+STRIPE_PRICE_ID_PREMIUM="price_..."
+
+# OpenAI TTS (可选)
+OPENAI_API_KEY="your-openai-api-key"
+
+# EXT_PUBLIC_SITE_URL="http://localhost:3000"
+GOOGLE_SITE_VERIFICATION="your-google-verification-code"
+
+# Google Analytics
+NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"

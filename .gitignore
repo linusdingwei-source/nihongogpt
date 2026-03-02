@@ -1,0 +1,41 @@
+# --- 敏感配置 (绝对不能提交) ---
+.env
+.env*.local
+env/
+# 保留示例文件是好的做法
+!.env.aliyun.example
+!.env.example
+
+# --- 依赖包 (体积巨大，不需要提交) ---
+node_modules/
+package-lock.json
+# 注意：通常建议提交 package-lock.json 以锁定版本。
+# 如果你确定不想提交锁文件，请保持上面这行；否则删除上面这行。
+
+# --- Next.js 构建产物 ---
+.next/
+out/
+build/
+dist/
+.vercel/
+
+# --- IDE 和系统文件 ---
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# --- TypeScript 缓存 ---
+*.tsbuildinfo
+next-env.d.ts
+
+# --- 日志文件 ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- 其它可能的临时文件 (根据你的列表) ---
+.dockerignore
+.qoder/
