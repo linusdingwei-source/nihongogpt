@@ -32,46 +32,50 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   // 在 Vercel 上需要信任主机
   trustHost: true,
-  // 修复 PKCE cookie 配置
-  cookies: {
-    pkceCodeVerifier: {
-      name: '__Secure-authjs.pkce.code_verifier',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        // 不设置 domain，让浏览器自动处理
+  // Cookie 配置：本地开发用普通名称（__Host- / __Secure- 要求 HTTPS），生产环境用安全前缀
+  cookies: (function () {
+    const isDev = process.env.NODE_ENV !== 'production';
+    const prefix = isDev ? 'authjs' : '__Secure-authjs';
+    const hostPrefix = isDev ? 'authjs' : '__Host-authjs';
+    return {
+      pkceCodeVerifier: {
+        name: `${prefix}.pkce.code_verifier`,
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: !isDev,
+        },
       },
-    },
-    state: {
-      name: '__Secure-authjs.state',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
+      state: {
+        name: `${prefix}.state`,
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: !isDev,
+        },
       },
-    },
-    callbackUrl: {
-      name: '__Secure-authjs.callback_url',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
+      callbackUrl: {
+        name: `${prefix}.callback_url`,
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: !isDev,
+        },
       },
-    },
-    csrfToken: {
-      name: '__Host-authjs.csrf-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
+      csrfToken: {
+        name: `${hostPrefix}.csrf-token`,
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: !isDev,
+        },
       },
-    },
-  },
+    };
+  })(),
   // 启用调试模式（生产环境可以关闭）
   debug: process.env.NODE_ENV === 'development',
   providers: [

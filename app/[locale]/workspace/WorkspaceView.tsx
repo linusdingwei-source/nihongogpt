@@ -265,9 +265,9 @@ export function WorkspaceView(props: WorkspaceViewProps) {
                   </div>
                   <div className="flex-1 overflow-auto">
                     {comparisonSource ? (
-                      comparisonSource.type === 'pdf' ? (
+                      (comparisonSource.type === 'pdf' || comparisonSource.name?.toLowerCase().endsWith('.pdf')) ? (
                         <iframe
-                          src={comparisonSource.url}
+                          src={`/api/sources/${comparisonSource.id}/view`}
                           className="w-full h-full"
                           title={comparisonSource.name}
                         />

@@ -86,12 +86,15 @@ model Order {
   id            String   @id @default(cuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stripeId      String   @unique
-  amount        Int      // Amount in cents
+  stripeId      String   @unique  // Stripe: session id; Alipay/WeChat: out_trade_no
+  provider      String   @default("stripe") // stripe | alipay | wechat
+  amount        Int      // Amount in cents (Stripe) or 分 (Alipay/WeChat: 1元=100)
   credits       Int      // Credits purchased
   status        String   // pending, completed, failed
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([provider])
 }
 
 model RateLimit {
@@ -107,13 +110,14 @@ model RateLimit {
 }
 
 model Deck {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String   // 牌组名称
-  cards     Card[]   // 关联的卡片
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String   // 牌组名称
+  coverImageUrl  String?  // 牌组展示图（可选）
+  cards          Card[]   // 关联的卡片
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@unique([userId, name]) // 每个用户的牌组名称唯一
   @@index([userId])

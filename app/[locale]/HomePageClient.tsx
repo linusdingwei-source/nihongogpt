@@ -11,6 +11,7 @@ import { trackPageViewEvent, trackButtonClick } from '@/lib/analytics';
 interface Deck {
   id: string;
   name: string;
+  coverImageUrl?: string | null;
   cardCount: number;
   createdAt: string;
   updatedAt: string;
@@ -28,6 +29,35 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
   const [credits, setCredits] = useState<number | null>(null);
+
+  // 创建牌组弹窗
+  const [showCreateDeckModal, setShowCreateDeckModal] = useState(false);
+  const [newDeckName, setNewDeckName] = useState('');
+  const [newDeckCoverUrl, setNewDeckCoverUrl] = useState('');
+  const [createDeckLoading, setCreateDeckLoading] = useState(false);
+  const [createDeckError, setCreateDeckError] = useState('');
+
+  const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
+  const [editDeckName, setEditDeckName] = useState('');
+  const [editDeckCoverUrl, setEditDeckCoverUrl] = useState('');
+  const [editDeckLoading, setEditDeckLoading] = useState(false);
+  const [editDeckError, setEditDeckError] = useState('');
+
+  const [createCoverUploading, setCreateCoverUploading] = useState(false);
+  const [editCoverUploading, setEditCoverUploading] = useState(false);
+
+  const uploadCoverImage = useCallback(async (file: File): Promise<string> => {
+    const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+    const headers = getAnonymousHeaders();
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch('/api/upload/cover', { method: 'POST', headers, body: form });
+    const json = await res.json();
+    const data = json.success ? json.data : json;
+    if (!res.ok) throw new Error(data?.message || '上传失败');
+    if (!data?.url) throw new Error('未返回图片地址');
+    return data.url;
+  }, []);
 
   // 获取牌组列表
   const fetchDecks = useCallback(async () => {
@@ -78,10 +108,97 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
     router.push(`/workspace?deck=${encodeURIComponent(deckName)}`);
   };
 
-  // 处理创建新牌组
+  // 处理创建新牌组：先打开弹窗，用户填写名称和可选封面后再创建
   const handleCreateDeck = () => {
     trackButtonClick('CREATE_DECK', 'home_page');
-    router.push('/workspace');
+    setNewDeckName('');
+    setNewDeckCoverUrl('');
+    setCreateDeckError('');
+    setShowCreateDeckModal(true);
+  };
+
+  const handleCreateDeckSubmit = async () => {
+    const name = newDeckName.trim();
+    if (!name) {
+      setCreateDeckError('请输入牌组名称');
+      return;
+    }
+    setCreateDeckLoading(true);
+    setCreateDeckError('');
+    try {
+      const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+      const headers = getAnonymousHeaders();
+      const res = await fetch('/api/decks', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          coverImageUrl: newDeckCoverUrl.trim() || undefined,
+        }),
+      });
+      const response = await res.json();
+      const data = response.success ? response.data : response;
+      if (!res.ok) {
+        setCreateDeckError((data?.message) || '创建失败');
+        return;
+      }
+      setShowCreateDeckModal(false);
+      await fetchDecks();
+      router.push(`/workspace?deck=${encodeURIComponent(name)}`);
+    } catch (err) {
+      console.error('Create deck error:', err);
+      setCreateDeckError('创建失败，请重试');
+    } finally {
+      setCreateDeckLoading(false);
+    }
+  };
+
+  const openEditDeckModal = (deck: Deck) => {
+    setEditingDeck(deck);
+    setEditDeckName(deck.name);
+    setEditDeckCoverUrl(deck.coverImageUrl ?? '');
+    setEditDeckError('');
+  };
+
+  const handleEditDeckSubmit = async () => {
+    if (!editingDeck) return;
+    const name = editDeckName.trim();
+    if (!name) {
+      setEditDeckError('请输入牌组名称');
+      return;
+    }
+    setEditDeckLoading(true);
+    setEditDeckError('');
+    try {
+      const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+      const headers = getAnonymousHeaders();
+      const body: Record<string, unknown> = { id: editingDeck.id };
+      if (name !== editingDeck.name) body.newName = name;
+      const newCover = editDeckCoverUrl.trim() || null;
+      if (newCover !== (editingDeck.coverImageUrl ?? null)) body.coverImageUrl = newCover;
+      if (Object.keys(body).length === 1) {
+        setEditingDeck(null);
+        return;
+      }
+      const res = await fetch('/api/decks', {
+        method: 'PATCH',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const response = await res.json();
+      const data = response.success ? response.data : response;
+      if (!res.ok) {
+        setEditDeckError((data?.message) || '保存失败');
+        return;
+      }
+      setEditingDeck(null);
+      await fetchDecks();
+    } catch (err) {
+      console.error('Edit deck error:', err);
+      setEditDeckError('保存失败，请重试');
+    } finally {
+      setEditDeckLoading(false);
+    }
   };
 
   // 过滤牌组
@@ -224,8 +341,15 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
                   onClick={() => handleDeckClick(deck.name)}
                   className="group relative h-48 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all text-left"
                 >
-                  {/* 背景渐变 */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${getDeckColor(deckIndex)} opacity-90`} />
+                  {/* 封面图或渐变背景 */}
+                  {deck.coverImageUrl ? (
+                    <>
+                      <img src={deck.coverImageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40" />
+                    </>
+                  ) : (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${getDeckColor(deckIndex)} opacity-90`} />
+                  )}
                   
                   {/* 内容 */}
                   <div className="relative h-full p-4 flex flex-col justify-between text-white">
@@ -280,21 +404,29 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
               </>
             ) : recentDecks.length > 0 ? (
               recentDecks.map((deck) => (
-                <button
+                <div
                   key={deck.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleDeckClick(deck.name)}
-                  className="group h-48 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-lg transition-all bg-white dark:bg-gray-800 p-4 flex flex-col"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDeckClick(deck.name); } }}
+                  className="group h-48 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-lg transition-all bg-white dark:bg-gray-800 p-4 flex flex-col cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-12 h-12 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </div>
+                    {deck.coverImageUrl ? (
+                      <img src={deck.coverImageUrl} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: 实现更多选项菜单
+                        openEditDeckModal(deck);
                       }}
                       className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
                     >
@@ -311,7 +443,7 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
                       {deck.cardCount} 张卡片
                     </p>
                   </div>
-                </button>
+                </div>
               ))
             ) : (
               <div className="col-span-3 text-center py-12">
@@ -335,21 +467,29 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredDecks.map((deck, deckIndex) => (
-                <button
+                <div
                   key={deck.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleDeckClick(deck.name)}
-                  className="group h-48 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-lg transition-all bg-white dark:bg-gray-800 p-4 flex flex-col"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDeckClick(deck.name); } }}
+                  className="group h-48 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-lg transition-all bg-white dark:bg-gray-800 p-4 flex flex-col cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getDeckColor(deckIndex)} flex items-center justify-center flex-shrink-0`}>
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </div>
+                    {deck.coverImageUrl ? (
+                      <img src={deck.coverImageUrl} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getDeckColor(deckIndex)} flex items-center justify-center flex-shrink-0`}>
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: 实现更多选项菜单
+                        openEditDeckModal(deck);
                       }}
                       className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
                     >
@@ -366,12 +506,217 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
                       {deck.cardCount} 张卡片 · {new Date(deck.updatedAt).toLocaleDateString('zh-CN')}
                     </p>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           </div>
         )}
       </div>
+
+      {/* 创建牌组弹窗 */}
+      {showCreateDeckModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">创建新牌组</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">牌组名称 *</label>
+                <input
+                  type="text"
+                  value={newDeckName}
+                  onChange={(e) => setNewDeckName(e.target.value)}
+                  placeholder="例如：N5 词汇"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">封面图片（选填）</label>
+                {newDeckCoverUrl ? (
+                  <div className="relative inline-block">
+                    <img src={newDeckCoverUrl} alt="" className="h-24 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-600" />
+                    <button
+                      type="button"
+                      onClick={() => setNewDeckCoverUrl('')}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-sm hover:bg-black/80"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center bg-gray-50 dark:bg-gray-700/50"
+                    onPaste={async (e) => {
+                      const item = e.clipboardData?.items && Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'));
+                      if (!item) return;
+                      e.preventDefault();
+                      const file = item.getAsFile();
+                      if (!file) return;
+                      setCreateCoverUploading(true);
+                      try {
+                        const url = await uploadCoverImage(file);
+                        setNewDeckCoverUrl(url);
+                      } catch (err) {
+                        setCreateDeckError(err instanceof Error ? err.message : '上传失败');
+                      } finally {
+                        setCreateCoverUploading(false);
+                      }
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      id="create-cover-file"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setCreateCoverUploading(true);
+                        try {
+                          const url = await uploadCoverImage(file);
+                          setNewDeckCoverUrl(url);
+                        } catch (err) {
+                          setCreateDeckError(err instanceof Error ? err.message : '上传失败');
+                        } finally {
+                          setCreateCoverUploading(false);
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                    <label htmlFor="create-cover-file" className="cursor-pointer text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                      {createCoverUploading ? '上传中…' : '点击选择图片'}
+                    </label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">或在此处粘贴截图（Ctrl+V）</p>
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">支持 JPG/PNG/WebP，不超过 2MB</p>
+              </div>
+              {createDeckError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{createDeckError}</p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                type="button"
+                onClick={() => setShowCreateDeckModal(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateDeckSubmit}
+                disabled={createDeckLoading}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {createDeckLoading ? '创建中…' : '创建'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 编辑牌组弹窗 */}
+      {editingDeck && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">编辑牌组</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">牌组名称 *</label>
+                <input
+                  type="text"
+                  value={editDeckName}
+                  onChange={(e) => setEditDeckName(e.target.value)}
+                  placeholder="例如：N5 词汇"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">封面图片（选填）</label>
+                {editDeckCoverUrl ? (
+                  <div className="relative inline-block">
+                    <img src={editDeckCoverUrl} alt="" className="h-24 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-600" />
+                    <button
+                      type="button"
+                      onClick={() => setEditDeckCoverUrl('')}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-sm hover:bg-black/80"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center bg-gray-50 dark:bg-gray-700/50"
+                    onPaste={async (e) => {
+                      const item = e.clipboardData?.items && Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'));
+                      if (!item) return;
+                      e.preventDefault();
+                      const file = item.getAsFile();
+                      if (!file) return;
+                      setEditCoverUploading(true);
+                      try {
+                        const url = await uploadCoverImage(file);
+                        setEditDeckCoverUrl(url);
+                      } catch (err) {
+                        setEditDeckError(err instanceof Error ? err.message : '上传失败');
+                      } finally {
+                        setEditCoverUploading(false);
+                      }
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      id="edit-cover-file"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setEditCoverUploading(true);
+                        try {
+                          const url = await uploadCoverImage(file);
+                          setEditDeckCoverUrl(url);
+                        } catch (err) {
+                          setEditDeckError(err instanceof Error ? err.message : '上传失败');
+                        } finally {
+                          setEditCoverUploading(false);
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                    <label htmlFor="edit-cover-file" className="cursor-pointer text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                      {editCoverUploading ? '上传中…' : '点击选择图片'}
+                    </label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">或在此处粘贴截图（Ctrl+V）</p>
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">支持 JPG/PNG/WebP，不超过 2MB</p>
+              </div>
+              {editDeckError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{editDeckError}</p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                type="button"
+                onClick={() => setEditingDeck(null)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={handleEditDeckSubmit}
+                disabled={editDeckLoading}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {editDeckLoading ? '保存中…' : '保存'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -433,10 +433,13 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                 </div>
               );
             } else if (isPdf && url) {
+              // 使用后端代理预览，解决阿里云 OSS 默认域名强制下载 PDF 的问题
+              const viewUrl = `/api/sources/${selectedSource.id}/view`;
+              
               return (
                 <div className="flex-1 min-h-0 overflow-hidden">
                   <iframe
-                    src={url}
+                    src={viewUrl}
                     className="w-full h-full border-0"
                     title={selectedSource?.name || 'PDF Viewer'}
                   />

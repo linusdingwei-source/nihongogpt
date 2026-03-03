@@ -44,6 +44,18 @@ export async function sendEmail({ to, subject, html, from }: SendEmailOptions) {
     });
 
     if (error) {
+      const isResendTestRestriction =
+        error.message?.includes('only send testing emails to your own email') ||
+        (error as { name?: string }).name === 'validation_error';
+
+      // 开发环境：Resend 未验证域名时只能发到本人，此处不抛错、视为发送成功，验证码请看上方 [Verification Code] 日志
+      if (process.env.NODE_ENV === 'development' && isResendTestRestriction) {
+        console.warn(
+          '[Email] Resend 测试模式仅支持发到本人邮箱，已跳过真实发送。验证码请查看上方 [Verification Code] About to send email 日志中的 code 字段；正式环境请在 resend.com/domains 验证域名并设置 RESEND_FROM_EMAIL。'
+        );
+        return { id: 'dev-skipped' };
+      }
+
       console.error('[Email] Resend API error:', {
         error,
         message: error.message,

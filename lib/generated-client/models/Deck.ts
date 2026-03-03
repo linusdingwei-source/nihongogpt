@@ -28,6 +28,7 @@ export type DeckMinAggregateOutputType = {
   id: string | null
   userId: string | null
   name: string | null
+  coverImageUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +37,7 @@ export type DeckMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   name: string | null
+  coverImageUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,7 @@ export type DeckCountAggregateOutputType = {
   id: number
   userId: number
   name: number
+  coverImageUrl: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +57,7 @@ export type DeckMinAggregateInputType = {
   id?: true
   userId?: true
   name?: true
+  coverImageUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +66,7 @@ export type DeckMaxAggregateInputType = {
   id?: true
   userId?: true
   name?: true
+  coverImageUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +75,7 @@ export type DeckCountAggregateInputType = {
   id?: true
   userId?: true
   name?: true
+  coverImageUrl?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +157,7 @@ export type DeckGroupByOutputType = {
   id: string
   userId: string
   name: string
+  coverImageUrl: string | null
   createdAt: Date
   updatedAt: Date
   _count: DeckCountAggregateOutputType | null
@@ -180,6 +187,7 @@ export type DeckWhereInput = {
   id?: Prisma.StringFilter<"Deck"> | string
   userId?: Prisma.StringFilter<"Deck"> | string
   name?: Prisma.StringFilter<"Deck"> | string
+  coverImageUrl?: Prisma.StringNullableFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -190,6 +198,7 @@ export type DeckOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -204,6 +213,7 @@ export type DeckWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.DeckWhereInput | Prisma.DeckWhereInput[]
   userId?: Prisma.StringFilter<"Deck"> | string
   name?: Prisma.StringFilter<"Deck"> | string
+  coverImageUrl?: Prisma.StringNullableFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -214,6 +224,7 @@ export type DeckOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DeckCountOrderByAggregateInput
@@ -228,6 +239,7 @@ export type DeckScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Deck"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Deck"> | string
   name?: Prisma.StringWithAggregatesFilter<"Deck"> | string
+  coverImageUrl?: Prisma.StringNullableWithAggregatesFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Deck"> | Date | string
 }
@@ -235,6 +247,7 @@ export type DeckScalarWhereWithAggregatesInput = {
 export type DeckCreateInput = {
   id?: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutDecksInput
@@ -245,6 +258,7 @@ export type DeckUncheckedCreateInput = {
   id?: string
   userId: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
@@ -253,6 +267,7 @@ export type DeckUncheckedCreateInput = {
 export type DeckUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutDecksNestedInput
@@ -263,6 +278,7 @@ export type DeckUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
@@ -272,6 +288,7 @@ export type DeckCreateManyInput = {
   id?: string
   userId: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -279,6 +296,7 @@ export type DeckCreateManyInput = {
 export type DeckUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -287,6 +305,7 @@ export type DeckUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -310,6 +329,7 @@ export type DeckCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -318,6 +338,7 @@ export type DeckMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -326,6 +347,7 @@ export type DeckMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -396,6 +418,7 @@ export type DeckUpdateOneWithoutCardsNestedInput = {
 export type DeckCreateWithoutUserInput = {
   id?: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardCreateNestedManyWithoutDeckInput
@@ -404,6 +427,7 @@ export type DeckCreateWithoutUserInput = {
 export type DeckUncheckedCreateWithoutUserInput = {
   id?: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
@@ -442,6 +466,7 @@ export type DeckScalarWhereInput = {
   id?: Prisma.StringFilter<"Deck"> | string
   userId?: Prisma.StringFilter<"Deck"> | string
   name?: Prisma.StringFilter<"Deck"> | string
+  coverImageUrl?: Prisma.StringNullableFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
 }
@@ -449,6 +474,7 @@ export type DeckScalarWhereInput = {
 export type DeckCreateWithoutCardsInput = {
   id?: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutDecksInput
@@ -458,6 +484,7 @@ export type DeckUncheckedCreateWithoutCardsInput = {
   id?: string
   userId: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -481,6 +508,7 @@ export type DeckUpdateToOneWithWhereWithoutCardsInput = {
 export type DeckUpdateWithoutCardsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutDecksNestedInput
@@ -490,6 +518,7 @@ export type DeckUncheckedUpdateWithoutCardsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -497,6 +526,7 @@ export type DeckUncheckedUpdateWithoutCardsInput = {
 export type DeckCreateManyUserInput = {
   id?: string
   name: string
+  coverImageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -504,6 +534,7 @@ export type DeckCreateManyUserInput = {
 export type DeckUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUpdateManyWithoutDeckNestedInput
@@ -512,6 +543,7 @@ export type DeckUpdateWithoutUserInput = {
 export type DeckUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
@@ -520,6 +552,7 @@ export type DeckUncheckedUpdateWithoutUserInput = {
 export type DeckUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -559,6 +592,7 @@ export type DeckSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   userId?: boolean
   name?: boolean
+  coverImageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -570,6 +604,7 @@ export type DeckSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   userId?: boolean
   name?: boolean
+  coverImageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -579,6 +614,7 @@ export type DeckSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   userId?: boolean
   name?: boolean
+  coverImageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -588,11 +624,12 @@ export type DeckSelectScalar = {
   id?: boolean
   userId?: boolean
   name?: boolean
+  coverImageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DeckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
+export type DeckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "coverImageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
 export type DeckInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   cards?: boolean | Prisma.Deck$cardsArgs<ExtArgs>
@@ -615,6 +652,7 @@ export type $DeckPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     id: string
     userId: string
     name: string
+    coverImageUrl: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["deck"]>
@@ -1045,6 +1083,7 @@ export interface DeckFieldRefs {
   readonly id: Prisma.FieldRef<"Deck", 'String'>
   readonly userId: Prisma.FieldRef<"Deck", 'String'>
   readonly name: Prisma.FieldRef<"Deck", 'String'>
+  readonly coverImageUrl: Prisma.FieldRef<"Deck", 'String'>
   readonly createdAt: Prisma.FieldRef<"Deck", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Deck", 'DateTime'>
 }

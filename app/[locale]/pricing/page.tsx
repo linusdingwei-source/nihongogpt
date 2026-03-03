@@ -4,37 +4,15 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import { useSession } from 'next-auth/react';
+import { QRCodeSVG } from 'qrcode.react';
 import { trackPageViewEvent, trackButtonClick, trackCheckoutStarted } from '@/lib/analytics';
 
+type PaymentMethod = 'stripe' | 'alipay' | 'wechat';
+
 const packages = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: 5,
-    credits: 5,
-    bonusCredits: 2,
-    totalCredits: 7,
-    features: ['5 Credits', '+2 Bonus Credits', 'Basic Support'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 20,
-    credits: 20,
-    bonusCredits: 10,
-    totalCredits: 30,
-    features: ['20 Credits', '+10 Bonus Credits', 'Priority Support', 'Best Value'],
-    popular: true,
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 100,
-    credits: 100,
-    bonusCredits: 50,
-    totalCredits: 150,
-    features: ['100 Credits', '+50 Bonus Credits', 'Priority Support', 'Best for Power Users'],
-  },
+  { id: 'starter', name: 'Starter', price: 5, priceCny: 35, credits: 5, bonusCredits: 2, totalCredits: 7, features: ['5 Credits', '+2 Bonus Credits', 'Basic Support'] },
+  { id: 'pro', name: 'Pro', price: 20, priceCny: 140, credits: 20, bonusCredits: 10, totalCredits: 30, features: ['20 Credits', '+10 Bonus Credits', 'Priority Support', 'Best Value'], popular: true },
+  { id: 'premium', name: 'Premium', price: 100, priceCny: 700, credits: 100, bonusCredits: 50, totalCredits: 150, features: ['100 Credits', '+50 Bonus Credits', 'Priority Support', 'Best for Power Users'] },
 ];
 
 export default function PricingPage() {
@@ -43,53 +21,69 @@ export default function PricingPage() {
   const locale = useLocale();
   const { data: session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+  const [wechatQrUrl, setWechatQrUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // 追踪定价页访问
     trackPageViewEvent('PRICING', { locale });
   }, [locale]);
 
   const handlePurchase = async (packageId: string) => {
     if (!session) {
-      // Redirect to login
       router.push('/login');
       return;
     }
 
     setLoading(packageId);
-    
-    // 追踪购买按钮点击
-    const selectedPackage = packages.find(p => p.id === packageId);
+    const selectedPackage = packages.find((p) => p.id === packageId);
     if (selectedPackage) {
       trackButtonClick('PURCHASE', 'pricing_page');
       trackCheckoutStarted(packageId, selectedPackage.price);
-      
-      // 存储套餐信息用于支付成功后的追踪
-      sessionStorage.setItem('purchase_package', JSON.stringify({
-        packageId,
-        price: selectedPackage.price,
-        credits: selectedPackage.totalCredits,
-      }));
+      sessionStorage.setItem('purchase_package', JSON.stringify({ packageId, price: selectedPackage.price, credits: selectedPackage.totalCredits }));
     }
 
     try {
-      const res = await fetch('/api/payment/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageId }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.url) {
-        window.location.href = data.url;
-      } else {
+      if (paymentMethod === 'stripe') {
+        const res = await fetch('/api/payment/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId }),
+        });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          window.location.href = data.url;
+          return;
+        }
         alert(data.error || 'Failed to create checkout session');
-        setLoading(null);
+      } else if (paymentMethod === 'alipay') {
+        const res = await fetch('/api/payment/alipay/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId }),
+        });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        alert(data.error || 'Failed to create Alipay order');
+      } else if (paymentMethod === 'wechat') {
+        const res = await fetch('/api/payment/wechat/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId }),
+        });
+        const data = await res.json();
+        if (res.ok && data.code_url) {
+          setWechatQrUrl(data.code_url);
+          return;
+        }
+        alert(data.error || 'Failed to create WeChat Pay order');
       }
     } catch (error) {
       console.error('Purchase error:', error);
       alert('Network error');
+    } finally {
       setLoading(null);
     }
   };
@@ -104,7 +98,40 @@ export default function PricingPage() {
           <p className="text-xl text-gray-600 dark:text-gray-400">
             {t('pricing.description')}
           </p>
+          {session && (
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <span className="text-gray-600 dark:text-gray-400">支付方式：</span>
+              {(['stripe', 'alipay', 'wechat'] as const).map((method) => (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => setPaymentMethod(method)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    paymentMethod === method
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {method === 'stripe' && '信用卡 (Stripe)'}
+                  {method === 'alipay' && '支付宝'}
+                  {method === 'wechat' && '微信扫码'}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+
+        {wechatQrUrl && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setWechatQrUrl(null)}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl max-w-sm" onClick={(e) => e.stopPropagation()}>
+              <p className="text-center font-medium text-gray-900 dark:text-white mb-4">请使用微信扫描二维码完成支付</p>
+              <div className="flex justify-center bg-white p-4 rounded-lg">
+                <QRCodeSVG value={wechatQrUrl} size={220} level="M" />
+              </div>
+              <button type="button" className="mt-4 w-full py-2 bg-gray-200 dark:bg-gray-600 rounded-lg text-sm" onClick={() => setWechatQrUrl(null)}>关闭</button>
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {packages.map((pkg) => (
@@ -128,7 +155,7 @@ export default function PricingPage() {
                 </h3>
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    ${pkg.price}
+                    {paymentMethod === 'stripe' ? `$${pkg.price}` : `¥${pkg.priceCny}`}
                   </span>
                 </div>
                 <div className="text-lg text-gray-600 dark:text-gray-400 mb-2">

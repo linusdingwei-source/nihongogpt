@@ -3,7 +3,8 @@ import type { UploadResult } from '../storage';
 export async function uploadToAWSS3(
   fileBuffer: Buffer,
   filename: string,
-  contentType: string
+  contentType: string,
+  pathOpts?: { pathPrefix: string; basename: string }
 ): Promise<UploadResult> {
   // 使用 require 动态加载，避免 webpack 在构建时检查
   let S3Client, PutObjectCommand;
@@ -31,7 +32,9 @@ export async function uploadToAWSS3(
   });
 
   const timestamp = Date.now();
-  const uniqueFilename = `audio/${timestamp}-${filename}`;
+  const uniqueFilename = pathOpts
+    ? `${pathOpts.pathPrefix}/${timestamp}-${pathOpts.basename}`
+    : `audio/${timestamp}-${filename}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.S3_BUCKET,

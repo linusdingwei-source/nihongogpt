@@ -3,7 +3,8 @@ import type { UploadResult } from '../storage';
 export async function uploadToCloudflareR2(
   fileBuffer: Buffer,
   filename: string,
-  contentType: string
+  contentType: string,
+  pathOpts?: { pathPrefix: string; basename: string }
 ): Promise<UploadResult> {
   // 使用 require 动态加载，避免 webpack 在构建时检查
   // R2 使用 S3 兼容的 API
@@ -33,7 +34,9 @@ export async function uploadToCloudflareR2(
   });
 
   const timestamp = Date.now();
-  const uniqueFilename = `audio/${timestamp}-${filename}`;
+  const uniqueFilename = pathOpts
+    ? `${pathOpts.pathPrefix}/${timestamp}-${pathOpts.basename}`
+    : `audio/${timestamp}-${filename}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET,

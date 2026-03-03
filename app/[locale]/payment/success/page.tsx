@@ -15,6 +15,25 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const sessionId = searchParams.get('session_id');
+    const provider = searchParams.get('provider');
+    const outTradeNo = searchParams.get('out_trade_no');
+
+    // 支付宝/微信：仅同步跳转，积分由异步通知到账，直接显示成功并跳转
+    if (provider === 'alipay' && outTradeNo) {
+      const packageInfo = sessionStorage.getItem('purchase_package');
+      if (packageInfo) {
+        try {
+          const { packageId, price, credits } = JSON.parse(packageInfo);
+          trackPaymentSuccess(packageId, price, credits, outTradeNo);
+          sessionStorage.removeItem('purchase_package');
+        } catch (e) {
+          console.error('Failed to parse package info:', e);
+        }
+      }
+      setLoading(false);
+      setTimeout(() => router.push('/dashboard?payment=success'), 3000);
+      return;
+    }
 
     if (!sessionId) {
       setError('No session ID found');
@@ -22,15 +41,11 @@ export default function PaymentSuccessPage() {
       return;
     }
 
-    // Verify payment and redirect to dashboard
     const verifyPayment = async () => {
       try {
         const res = await fetch(`/api/payment/success?session_id=${sessionId}`);
         const data = await res.json();
-        
         if (res.ok && data.success) {
-          // Payment verified successfully
-          // Get package info from session storage or URL params
           const packageInfo = sessionStorage.getItem('purchase_package');
           if (packageInfo) {
             try {
@@ -41,14 +56,8 @@ export default function PaymentSuccessPage() {
               console.error('Failed to parse package info:', e);
             }
           }
-          
           setLoading(false);
-          
-          // Redirect to dashboard after 2 seconds
-          // Use router.push with path only, router will automatically add locale
-          setTimeout(() => {
-            router.push('/dashboard?payment=success');
-          }, 2000);
+          setTimeout(() => router.push('/dashboard?payment=success'), 2000);
         } else {
           setError(data.error || data.message || 'Payment verification failed');
           setLoading(false);

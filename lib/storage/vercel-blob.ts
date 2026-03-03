@@ -4,14 +4,17 @@ import type { UploadResult } from '../storage';
 export async function uploadToVercelBlob(
   fileBuffer: Buffer,
   filename: string,
-  contentType: string
+  contentType: string,
+  pathOpts?: { pathPrefix: string; basename: string }
 ): Promise<UploadResult> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     throw new Error('BLOB_READ_WRITE_TOKEN is not configured');
   }
 
-  // 直接使用传入的文件名，它已经在上层处理过唯一性和路径了
-  const uniqueFilename = filename;
+  const timestamp = Date.now();
+  const uniqueFilename = pathOpts
+    ? `${pathOpts.pathPrefix}/${timestamp}-${pathOpts.basename}`
+    : filename;
 
   const blob = await put(uniqueFilename, fileBuffer, {
     access: 'public',

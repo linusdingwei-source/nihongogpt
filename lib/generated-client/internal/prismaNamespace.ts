@@ -1337,6 +1337,7 @@ export const OrderScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   stripeId: 'stripeId',
+  provider: 'provider',
   amount: 'amount',
   credits: 'credits',
   status: 'status',
@@ -1363,6 +1364,7 @@ export const DeckScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   name: 'name',
+  coverImageUrl: 'coverImageUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

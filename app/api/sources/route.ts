@@ -3,7 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
-import { uploadToStorage } from '@/lib/storage';
+import { uploadToStorage, getSignedUrlForStorageUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,8 +41,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const sourcesWithSignedUrls = await Promise.all(
+      sources.map(async (s) => ({
+        ...s,
+        contentUrl: await getSignedUrlForStorageUrl(s.contentUrl),
+        fileUrl: await getSignedUrlForStorageUrl(s.fileUrl),
+      }))
+    );
+
     return NextResponse.json(
-      successResponse({ sources })
+      successResponse({ sources: sourcesWithSignedUrls })
     );
   } catch (error) {
     console.error('Get sources error:', error);

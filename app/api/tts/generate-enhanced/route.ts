@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       let finalAudioUrl = dashscopeAudioUrl;
       let audioFilename: string | null = null;
       
-      // 检查是否配置了云存储
+      // 检查是否配置了云存储（由 STORAGE_PROVIDER 控制：vercel-blob / aliyun-oss / aws-s3 / cloudflare-r2）
       const storageProvider = process.env.STORAGE_PROVIDER;
       if (storageProvider && storageProvider !== 'none') {
         try {

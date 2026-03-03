@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
+import { getSignedUrlForStorageUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,15 +29,20 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
+    const decksWithSignedUrls = await Promise.all(
+      decks.map(async (deck) => ({
+        id: deck.id,
+        name: deck.name,
+        coverImageUrl: await getSignedUrlForStorageUrl(deck.coverImageUrl ?? null),
+        cardCount: deck._count.cards,
+        createdAt: deck.createdAt,
+        updatedAt: deck.updatedAt,
+      }))
+    );
+
     return NextResponse.json(
       successResponse({
-        decks: decks.map(deck => ({
-          id: deck.id,
-          name: deck.name,
-          cardCount: deck._count.cards,
-          createdAt: deck.createdAt,
-          updatedAt: deck.updatedAt,
-        })),
+        decks: decksWithSignedUrls,
       })
     );
   } catch (error) {
@@ -60,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name } = await request.json();
+    const { name, coverImageUrl } = await request.json();
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json(
@@ -69,6 +75,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const deckName = name.trim();
+    const cover = typeof coverImageUrl === 'string' && coverImageUrl.trim() ? coverImageUrl.trim() : null;
 
     // 检查牌组是否已存在
     const existingDeck = await prisma.deck.findUnique({
@@ -91,6 +98,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId,
         name: deckName,
+        ...(cover !== null && { coverImageUrl: cover }),
       },
     });
 
@@ -117,18 +125,28 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { id, newName } = await request.json();
+    const { id, newName, coverImageUrl } = await request.json();
 
-    if (!id || !newName || typeof newName !== 'string' || !newName.trim()) {
+    if (!id) {
       return NextResponse.json(
-        errorResponse(ErrorCodes.BAD_REQUEST, 'Deck ID and new name are required'),
+        errorResponse(ErrorCodes.BAD_REQUEST, 'Deck ID is required'),
         { status: 400 }
       );
     }
 
-    const trimmedNewName = newName.trim();
+    const trimmedNewName = typeof newName === 'string' ? newName.trim() : undefined;
+    const cover = coverImageUrl === undefined
+      ? undefined
+      : (typeof coverImageUrl === 'string' && coverImageUrl.trim() ? coverImageUrl.trim() : null);
 
-    // 查找要重命名的牌组
+    if (trimmedNewName === undefined && cover === undefined) {
+      return NextResponse.json(
+        errorResponse(ErrorCodes.BAD_REQUEST, 'Provide newName and/or coverImageUrl to update'),
+        { status: 400 }
+      );
+    }
+
+    // 查找牌组
     const deck = await prisma.deck.findFirst({
       where: { id, userId },
     });
@@ -142,8 +160,8 @@ export async function PATCH(request: NextRequest) {
 
     const oldName = deck.name;
 
-    // 检查新名称是否已存在
-    if (oldName !== trimmedNewName) {
+    // 若仅更新封面，不重命名
+    if (trimmedNewName !== undefined && oldName !== trimmedNewName) {
       const existingDeck = await prisma.deck.findUnique({
         where: {
           userId_name: {
@@ -161,24 +179,25 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // 使用事务同时更新牌组名和卡片的 deckName
+    const updateData: { name?: string; coverImageUrl?: string | null } = {};
+    if (trimmedNewName !== undefined) updateData.name = trimmedNewName;
+    if (cover !== undefined) updateData.coverImageUrl = cover;
+
     const updatedDeck = await prisma.$transaction(async (tx) => {
-      // 更新牌组名称
       const updated = await tx.deck.update({
         where: { id },
-        data: { name: trimmedNewName },
+        data: updateData,
       });
 
-      // 更新所有关联卡片的 deckName
-      await tx.card.updateMany({
-        where: {
-          userId,
-          deckName: oldName,
-        },
-        data: {
-          deckName: trimmedNewName,
-        },
-      });
+      if (trimmedNewName !== undefined && oldName !== trimmedNewName) {
+        await tx.card.updateMany({
+          where: {
+            userId,
+            deckName: oldName,
+          },
+          data: { deckName: trimmedNewName },
+        });
+      }
 
       return updated;
     });

@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
         data: {
           userId,
           stripeId: session.id,
+          provider: 'stripe',
           amount,
           credits: totalCredits,
           status: 'completed',

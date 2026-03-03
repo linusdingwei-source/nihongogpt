@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  serverExternalPackages: ['ali-oss'],
   // Increase body size limit for file uploads (PDF, audio, images, etc.)
   serverActions: {
     bodySizeLimit: '50mb',
@@ -31,11 +32,10 @@ const nextConfig = {
       )
     );
 
-    // 忽略可选存储依赖，避免构建时检查
-    // 这些依赖只在运行时动态加载（如果已安装）
+    // 仅忽略 @aws-sdk/client-s3（ali-oss 已通过 serverExternalPackages 在服务端从 node_modules 加载）
     config.plugins.push(
       new webpack.IgnorePlugin({
-        resourceRegExp: /^(ali-oss|@aws-sdk\/client-s3)$/,
+        resourceRegExp: /^@aws-sdk\/client-s3$/,
       })
     );
     

@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
+import { getSignedUrlForStorageUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,17 +53,18 @@ export async function GET(
       );
     }
 
-    // 如果内容存储在 contentUrl 中，且类型是 text，尝试从 URL 获取
+    const contentUrlSigned = await getSignedUrlForStorageUrl(source.contentUrl);
+    const fileUrlSigned = await getSignedUrlForStorageUrl(source.fileUrl);
+
     let finalContent = source.content;
-    if (!finalContent && source.contentUrl && source.type === 'text') {
+    if (!finalContent && contentUrlSigned && source.type === 'text') {
       try {
-        const response = await fetch(source.contentUrl);
+        const response = await fetch(contentUrlSigned);
         if (response.ok) {
           finalContent = await response.text();
         }
       } catch (error) {
         console.error('Failed to fetch content from URL:', error);
-        // 如果获取失败，使用数据库中的 content（可能为空）
       }
     }
 
@@ -70,7 +72,9 @@ export async function GET(
       successResponse({ 
         source: {
           ...source,
-          content: finalContent || source.content,
+          contentUrl: contentUrlSigned,
+          fileUrl: fileUrlSigned,
+          content: finalContent ?? source.content,
         }
       })
     );

@@ -40,6 +40,7 @@ export type OrderMinAggregateOutputType = {
   id: string | null
   userId: string | null
   stripeId: string | null
+  provider: string | null
   amount: number | null
   credits: number | null
   status: string | null
@@ -51,6 +52,7 @@ export type OrderMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   stripeId: string | null
+  provider: string | null
   amount: number | null
   credits: number | null
   status: string | null
@@ -62,6 +64,7 @@ export type OrderCountAggregateOutputType = {
   id: number
   userId: number
   stripeId: number
+  provider: number
   amount: number
   credits: number
   status: number
@@ -85,6 +88,7 @@ export type OrderMinAggregateInputType = {
   id?: true
   userId?: true
   stripeId?: true
+  provider?: true
   amount?: true
   credits?: true
   status?: true
@@ -96,6 +100,7 @@ export type OrderMaxAggregateInputType = {
   id?: true
   userId?: true
   stripeId?: true
+  provider?: true
   amount?: true
   credits?: true
   status?: true
@@ -107,6 +112,7 @@ export type OrderCountAggregateInputType = {
   id?: true
   userId?: true
   stripeId?: true
+  provider?: true
   amount?: true
   credits?: true
   status?: true
@@ -205,6 +211,7 @@ export type OrderGroupByOutputType = {
   id: string
   userId: string
   stripeId: string
+  provider: string
   amount: number
   credits: number
   status: string
@@ -239,6 +246,7 @@ export type OrderWhereInput = {
   id?: Prisma.StringFilter<"Order"> | string
   userId?: Prisma.StringFilter<"Order"> | string
   stripeId?: Prisma.StringFilter<"Order"> | string
+  provider?: Prisma.StringFilter<"Order"> | string
   amount?: Prisma.IntFilter<"Order"> | number
   credits?: Prisma.IntFilter<"Order"> | number
   status?: Prisma.StringFilter<"Order"> | string
@@ -251,6 +259,7 @@ export type OrderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   stripeId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -266,6 +275,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.OrderWhereInput[]
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   userId?: Prisma.StringFilter<"Order"> | string
+  provider?: Prisma.StringFilter<"Order"> | string
   amount?: Prisma.IntFilter<"Order"> | number
   credits?: Prisma.IntFilter<"Order"> | number
   status?: Prisma.StringFilter<"Order"> | string
@@ -278,6 +288,7 @@ export type OrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   stripeId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -297,6 +308,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Order"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Order"> | string
   stripeId?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  provider?: Prisma.StringWithAggregatesFilter<"Order"> | string
   amount?: Prisma.IntWithAggregatesFilter<"Order"> | number
   credits?: Prisma.IntWithAggregatesFilter<"Order"> | number
   status?: Prisma.StringWithAggregatesFilter<"Order"> | string
@@ -307,6 +319,7 @@ export type OrderScalarWhereWithAggregatesInput = {
 export type OrderCreateInput = {
   id?: string
   stripeId: string
+  provider?: string
   amount: number
   credits: number
   status: string
@@ -319,6 +332,7 @@ export type OrderUncheckedCreateInput = {
   id?: string
   userId: string
   stripeId: string
+  provider?: string
   amount: number
   credits: number
   status: string
@@ -329,6 +343,7 @@ export type OrderUncheckedCreateInput = {
 export type OrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -341,6 +356,7 @@ export type OrderUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -352,6 +368,7 @@ export type OrderCreateManyInput = {
   id?: string
   userId: string
   stripeId: string
+  provider?: string
   amount: number
   credits: number
   status: string
@@ -362,6 +379,7 @@ export type OrderCreateManyInput = {
 export type OrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -373,6 +391,7 @@ export type OrderUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -394,6 +413,7 @@ export type OrderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   stripeId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -410,6 +430,7 @@ export type OrderMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   stripeId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -421,6 +442,7 @@ export type OrderMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   stripeId?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -486,6 +508,7 @@ export type IntFieldUpdateOperationsInput = {
 export type OrderCreateWithoutUserInput = {
   id?: string
   stripeId: string
+  provider?: string
   amount: number
   credits: number
   status: string
@@ -496,6 +519,7 @@ export type OrderCreateWithoutUserInput = {
 export type OrderUncheckedCreateWithoutUserInput = {
   id?: string
   stripeId: string
+  provider?: string
   amount: number
   credits: number
   status: string
@@ -536,6 +560,7 @@ export type OrderScalarWhereInput = {
   id?: Prisma.StringFilter<"Order"> | string
   userId?: Prisma.StringFilter<"Order"> | string
   stripeId?: Prisma.StringFilter<"Order"> | string
+  provider?: Prisma.StringFilter<"Order"> | string
   amount?: Prisma.IntFilter<"Order"> | number
   credits?: Prisma.IntFilter<"Order"> | number
   status?: Prisma.StringFilter<"Order"> | string
@@ -546,6 +571,7 @@ export type OrderScalarWhereInput = {
 export type OrderCreateManyUserInput = {
   id?: string
   stripeId: string
+  provider?: string
   amount: number
   credits: number
   status: string
@@ -556,6 +582,7 @@ export type OrderCreateManyUserInput = {
 export type OrderUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -566,6 +593,7 @@ export type OrderUpdateWithoutUserInput = {
 export type OrderUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -576,6 +604,7 @@ export type OrderUncheckedUpdateWithoutUserInput = {
 export type OrderUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stripeId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   credits?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -589,6 +618,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   id?: boolean
   userId?: boolean
   stripeId?: boolean
+  provider?: boolean
   amount?: boolean
   credits?: boolean
   status?: boolean
@@ -601,6 +631,7 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   userId?: boolean
   stripeId?: boolean
+  provider?: boolean
   amount?: boolean
   credits?: boolean
   status?: boolean
@@ -613,6 +644,7 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   userId?: boolean
   stripeId?: boolean
+  provider?: boolean
   amount?: boolean
   credits?: boolean
   status?: boolean
@@ -625,6 +657,7 @@ export type OrderSelectScalar = {
   id?: boolean
   userId?: boolean
   stripeId?: boolean
+  provider?: boolean
   amount?: boolean
   credits?: boolean
   status?: boolean
@@ -632,7 +665,7 @@ export type OrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "stripeId" | "amount" | "credits" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "stripeId" | "provider" | "amount" | "credits" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -652,6 +685,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     id: string
     userId: string
     stripeId: string
+    provider: string
     amount: number
     credits: number
     status: string
@@ -1084,6 +1118,7 @@ export interface OrderFieldRefs {
   readonly id: Prisma.FieldRef<"Order", 'String'>
   readonly userId: Prisma.FieldRef<"Order", 'String'>
   readonly stripeId: Prisma.FieldRef<"Order", 'String'>
+  readonly provider: Prisma.FieldRef<"Order", 'String'>
   readonly amount: Prisma.FieldRef<"Order", 'Int'>
   readonly credits: Prisma.FieldRef<"Order", 'Int'>
   readonly status: Prisma.FieldRef<"Order", 'String'>
