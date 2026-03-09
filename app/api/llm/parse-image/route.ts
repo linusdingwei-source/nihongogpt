@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
 import OpenAI from "openai";
+import { getSignedUrlForStorageUrl } from '@/lib/storage';
 
 // Vercel 函数配置：延长超时时间以支持图像解析
 export const maxDuration = 60; // 60 秒
@@ -55,6 +56,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prepare image content - prefer base64 if provided (avoids needing to upload)
+    let finalImageUrl = imageUrl;
+    
+    // 强制检查：如果是我们自己的 OSS URL 且没有签名，或者是一个存储路径，则进行签名
+    const isOssUrl = imageUrl && imageUrl.includes('aliyuncs.com');
+    const isSigned = imageUrl && (imageUrl.includes('x-oss-signature') || imageUrl.includes('OSSAccessKeyId'));
+    const isStoragePath = imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:');
+
+    if (imageUrl && (isStoragePath || (isOssUrl && !isSigned))) {
+      // 提取 key: 如果是完整 URL，需要去掉域名部分；如果是路径，直接使用
+      let objectKey = imageUrl;
+      if (isOssUrl) {
+        try {
+          const urlObj = new URL(imageUrl);
+          // 去掉开头的 /
+          objectKey = urlObj.pathname.startsWith('/') ? urlObj.pathname.substring(1) : urlObj.pathname;
+        } catch (e) {
+          console.warn('[Parse Image] Failed to parse OSS URL:', e);
+        }
+      }
+      
+      console.log(`[Parse Image] Generating signature for: ${objectKey}`);
+      const signedUrl = await getSignedUrlForStorageUrl(objectKey, 3600);
+      if (signedUrl) {
+        finalImageUrl = signedUrl;
+      }
+    }
+
+    // Use jpeg format for smaller payload size
+    const imageContent = imageBase64 
+      ? `data:image/jpeg;base64,${imageBase64}`
+      : finalImageUrl;
+
+    console.log(`[Parse Image] Final URL to LLM: ${finalImageUrl?.split('?')[0]}... (signature hidden)`);
+
     // 初始化 OpenAI 客户端 (兼容百炼)
     // 图像解析需要更长的超时时间
     const openai = new OpenAI({
@@ -63,12 +99,6 @@ export async function POST(request: NextRequest) {
       timeout: 120000, // 120 秒超时，图像解析需要更多时间
     });
 
-    // Prepare image content - prefer base64 if provided (avoids needing to upload)
-    // Use jpeg format for smaller payload size
-    const imageContent = imageBase64 
-      ? `data:image/jpeg;base64,${imageBase64}`
-      : imageUrl;
-
     // Log base64 size for debugging
     let imageSizeKB = 0;
     if (imageBase64) {
@@ -76,10 +106,10 @@ export async function POST(request: NextRequest) {
       console.log(`Parsing image: base64 size ~${imageSizeKB}KB`);
     }
 
-    // 调用 qwen3.5-plus 进行文档解析
+    // 调用 qwen3.5-plus 进行文档解析 (确保使用支持多模态的最新模型)
     const response = await openai.chat.completions.create({
       model: "qwen3.5-plus",
-      max_tokens: 8192, // 确保完整输出
+      max_tokens: 8192, // 图像解析可能输出大量 Markdown 内容，给予足够空间
       messages: [
         {
           role: "user",

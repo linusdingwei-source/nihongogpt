@@ -7,11 +7,24 @@ export async function uploadToAliyunOSS(
   pathOpts?: { pathPrefix: string; basename: string }
 ): Promise<UploadResult> {
   // 动态 import，配合 next.config serverExternalPackages 从 node_modules 加载
-  let OSS: typeof import('ali-oss');
+  let OSS: any;
   try {
-    OSS = (await import('ali-oss')).default;
-  } catch {
-    throw new Error('ali-oss package is not installed. Run: npm install ali-oss');
+    const mod = await import('ali-oss');
+    // ESM 导入 CJS 模块时，Next.js/Webpack 可能会把 exports 挂在 .default 下
+    // 也有可能直接返回 exports。我们需要兼容这两种情况。
+    OSS = mod.default || mod;
+    
+    // 如果 OSS 还是一个包含 default 的对象（双重 default 情况），继续解包
+    if (OSS && OSS.default && typeof OSS !== 'function') {
+      OSS = OSS.default;
+    }
+  } catch (e) {
+    console.error('Failed to import ali-oss:', e);
+    throw new Error('ali-oss package load failed');
+  }
+
+  if (typeof OSS !== 'function' && typeof OSS !== 'object') {
+    throw new Error('ali-oss package is not a constructor or object');
   }
 
   if (!process.env.OSS_REGION || !process.env.OSS_BUCKET || 
@@ -36,6 +49,7 @@ export async function uploadToAliyunOSS(
       bucket: process.env.OSS_BUCKET.trim(),
       accessKeyId: process.env.OSS_ACCESS_KEY_ID.trim(),
       accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET.trim(),
+      secure: true, // 强制使用 HTTPS
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -56,15 +70,22 @@ export async function uploadToAliyunOSS(
     ? `${prefix}${pathOpts.pathPrefix}/${timestamp}-${pathOpts.basename}`
     : `${prefix}audio/${timestamp}-${filename}`;
 
-  const result = await client.put(uniqueFilename, fileBuffer, {
-    contentType,
-  });
+  console.log(`[OSS] Uploading to: ${uniqueFilename}, contentType: ${contentType}, bufferSize: ${fileBuffer.length}`);
 
-  return {
-    url: result.url,
-    filename: uniqueFilename,
-    size: fileBuffer.length,
-  };
+  try {
+    const result = await client.put(uniqueFilename, fileBuffer, {
+      contentType,
+    });
+    console.log(`[OSS] Upload success: ${result.url}`);
+    return {
+      url: result.url,
+      filename: uniqueFilename,
+      size: fileBuffer.length,
+    };
+  } catch (err) {
+    console.error(`[OSS] Put failed for ${uniqueFilename}:`, err);
+    throw err;
+  }
 }
 
 /** 判断是否为当前配置的 OSS Bucket 的 URL */
@@ -94,9 +115,6 @@ export function getOssKeyFromUrl(url: string): string | null {
   }
 }
 
-/** 生成私有 Bucket 的签名访问 URL（默认 1 小时有效）
- * 使用 response-content-disposition=inline，使 PDF/图片在 iframe 中预览而非下载
- */
 export async function getSignedUrl(
   objectKey: string,
   expiresSeconds: number = 3600,
@@ -106,8 +124,16 @@ export async function getSignedUrl(
   try {
     const mod = await import('ali-oss');
     OSS = mod.default || mod;
-  } catch {
-    throw new Error('ali-oss package is not installed');
+    if (OSS && OSS.default && typeof OSS !== 'function') {
+      OSS = OSS.default;
+    }
+  } catch (e) {
+    console.error('Failed to import ali-oss in getSignedUrl:', e);
+    throw new Error('ali-oss package load failed');
+  }
+
+  if (typeof OSS !== 'function' && typeof OSS !== 'object') {
+    throw new Error('ali-oss package is not a constructor or object');
   }
   if (!process.env.OSS_REGION || !process.env.OSS_BUCKET || !process.env.OSS_ACCESS_KEY_ID || !process.env.OSS_ACCESS_KEY_SECRET) {
     throw new Error('Aliyun OSS configuration is incomplete');

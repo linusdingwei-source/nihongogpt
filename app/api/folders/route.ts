@@ -19,28 +19,48 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const folders = await prisma.sourceFolder.findMany({
-      where: { userId },
-      orderBy: { name: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        parentId: true,
-        createdAt: true,
-        _count: {
-          select: { sources: true },
-        },
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const deckId = searchParams.get('deckId');
 
-    return NextResponse.json(
-      successResponse({
-        folders: folders.map(f => ({
-          ...f,
-          sourceCount: f._count.sources,
-        })),
-      })
-    );
+    console.log(`[GET /api/folders] Fetching folders for userId: ${userId}, deckId: ${deckId}`);
+
+    const where: any = { userId };
+    if (deckId) {
+      where.deckId = {
+        equals: deckId
+      };
+    }
+
+    try {
+      console.log('[GET /api/folders] Calling prisma.sourceFolder.findMany with:', JSON.stringify(where));
+      const folders = await prisma.sourceFolder.findMany({
+        where,
+        orderBy: { name: 'asc' },
+        select: {
+          id: true,
+          name: true,
+          parentId: true,
+          createdAt: true,
+          deckId: true,
+          _count: {
+            select: { sources: true },
+          },
+        },
+      });
+      console.log(`[GET /api/folders] Found ${folders.length} folders`);
+
+      return NextResponse.json(
+        successResponse({
+          folders: folders.map(f => ({
+            ...f,
+            sourceCount: f._count.sources,
+          })),
+        })
+      );
+    } catch (prismaError) {
+      console.error('[GET /api/folders] Prisma error:', prismaError);
+      throw prismaError;
+    }
   } catch (error) {
     console.error('Get folders error:', error);
     return NextResponse.json(
@@ -64,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, parentId } = body;
+    const { name, parentId, deckId } = body;
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json(
@@ -86,18 +106,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 检查同目录下是否存在同名目录
+    // 检查同目录下是否存在同名目录（在同一个牌组内）
     const existingFolder = await prisma.sourceFolder.findFirst({
       where: {
         userId,
         name: name.trim(),
         parentId: parentId || null,
+        deckId: deckId || null,
       },
     });
 
     if (existingFolder) {
       return NextResponse.json(
-        errorResponse(ErrorCodes.BAD_REQUEST, 'Folder with this name already exists'),
+        errorResponse(ErrorCodes.BAD_REQUEST, 'Folder with this name already exists in this deck'),
         { status: 400 }
       );
     }
@@ -107,6 +128,7 @@ export async function POST(request: NextRequest) {
         userId,
         name: name.trim(),
         parentId: parentId || null,
+        deckId: deckId || null,
       },
       select: {
         id: true,

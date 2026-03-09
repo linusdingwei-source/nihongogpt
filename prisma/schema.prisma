@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated-client"
 }
 
@@ -116,6 +116,8 @@ model Deck {
   name           String   // 牌组名称
   coverImageUrl  String?  // 牌组展示图（可选）
   cards          Card[]   // 关联的卡片
+  sources        Source[]
+  folders        SourceFolder[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -196,6 +198,9 @@ model Source {
   mimeType    String?  // MIME 类型
   size        Int?     // 文件大小（字节）
   
+  deckId      String?
+  deck        Deck?    @relation(fields: [deckId], references: [id], onDelete: SetNull)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -203,6 +208,7 @@ model Source {
   @@index([type])
   @@index([folderId])
   @@index([parentSourceId])
+  @@index([deckId])
   @@index([createdAt])
 }
 
@@ -216,12 +222,16 @@ model SourceFolder {
   parent      SourceFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children    SourceFolder[] @relation("FolderHierarchy")
   
+  deckId      String?
+  deck        Deck?    @relation(fields: [deckId], references: [id], onDelete: SetNull)
+
   sources     Source[]
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  @@unique([userId, name, parentId]) // 同一目录下名称唯一
+  @@unique([userId, name, parentId, deckId]) // 同一目录下同一牌组内名称唯一
   @@index([userId])
   @@index([parentId])
+  @@index([deckId])
 }

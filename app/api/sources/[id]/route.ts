@@ -170,7 +170,13 @@ export async function PATCH(
     });
 
     return NextResponse.json(
-      successResponse({ source })
+      successResponse({ 
+        source: {
+          ...source,
+          contentUrl: await getSignedUrlForStorageUrl(source.contentUrl),
+          fileUrl: await getSignedUrlForStorageUrl(source.fileUrl),
+        }
+      })
     );
   } catch (error) {
     console.error('Update source error:', error);

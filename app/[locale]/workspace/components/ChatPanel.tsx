@@ -174,18 +174,49 @@ export function ChatPanel(props: WorkspaceViewProps) {
             </p>
           </div>
         ) : (
-          messages.map((message) => (
-            <div 
-              key={message.id} 
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`max-w-[90%] flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`rounded-2xl px-4 py-2.5 text-sm ${
-                  message.role === 'user' 
-                    ? 'bg-indigo-600 text-white rounded-br-none shadow-sm' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none shadow-sm'
-                }`}>
-                  {message.role === 'assistant' ? (
+          messages.map((message) => {
+            const isUser = message.role === 'user';
+            const isRight = message.align === 'right' || (!message.align && isUser);
+            const isAssistant = message.role === 'assistant';
+            
+            return (
+              <div 
+                key={message.id} 
+                className={`flex w-full mb-4 ${isRight ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`flex items-start gap-2.5 max-w-[90%] ${isRight ? 'flex-row-reverse' : ''}`}>
+                  {/* Avatar/Icon */}
+                  {!isRight && isAssistant && (
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-indigo-200/50 dark:border-indigo-800/50">
+                      <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                  )}
+                  {isRight && isUser && (
+                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                      <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                  {isRight && isAssistant && (
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-emerald-200/50 dark:border-emerald-800/50">
+                      <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  )}
+
+                  <div className={`flex flex-col ${isRight ? 'items-end' : 'items-start'}`}>
+                    <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm transition-all ${
+                      isUser
+                        ? 'bg-indigo-600 text-white rounded-tr-none' 
+                        : isRight
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-100 rounded-tr-none'
+                          : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-gray-100 rounded-tl-none shadow-sm'
+                    }`}>
+                      {isAssistant ? (
                     message.type === 'flashcards' ? (
                       <div className="space-y-3 min-w-[240px]">
                         <div className="flex items-center gap-2 text-xs font-semibold pb-2 border-b border-gray-200 dark:border-gray-600">
@@ -374,8 +405,10 @@ export function ChatPanel(props: WorkspaceViewProps) {
                 </div>
               </div>
             </div>
-          ))
-        )}
+          </div>
+        );
+      })
+    )}
         {/* Standalone cancel buttons when generation in progress but not chatLoading */}
         {!chatLoading && (isPdfGenerating || isCardGenerating) && (
           <div className="flex justify-start mb-2">

@@ -29,6 +29,7 @@ export type SourceFolderMinAggregateOutputType = {
   userId: string | null
   name: string | null
   parentId: string | null
+  deckId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -38,6 +39,7 @@ export type SourceFolderMaxAggregateOutputType = {
   userId: string | null
   name: string | null
   parentId: string | null
+  deckId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -47,6 +49,7 @@ export type SourceFolderCountAggregateOutputType = {
   userId: number
   name: number
   parentId: number
+  deckId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -58,6 +61,7 @@ export type SourceFolderMinAggregateInputType = {
   userId?: true
   name?: true
   parentId?: true
+  deckId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -67,6 +71,7 @@ export type SourceFolderMaxAggregateInputType = {
   userId?: true
   name?: true
   parentId?: true
+  deckId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -76,6 +81,7 @@ export type SourceFolderCountAggregateInputType = {
   userId?: true
   name?: true
   parentId?: true
+  deckId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -158,6 +164,7 @@ export type SourceFolderGroupByOutputType = {
   userId: string
   name: string
   parentId: string | null
+  deckId: string | null
   createdAt: Date
   updatedAt: Date
   _count: SourceFolderCountAggregateOutputType | null
@@ -188,11 +195,13 @@ export type SourceFolderWhereInput = {
   userId?: Prisma.StringFilter<"SourceFolder"> | string
   name?: Prisma.StringFilter<"SourceFolder"> | string
   parentId?: Prisma.StringNullableFilter<"SourceFolder"> | string | null
+  deckId?: Prisma.StringNullableFilter<"SourceFolder"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SourceFolder"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SourceFolder"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   parent?: Prisma.XOR<Prisma.SourceFolderNullableScalarRelationFilter, Prisma.SourceFolderWhereInput> | null
   children?: Prisma.SourceFolderListRelationFilter
+  deck?: Prisma.XOR<Prisma.DeckNullableScalarRelationFilter, Prisma.DeckWhereInput> | null
   sources?: Prisma.SourceListRelationFilter
 }
 
@@ -201,36 +210,41 @@ export type SourceFolderOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   parentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  deckId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   parent?: Prisma.SourceFolderOrderByWithRelationInput
   children?: Prisma.SourceFolderOrderByRelationAggregateInput
+  deck?: Prisma.DeckOrderByWithRelationInput
   sources?: Prisma.SourceOrderByRelationAggregateInput
 }
 
 export type SourceFolderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId_name_parentId?: Prisma.SourceFolderUserIdNameParentIdCompoundUniqueInput
+  userId_name_parentId_deckId?: Prisma.SourceFolderUserIdNameParentIdDeckIdCompoundUniqueInput
   AND?: Prisma.SourceFolderWhereInput | Prisma.SourceFolderWhereInput[]
   OR?: Prisma.SourceFolderWhereInput[]
   NOT?: Prisma.SourceFolderWhereInput | Prisma.SourceFolderWhereInput[]
   userId?: Prisma.StringFilter<"SourceFolder"> | string
   name?: Prisma.StringFilter<"SourceFolder"> | string
   parentId?: Prisma.StringNullableFilter<"SourceFolder"> | string | null
+  deckId?: Prisma.StringNullableFilter<"SourceFolder"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SourceFolder"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SourceFolder"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   parent?: Prisma.XOR<Prisma.SourceFolderNullableScalarRelationFilter, Prisma.SourceFolderWhereInput> | null
   children?: Prisma.SourceFolderListRelationFilter
+  deck?: Prisma.XOR<Prisma.DeckNullableScalarRelationFilter, Prisma.DeckWhereInput> | null
   sources?: Prisma.SourceListRelationFilter
-}, "id" | "userId_name_parentId">
+}, "id" | "userId_name_parentId_deckId">
 
 export type SourceFolderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   parentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  deckId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SourceFolderCountOrderByAggregateInput
@@ -246,6 +260,7 @@ export type SourceFolderScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"SourceFolder"> | string
   name?: Prisma.StringWithAggregatesFilter<"SourceFolder"> | string
   parentId?: Prisma.StringNullableWithAggregatesFilter<"SourceFolder"> | string | null
+  deckId?: Prisma.StringNullableWithAggregatesFilter<"SourceFolder"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SourceFolder"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SourceFolder"> | Date | string
 }
@@ -258,6 +273,7 @@ export type SourceFolderCreateInput = {
   user: Prisma.UserCreateNestedOneWithoutSourceFoldersInput
   parent?: Prisma.SourceFolderCreateNestedOneWithoutChildrenInput
   children?: Prisma.SourceFolderCreateNestedManyWithoutParentInput
+  deck?: Prisma.DeckCreateNestedOneWithoutFoldersInput
   sources?: Prisma.SourceCreateNestedManyWithoutFolderInput
 }
 
@@ -266,6 +282,7 @@ export type SourceFolderUncheckedCreateInput = {
   userId: string
   name: string
   parentId?: string | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.SourceFolderUncheckedCreateNestedManyWithoutParentInput
@@ -280,6 +297,7 @@ export type SourceFolderUpdateInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutSourceFoldersNestedInput
   parent?: Prisma.SourceFolderUpdateOneWithoutChildrenNestedInput
   children?: Prisma.SourceFolderUpdateManyWithoutParentNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutFoldersNestedInput
   sources?: Prisma.SourceUpdateManyWithoutFolderNestedInput
 }
 
@@ -288,6 +306,7 @@ export type SourceFolderUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.SourceFolderUncheckedUpdateManyWithoutParentNestedInput
@@ -299,6 +318,7 @@ export type SourceFolderCreateManyInput = {
   userId: string
   name: string
   parentId?: string | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -315,6 +335,7 @@ export type SourceFolderUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -334,10 +355,11 @@ export type SourceFolderNullableScalarRelationFilter = {
   isNot?: Prisma.SourceFolderWhereInput | null
 }
 
-export type SourceFolderUserIdNameParentIdCompoundUniqueInput = {
+export type SourceFolderUserIdNameParentIdDeckIdCompoundUniqueInput = {
   userId: string
   name: string
   parentId: string
+  deckId: string
 }
 
 export type SourceFolderCountOrderByAggregateInput = {
@@ -345,6 +367,7 @@ export type SourceFolderCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  deckId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -354,6 +377,7 @@ export type SourceFolderMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  deckId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -363,6 +387,7 @@ export type SourceFolderMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  deckId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -406,6 +431,48 @@ export type SourceFolderUncheckedUpdateManyWithoutUserNestedInput = {
   connect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
   update?: Prisma.SourceFolderUpdateWithWhereUniqueWithoutUserInput | Prisma.SourceFolderUpdateWithWhereUniqueWithoutUserInput[]
   updateMany?: Prisma.SourceFolderUpdateManyWithWhereWithoutUserInput | Prisma.SourceFolderUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.SourceFolderScalarWhereInput | Prisma.SourceFolderScalarWhereInput[]
+}
+
+export type SourceFolderCreateNestedManyWithoutDeckInput = {
+  create?: Prisma.XOR<Prisma.SourceFolderCreateWithoutDeckInput, Prisma.SourceFolderUncheckedCreateWithoutDeckInput> | Prisma.SourceFolderCreateWithoutDeckInput[] | Prisma.SourceFolderUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceFolderCreateOrConnectWithoutDeckInput | Prisma.SourceFolderCreateOrConnectWithoutDeckInput[]
+  createMany?: Prisma.SourceFolderCreateManyDeckInputEnvelope
+  connect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+}
+
+export type SourceFolderUncheckedCreateNestedManyWithoutDeckInput = {
+  create?: Prisma.XOR<Prisma.SourceFolderCreateWithoutDeckInput, Prisma.SourceFolderUncheckedCreateWithoutDeckInput> | Prisma.SourceFolderCreateWithoutDeckInput[] | Prisma.SourceFolderUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceFolderCreateOrConnectWithoutDeckInput | Prisma.SourceFolderCreateOrConnectWithoutDeckInput[]
+  createMany?: Prisma.SourceFolderCreateManyDeckInputEnvelope
+  connect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+}
+
+export type SourceFolderUpdateManyWithoutDeckNestedInput = {
+  create?: Prisma.XOR<Prisma.SourceFolderCreateWithoutDeckInput, Prisma.SourceFolderUncheckedCreateWithoutDeckInput> | Prisma.SourceFolderCreateWithoutDeckInput[] | Prisma.SourceFolderUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceFolderCreateOrConnectWithoutDeckInput | Prisma.SourceFolderCreateOrConnectWithoutDeckInput[]
+  upsert?: Prisma.SourceFolderUpsertWithWhereUniqueWithoutDeckInput | Prisma.SourceFolderUpsertWithWhereUniqueWithoutDeckInput[]
+  createMany?: Prisma.SourceFolderCreateManyDeckInputEnvelope
+  set?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  disconnect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  delete?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  connect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  update?: Prisma.SourceFolderUpdateWithWhereUniqueWithoutDeckInput | Prisma.SourceFolderUpdateWithWhereUniqueWithoutDeckInput[]
+  updateMany?: Prisma.SourceFolderUpdateManyWithWhereWithoutDeckInput | Prisma.SourceFolderUpdateManyWithWhereWithoutDeckInput[]
+  deleteMany?: Prisma.SourceFolderScalarWhereInput | Prisma.SourceFolderScalarWhereInput[]
+}
+
+export type SourceFolderUncheckedUpdateManyWithoutDeckNestedInput = {
+  create?: Prisma.XOR<Prisma.SourceFolderCreateWithoutDeckInput, Prisma.SourceFolderUncheckedCreateWithoutDeckInput> | Prisma.SourceFolderCreateWithoutDeckInput[] | Prisma.SourceFolderUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceFolderCreateOrConnectWithoutDeckInput | Prisma.SourceFolderCreateOrConnectWithoutDeckInput[]
+  upsert?: Prisma.SourceFolderUpsertWithWhereUniqueWithoutDeckInput | Prisma.SourceFolderUpsertWithWhereUniqueWithoutDeckInput[]
+  createMany?: Prisma.SourceFolderCreateManyDeckInputEnvelope
+  set?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  disconnect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  delete?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  connect?: Prisma.SourceFolderWhereUniqueInput | Prisma.SourceFolderWhereUniqueInput[]
+  update?: Prisma.SourceFolderUpdateWithWhereUniqueWithoutDeckInput | Prisma.SourceFolderUpdateWithWhereUniqueWithoutDeckInput[]
+  updateMany?: Prisma.SourceFolderUpdateManyWithWhereWithoutDeckInput | Prisma.SourceFolderUpdateManyWithWhereWithoutDeckInput[]
   deleteMany?: Prisma.SourceFolderScalarWhereInput | Prisma.SourceFolderScalarWhereInput[]
 }
 
@@ -490,6 +557,7 @@ export type SourceFolderCreateWithoutUserInput = {
   updatedAt?: Date | string
   parent?: Prisma.SourceFolderCreateNestedOneWithoutChildrenInput
   children?: Prisma.SourceFolderCreateNestedManyWithoutParentInput
+  deck?: Prisma.DeckCreateNestedOneWithoutFoldersInput
   sources?: Prisma.SourceCreateNestedManyWithoutFolderInput
 }
 
@@ -497,6 +565,7 @@ export type SourceFolderUncheckedCreateWithoutUserInput = {
   id?: string
   name: string
   parentId?: string | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.SourceFolderUncheckedCreateNestedManyWithoutParentInput
@@ -537,8 +606,57 @@ export type SourceFolderScalarWhereInput = {
   userId?: Prisma.StringFilter<"SourceFolder"> | string
   name?: Prisma.StringFilter<"SourceFolder"> | string
   parentId?: Prisma.StringNullableFilter<"SourceFolder"> | string | null
+  deckId?: Prisma.StringNullableFilter<"SourceFolder"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SourceFolder"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SourceFolder"> | Date | string
+}
+
+export type SourceFolderCreateWithoutDeckInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSourceFoldersInput
+  parent?: Prisma.SourceFolderCreateNestedOneWithoutChildrenInput
+  children?: Prisma.SourceFolderCreateNestedManyWithoutParentInput
+  sources?: Prisma.SourceCreateNestedManyWithoutFolderInput
+}
+
+export type SourceFolderUncheckedCreateWithoutDeckInput = {
+  id?: string
+  userId: string
+  name: string
+  parentId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  children?: Prisma.SourceFolderUncheckedCreateNestedManyWithoutParentInput
+  sources?: Prisma.SourceUncheckedCreateNestedManyWithoutFolderInput
+}
+
+export type SourceFolderCreateOrConnectWithoutDeckInput = {
+  where: Prisma.SourceFolderWhereUniqueInput
+  create: Prisma.XOR<Prisma.SourceFolderCreateWithoutDeckInput, Prisma.SourceFolderUncheckedCreateWithoutDeckInput>
+}
+
+export type SourceFolderCreateManyDeckInputEnvelope = {
+  data: Prisma.SourceFolderCreateManyDeckInput | Prisma.SourceFolderCreateManyDeckInput[]
+  skipDuplicates?: boolean
+}
+
+export type SourceFolderUpsertWithWhereUniqueWithoutDeckInput = {
+  where: Prisma.SourceFolderWhereUniqueInput
+  update: Prisma.XOR<Prisma.SourceFolderUpdateWithoutDeckInput, Prisma.SourceFolderUncheckedUpdateWithoutDeckInput>
+  create: Prisma.XOR<Prisma.SourceFolderCreateWithoutDeckInput, Prisma.SourceFolderUncheckedCreateWithoutDeckInput>
+}
+
+export type SourceFolderUpdateWithWhereUniqueWithoutDeckInput = {
+  where: Prisma.SourceFolderWhereUniqueInput
+  data: Prisma.XOR<Prisma.SourceFolderUpdateWithoutDeckInput, Prisma.SourceFolderUncheckedUpdateWithoutDeckInput>
+}
+
+export type SourceFolderUpdateManyWithWhereWithoutDeckInput = {
+  where: Prisma.SourceFolderScalarWhereInput
+  data: Prisma.XOR<Prisma.SourceFolderUpdateManyMutationInput, Prisma.SourceFolderUncheckedUpdateManyWithoutDeckInput>
 }
 
 export type SourceFolderCreateWithoutSourcesInput = {
@@ -549,6 +667,7 @@ export type SourceFolderCreateWithoutSourcesInput = {
   user: Prisma.UserCreateNestedOneWithoutSourceFoldersInput
   parent?: Prisma.SourceFolderCreateNestedOneWithoutChildrenInput
   children?: Prisma.SourceFolderCreateNestedManyWithoutParentInput
+  deck?: Prisma.DeckCreateNestedOneWithoutFoldersInput
 }
 
 export type SourceFolderUncheckedCreateWithoutSourcesInput = {
@@ -556,6 +675,7 @@ export type SourceFolderUncheckedCreateWithoutSourcesInput = {
   userId: string
   name: string
   parentId?: string | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.SourceFolderUncheckedCreateNestedManyWithoutParentInput
@@ -585,6 +705,7 @@ export type SourceFolderUpdateWithoutSourcesInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutSourceFoldersNestedInput
   parent?: Prisma.SourceFolderUpdateOneWithoutChildrenNestedInput
   children?: Prisma.SourceFolderUpdateManyWithoutParentNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutFoldersNestedInput
 }
 
 export type SourceFolderUncheckedUpdateWithoutSourcesInput = {
@@ -592,6 +713,7 @@ export type SourceFolderUncheckedUpdateWithoutSourcesInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.SourceFolderUncheckedUpdateManyWithoutParentNestedInput
@@ -604,6 +726,7 @@ export type SourceFolderCreateWithoutChildrenInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSourceFoldersInput
   parent?: Prisma.SourceFolderCreateNestedOneWithoutChildrenInput
+  deck?: Prisma.DeckCreateNestedOneWithoutFoldersInput
   sources?: Prisma.SourceCreateNestedManyWithoutFolderInput
 }
 
@@ -612,6 +735,7 @@ export type SourceFolderUncheckedCreateWithoutChildrenInput = {
   userId: string
   name: string
   parentId?: string | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutFolderInput
@@ -629,6 +753,7 @@ export type SourceFolderCreateWithoutParentInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSourceFoldersInput
   children?: Prisma.SourceFolderCreateNestedManyWithoutParentInput
+  deck?: Prisma.DeckCreateNestedOneWithoutFoldersInput
   sources?: Prisma.SourceCreateNestedManyWithoutFolderInput
 }
 
@@ -636,6 +761,7 @@ export type SourceFolderUncheckedCreateWithoutParentInput = {
   id?: string
   userId: string
   name: string
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.SourceFolderUncheckedCreateNestedManyWithoutParentInput
@@ -670,6 +796,7 @@ export type SourceFolderUpdateWithoutChildrenInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSourceFoldersNestedInput
   parent?: Prisma.SourceFolderUpdateOneWithoutChildrenNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutFoldersNestedInput
   sources?: Prisma.SourceUpdateManyWithoutFolderNestedInput
 }
 
@@ -678,6 +805,7 @@ export type SourceFolderUncheckedUpdateWithoutChildrenInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutFolderNestedInput
@@ -703,6 +831,7 @@ export type SourceFolderCreateManyUserInput = {
   id?: string
   name: string
   parentId?: string | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -714,6 +843,7 @@ export type SourceFolderUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parent?: Prisma.SourceFolderUpdateOneWithoutChildrenNestedInput
   children?: Prisma.SourceFolderUpdateManyWithoutParentNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutFoldersNestedInput
   sources?: Prisma.SourceUpdateManyWithoutFolderNestedInput
 }
 
@@ -721,6 +851,7 @@ export type SourceFolderUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.SourceFolderUncheckedUpdateManyWithoutParentNestedInput
@@ -731,6 +862,47 @@ export type SourceFolderUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SourceFolderCreateManyDeckInput = {
+  id?: string
+  userId: string
+  name: string
+  parentId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SourceFolderUpdateWithoutDeckInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSourceFoldersNestedInput
+  parent?: Prisma.SourceFolderUpdateOneWithoutChildrenNestedInput
+  children?: Prisma.SourceFolderUpdateManyWithoutParentNestedInput
+  sources?: Prisma.SourceUpdateManyWithoutFolderNestedInput
+}
+
+export type SourceFolderUncheckedUpdateWithoutDeckInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  children?: Prisma.SourceFolderUncheckedUpdateManyWithoutParentNestedInput
+  sources?: Prisma.SourceUncheckedUpdateManyWithoutFolderNestedInput
+}
+
+export type SourceFolderUncheckedUpdateManyWithoutDeckInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -739,6 +911,7 @@ export type SourceFolderCreateManyParentInput = {
   id?: string
   userId: string
   name: string
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -750,6 +923,7 @@ export type SourceFolderUpdateWithoutParentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSourceFoldersNestedInput
   children?: Prisma.SourceFolderUpdateManyWithoutParentNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutFoldersNestedInput
   sources?: Prisma.SourceUpdateManyWithoutFolderNestedInput
 }
 
@@ -757,6 +931,7 @@ export type SourceFolderUncheckedUpdateWithoutParentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.SourceFolderUncheckedUpdateManyWithoutParentNestedInput
@@ -767,6 +942,7 @@ export type SourceFolderUncheckedUpdateManyWithoutParentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -816,11 +992,13 @@ export type SourceFolderSelect<ExtArgs extends runtime.Types.Extensions.Internal
   userId?: boolean
   name?: boolean
   parentId?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.SourceFolder$parentArgs<ExtArgs>
   children?: boolean | Prisma.SourceFolder$childrenArgs<ExtArgs>
+  deck?: boolean | Prisma.SourceFolder$deckArgs<ExtArgs>
   sources?: boolean | Prisma.SourceFolder$sourcesArgs<ExtArgs>
   _count?: boolean | Prisma.SourceFolderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sourceFolder"]>
@@ -830,10 +1008,12 @@ export type SourceFolderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   userId?: boolean
   name?: boolean
   parentId?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.SourceFolder$parentArgs<ExtArgs>
+  deck?: boolean | Prisma.SourceFolder$deckArgs<ExtArgs>
 }, ExtArgs["result"]["sourceFolder"]>
 
 export type SourceFolderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -841,10 +1021,12 @@ export type SourceFolderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   userId?: boolean
   name?: boolean
   parentId?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.SourceFolder$parentArgs<ExtArgs>
+  deck?: boolean | Prisma.SourceFolder$deckArgs<ExtArgs>
 }, ExtArgs["result"]["sourceFolder"]>
 
 export type SourceFolderSelectScalar = {
@@ -852,25 +1034,29 @@ export type SourceFolderSelectScalar = {
   userId?: boolean
   name?: boolean
   parentId?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SourceFolderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "parentId" | "createdAt" | "updatedAt", ExtArgs["result"]["sourceFolder"]>
+export type SourceFolderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "parentId" | "deckId" | "createdAt" | "updatedAt", ExtArgs["result"]["sourceFolder"]>
 export type SourceFolderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.SourceFolder$parentArgs<ExtArgs>
   children?: boolean | Prisma.SourceFolder$childrenArgs<ExtArgs>
+  deck?: boolean | Prisma.SourceFolder$deckArgs<ExtArgs>
   sources?: boolean | Prisma.SourceFolder$sourcesArgs<ExtArgs>
   _count?: boolean | Prisma.SourceFolderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SourceFolderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.SourceFolder$parentArgs<ExtArgs>
+  deck?: boolean | Prisma.SourceFolder$deckArgs<ExtArgs>
 }
 export type SourceFolderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.SourceFolder$parentArgs<ExtArgs>
+  deck?: boolean | Prisma.SourceFolder$deckArgs<ExtArgs>
 }
 
 export type $SourceFolderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -879,6 +1065,7 @@ export type $SourceFolderPayload<ExtArgs extends runtime.Types.Extensions.Intern
     user: Prisma.$UserPayload<ExtArgs>
     parent: Prisma.$SourceFolderPayload<ExtArgs> | null
     children: Prisma.$SourceFolderPayload<ExtArgs>[]
+    deck: Prisma.$DeckPayload<ExtArgs> | null
     sources: Prisma.$SourcePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -886,6 +1073,7 @@ export type $SourceFolderPayload<ExtArgs extends runtime.Types.Extensions.Intern
     userId: string
     name: string
     parentId: string | null
+    deckId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["sourceFolder"]>
@@ -1285,6 +1473,7 @@ export interface Prisma__SourceFolderClient<T, Null = never, ExtArgs extends run
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   parent<T extends Prisma.SourceFolder$parentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SourceFolder$parentArgs<ExtArgs>>): Prisma.Prisma__SourceFolderClient<runtime.Types.Result.GetResult<Prisma.$SourceFolderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   children<T extends Prisma.SourceFolder$childrenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SourceFolder$childrenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deck<T extends Prisma.SourceFolder$deckArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SourceFolder$deckArgs<ExtArgs>>): Prisma.Prisma__DeckClient<runtime.Types.Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sources<T extends Prisma.SourceFolder$sourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SourceFolder$sourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1319,6 +1508,7 @@ export interface SourceFolderFieldRefs {
   readonly userId: Prisma.FieldRef<"SourceFolder", 'String'>
   readonly name: Prisma.FieldRef<"SourceFolder", 'String'>
   readonly parentId: Prisma.FieldRef<"SourceFolder", 'String'>
+  readonly deckId: Prisma.FieldRef<"SourceFolder", 'String'>
   readonly createdAt: Prisma.FieldRef<"SourceFolder", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SourceFolder", 'DateTime'>
 }
@@ -1757,6 +1947,25 @@ export type SourceFolder$childrenArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.SourceFolderScalarFieldEnum | Prisma.SourceFolderScalarFieldEnum[]
+}
+
+/**
+ * SourceFolder.deck
+ */
+export type SourceFolder$deckArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Deck
+   */
+  select?: Prisma.DeckSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Deck
+   */
+  omit?: Prisma.DeckOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeckInclude<ExtArgs> | null
+  where?: Prisma.DeckWhereInput
 }
 
 /**

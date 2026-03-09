@@ -8,7 +8,7 @@ env/
 
 # --- 依赖包 (体积巨大，不需要提交) ---
 node_modules/
-package-lock.json
+# package-lock.json
 # 注意：通常建议提交 package-lock.json 以锁定版本。
 # 如果你确定不想提交锁文件，请保持上面这行；否则删除上面这行。
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
+import { getSignedUrlForStorageUrl } from '@/lib/storage';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const deckId = searchParams.get('deckId');
     const deckName = searchParams.get('deck');
     const sourceId = searchParams.get('sourceId');
     const category = searchParams.get('category') || 'WORD'; // WORD, SENTENCE, or NOTE
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest) {
 
     const where: {
       userId: string;
+      deckId?: string;
       deckName?: string;
       sourceId?: string;
       category?: string;
@@ -52,7 +55,9 @@ export async function GET(request: NextRequest) {
       where.cardType = { not: '单词' };
     }
 
-    if (deckName) {
+    if (deckId) {
+      where.deckId = deckId;
+    } else if (deckName) {
       where.deckName = deckName;
     }
 
@@ -105,9 +110,15 @@ export async function GET(request: NextRequest) {
       prisma.card.count({ where }),
     ]);
 
+    // 为音频 URL 生成签名
+    const cardsWithSignedUrls = await Promise.all(cards.map(async (card) => ({
+      ...card,
+      audioUrl: await getSignedUrlForStorageUrl(card.audioUrl),
+    })));
+
     return NextResponse.json(
       successResponse({
-        cards,
+        cards: cardsWithSignedUrls,
         pagination: {
           page,
           limit,

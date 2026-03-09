@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { consumeCredits, getCredits } from '@/lib/credits';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
+import { getSignedUrlForStorageUrl } from '@/lib/storage';
 
 const TTS_CREDITS_COST = 0.01; // TTS 生成消耗 0.01 credit (100次调用=1credit)
 
@@ -141,11 +142,12 @@ export async function POST(request: NextRequest) {
       await consumeCredits(userId, TTS_CREDITS_COST);
       
       const remainingCredits = await getCredits(userId);
+      const signedAudioUrl = await getSignedUrlForStorageUrl(finalAudioUrl);
 
       return NextResponse.json(
         successResponse({
           audio: {
-            url: finalAudioUrl,
+            url: signedAudioUrl,
             filename: audioFilename,
             // 如果需要时间戳，需要调用支持时间戳的 API
             // timestamps: data.output.timestamps || null,

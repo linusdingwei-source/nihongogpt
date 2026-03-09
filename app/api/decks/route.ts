@@ -102,7 +102,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(successResponse({ deck }));
+    return NextResponse.json(successResponse({ 
+      deck: {
+        ...deck,
+        coverImageUrl: await getSignedUrlForStorageUrl(deck.coverImageUrl ?? null),
+      }
+    }));
   } catch (error) {
     console.error('Create deck error:', error);
     return NextResponse.json(
@@ -202,7 +207,12 @@ export async function PATCH(request: NextRequest) {
       return updated;
     });
 
-    return NextResponse.json(successResponse({ deck: updatedDeck }));
+    return NextResponse.json(successResponse({ 
+      deck: {
+        ...updatedDeck,
+        coverImageUrl: await getSignedUrlForStorageUrl(updatedDeck.coverImageUrl ?? null),
+      }
+    }));
   } catch (error) {
     console.error('Rename deck error:', error);
     return NextResponse.json(

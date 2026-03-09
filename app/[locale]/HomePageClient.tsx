@@ -103,9 +103,9 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
   }, [fetchDecks, fetchCredits, status, routerLocale]);
 
   // 处理牌组点击
-  const handleDeckClick = (deckName: string) => {
+  const handleDeckClick = (deckId: string) => {
     trackButtonClick('DECK_CLICK', 'home_page');
-    router.push(`/workspace?deck=${encodeURIComponent(deckName)}`);
+    router.push(`/workspace?deckId=${deckId}`);
   };
 
   // 处理创建新牌组：先打开弹窗，用户填写名称和可选封面后再创建
@@ -338,7 +338,7 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
               {featuredDecks.map((deck, deckIndex) => (
                 <button
                   key={deck.id}
-                  onClick={() => handleDeckClick(deck.name)}
+                  onClick={() => handleDeckClick(deck.id)}
                   className="group relative h-48 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all text-left"
                 >
                   {/* 封面图或渐变背景 */}
@@ -408,8 +408,8 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
                   key={deck.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => handleDeckClick(deck.name)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDeckClick(deck.name); } }}
+                  onClick={() => handleDeckClick(deck.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDeckClick(deck.id); } }}
                   className="group h-48 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-lg transition-all bg-white dark:bg-gray-800 p-4 flex flex-col cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -471,8 +471,8 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
                   key={deck.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => handleDeckClick(deck.name)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDeckClick(deck.name); } }}
+                  onClick={() => handleDeckClick(deck.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDeckClick(deck.id); } }}
                   className="group h-48 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-lg transition-all bg-white dark:bg-gray-800 p-4 flex flex-col cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">

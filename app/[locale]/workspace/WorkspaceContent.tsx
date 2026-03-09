@@ -48,6 +48,7 @@ type ChatMessage = {
   role: 'user' | 'assistant';
   content: string;
   type?: 'chat' | 'analysis' | 'flashcards';
+  align?: 'left' | 'right';
   data?: {
     markdown?: string;
     html?: string;
@@ -66,6 +67,17 @@ type ChatMessage = {
   timestamp: number;
 };
 
+// Helper to strip markdown fences from LLM output
+const stripFences = (content: string) => {
+  if (!content) return '';
+  let result = content.trim();
+  // Strip ```markdown ... ``` or ``` ... ```
+  // Supports various language tags
+  result = result.replace(/^```(?:markdown|json|text|html|japanese)?\s*/i, '');
+  result = result.replace(/\s*```\s*$/, '');
+  return result.trim();
+};
+
 export function WorkspacePageContent() {
   const t = useTranslations();
   const workspaceT = useTranslations('workspace');
@@ -74,22 +86,42 @@ export function WorkspacePageContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   
-  // 当前工作区牌组（从URL参数或默认值）
-  const [currentWorkspaceDeck, setCurrentWorkspaceDeck] = useState<string>('default');
+  // 当前工作区牌组 ID（从URL参数或默认值）
+  const [currentWorkspaceDeckId, setCurrentWorkspaceDeckId] = useState<string>('');
+  const [currentWorkspaceDeckName, setCurrentWorkspaceDeckName] = useState<string>('default');
 
   useEffect(() => {
-    const deckParam = searchParams.get('deck');
-    if (deckParam) {
-      setCurrentWorkspaceDeck(decodeURIComponent(deckParam));
-    }
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlDeck = params.get('deck');
-      if (urlDeck) {
-        setCurrentWorkspaceDeck(decodeURIComponent(urlDeck));
+    const deckIdParam = searchParams.get('deckId');
+    if (deckIdParam) {
+      setCurrentWorkspaceDeckId(deckIdParam);
+    } else {
+      // 兼容旧版，尝试从 deck 参数获取名称
+      const deckNameParam = searchParams.get('deck');
+      if (deckNameParam) {
+        setCurrentWorkspaceDeckName(decodeURIComponent(deckNameParam));
       }
     }
   }, [searchParams]);
+
+  // 根据 deckId 获取牌组详情
+  const [deckDetails, setDeckDetails] = useState<Deck | null>(null);
+  
+  useEffect(() => {
+    const fetchDeckDetails = async () => {
+      if (!currentWorkspaceDeckId) return;
+      try {
+        const response = await fetch(`/api/decks/${currentWorkspaceDeckId}`);
+        const data = await response.json();
+        if (data.success && data.data.deck) {
+          setDeckDetails(data.data.deck);
+          setCurrentWorkspaceDeckName(data.data.deck.name);
+        }
+      } catch (error) {
+        console.error('Failed to fetch deck details:', error);
+      }
+    };
+    fetchDeckDetails();
+  }, [currentWorkspaceDeckId]);
 
   // 卡片生成相关状态
   const [cardText, setCardText] = useState('');
@@ -147,6 +179,10 @@ export function WorkspacePageContent() {
   const [editingSourceName, setEditingSourceName] = useState('');
   const [showSourceMenuId, setShowSourceMenuId] = useState<string | null>(null);
   
+  // 触发单个卡片的听写/跟读
+  const [specialStudyCard, setSpecialStudyCard] = useState<any | null>(null);
+  const [specialStudyType, setSpecialStudyType] = useState<'dictation' | 'shadowing' | null>(null);
+
   // 面板收起/展开状态
   const [isSourcePanelCollapsed, setIsSourcePanelCollapsed] = useState(false);
   const [isStudioPanelCollapsed, setIsStudioPanelCollapsed] = useState(false);
@@ -158,29 +194,36 @@ export function WorkspacePageContent() {
   const [isResizingStudio, setIsResizingStudio] = useState(false);
 
   // Chat 相关状态
-  const CHAT_STORAGE_KEY = 'ankigpt_chat_history';
+  const CHAT_STORAGE_KEY = useMemo(() => 
+    `ankigpt_chat_history_${currentWorkspaceDeckId || currentWorkspaceDeckName}`, 
+    [currentWorkspaceDeckId, currentWorkspaceDeckName]
+  );
   const MAX_STORED_MESSAGES = 100;
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   
-  // 从 localStorage 加载历史消息
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    if (typeof window === 'undefined') return [];
+  // 加载历史消息的 Effect
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     try {
       const stored = localStorage.getItem(CHAT_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as ChatMessage[];
-        return parsed.slice(-MAX_STORED_MESSAGES);
+        setMessages(parsed.slice(-MAX_STORED_MESSAGES));
+      } else {
+        setMessages([]); // 如果没有该牌组的历史记录，则清空
       }
     } catch (e) {
       console.error('Failed to load chat history:', e);
+      setMessages([]);
     }
-    return [];
-  });
+  }, [CHAT_STORAGE_KEY]);
+
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   
-  // 保存消息到 localStorage
+  // 保存消息的 Effect
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || messages.length === 0) return;
     try {
       // 只保存最近的消息
       const toStore = messages.slice(-MAX_STORED_MESSAGES);
@@ -188,7 +231,7 @@ export function WorkspacePageContent() {
     } catch (e) {
       console.error('Failed to save chat history:', e);
     }
-  }, [messages]);
+  }, [messages, CHAT_STORAGE_KEY]);
 
   const addMessage = useCallback((msg: Omit<ChatMessage, 'timestamp'>) => {
     setMessages(prev => [...prev, { ...msg, timestamp: Date.now() }].slice(-MAX_STORED_MESSAGES));
@@ -333,8 +376,13 @@ export function WorkspacePageContent() {
     try {
       const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
       const headers = getAnonymousHeaders();
-      // 添加时间戳防止缓存
-      const res = await fetch(`/api/sources?_t=${Date.now()}`, { headers });
+      const params = new URLSearchParams();
+      params.append('_t', Date.now().toString());
+      if (currentWorkspaceDeckId) {
+        params.append('deckId', currentWorkspaceDeckId);
+      }
+      
+      const res = await fetch(`/api/sources?${params.toString()}`, { headers });
       const response = await res.json();
       const data = response.success ? response.data : response;
       if (data?.sources) {
@@ -345,7 +393,7 @@ export function WorkspacePageContent() {
     } finally {
       setSourcesLoading(false);
     }
-  }, []);
+  }, [currentWorkspaceDeckId]);
 
   // 获取卡片列表
   const fetchCards = useCallback(async () => {
@@ -355,8 +403,10 @@ export function WorkspacePageContent() {
       const headers = getAnonymousHeaders();
       const params = new URLSearchParams();
       // 工作区只显示当前工作区牌组的卡片
-      if (currentWorkspaceDeck && currentWorkspaceDeck !== 'default') {
-        params.append('deck', currentWorkspaceDeck);
+      if (currentWorkspaceDeckId) {
+        params.append('deckId', currentWorkspaceDeckId);
+      } else if (currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default') {
+        params.append('deck', currentWorkspaceDeckName);
       }
       if (selectedSourceId) {
         params.append('sourceId', selectedSourceId);
@@ -396,7 +446,7 @@ export function WorkspacePageContent() {
     } finally {
       setCardsLoading(false);
     }
-  }, [currentWorkspaceDeck, selectedSourceId, activeStudioTab, page, debouncedSearchQuery, cardT]);
+  }, [currentWorkspaceDeckId, currentWorkspaceDeckName, selectedSourceId, activeStudioTab, page, debouncedSearchQuery, cardT]);
 
   // 检查 URL 参数中的 deck（同步更新状态）
   useEffect(() => {
@@ -411,22 +461,22 @@ export function WorkspacePageContent() {
       deckParam = searchParams.get('deck');
     }
     
-    if (deckParam && currentWorkspaceDeck === 'default') {
+    if (deckParam && currentWorkspaceDeckName === 'default') {
       // 只有在当前还是默认值时才更新，避免覆盖用户手动设置的值
       const decodedDeckName = decodeURIComponent(deckParam);
       setCurrentWorkspaceDeck(decodedDeckName);
     } else if (deckParam) {
       // 如果已经有值，也更新一下确保同步
       const decodedDeckName = decodeURIComponent(deckParam);
-      if (decodedDeckName !== currentWorkspaceDeck) {
+      if (decodedDeckName !== currentWorkspaceDeckName) {
         setCurrentWorkspaceDeck(decodedDeckName);
       }
     }
-  }, [searchParams, currentWorkspaceDeck]);
+  }, [searchParams, currentWorkspaceDeckName]);
   
   // 清除 URL 参数（延迟执行，确保状态已更新且已渲染）
   useEffect(() => {
-    if (currentWorkspaceDeck !== 'default' && typeof window !== 'undefined') {
+    if (currentWorkspaceDeckName !== 'default' && typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('deck')) {
         // 延迟清除，确保组件已经渲染完成
@@ -436,7 +486,7 @@ export function WorkspacePageContent() {
         return () => clearTimeout(timer);
       }
     }
-  }, [currentWorkspaceDeck]);
+  }, [currentWorkspaceDeckName]);
 
   // 初始化时获取来源列表
   useEffect(() => {
@@ -670,7 +720,8 @@ export function WorkspacePageContent() {
         body: JSON.stringify({
           text: cardText,
           cardType,
-          deckName: currentWorkspaceDeck.trim() || 'default',
+          deckId: currentWorkspaceDeckId,
+          deckName: currentWorkspaceDeckName,
           includePronunciation,
         }),
       });
@@ -708,10 +759,121 @@ export function WorkspacePageContent() {
 
     setCardLoading(true);
     setCardError('');
+    setIsCardGenerating(true);
+
+    let successCount = 0;
+    let failCount = 0;
+    const generatedCards: Card[] = [];
+    const failedItems: Array<{ text: string; type?: string; reason: string }> = [];
+    const statusMessageId = Date.now().toString();
 
     try {
       const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
       const headers = getAnonymousHeaders();
+
+      // 更新进度的函数
+      const updateProgress = (current: number, total: number, currentItem: string) => {
+        setMessages(prev => {
+          const newMessages = prev.filter(m => m.id !== statusMessageId);
+          const progressMsg: ChatMessage = {
+            id: statusMessageId,
+            role: 'assistant',
+            content: `正在生成卡片 (${current}/${total})...\n\n当前: ${currentItem}`,
+            type: 'chat',
+            timestamp: Date.now(),
+          };
+          return [...newMessages, progressMsg].slice(-50);
+        });
+      };
+
+      // 带重试的单个卡片生成函数
+      const generateSingleCard = async (item: { text: string; type: string; pageNumber?: number }, currentDeckName: string, retries = 2): Promise<{ success: boolean; card?: Card; error?: string }> => {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          try {
+            if (attempt > 0) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+            
+            const genRes = await fetch('/api/cards/generate', {
+              method: 'POST',
+              headers: { ...headers, 'Content-Type': 'application/json', 'Connection': 'keep-alive' },
+              body: JSON.stringify({
+                text: item.text,
+                cardType: item.type === 'WORD' ? '单词' : '问答题（附翻转卡片）',
+                deckId: currentWorkspaceDeckId,
+                deckName: currentDeckName,
+                sourceId: selectedSourceId,
+                pageNumber: item.pageNumber, 
+                includePronunciation: true,
+              }),
+              signal: controller.signal,
+              keepalive: true,
+            });
+            
+            clearTimeout(timeoutId);
+
+            const genResponse = await genRes.json();
+            if (genRes.ok && genResponse.success) {
+              if (genResponse.data.cachedFromExisting) {
+                addMessage({
+                  id: `cache-hit-${Date.now()}`,
+                  role: 'assistant',
+                  content: `**♻️ 复用现有卡片数据**\n\n**文本:** ${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}\n\n✅ 已存在相同内容的卡片，跳过LLM分析和TTS生成，直接复用已有数据。`,
+                  type: 'chat',
+                });
+              } else {
+                if (genResponse.data.llmInteraction) {
+                  const llm = genResponse.data.llmInteraction;
+                  const timestamp = Date.now();
+                  addMessage({
+                    id: `llm-card-prompt-${timestamp}`,
+                    role: 'assistant',
+                    align: 'left',
+                    content: `**🧠 卡片LLM分析 - 提示词**\n\n**输入:** ${item.text.substring(0, 100)}${item.text.length > 100 ? '...' : ''}\n\n**模型:** ${llm.model}\n\n**User Prompt:** ${llm.userPrompt.substring(0, 500)}${llm.userPrompt.length > 500 ? '...' : ''}`,
+                    type: 'chat',
+                  });
+                  addMessage({
+                    id: `llm-card-output-${timestamp}`,
+                    role: 'assistant',
+                    align: 'right',
+                    content: `**🧠 卡片LLM分析 - 输出**\n\n${stripFences(llm.response).substring(0, 1000)}${llm.response.length > 1000 ? '...' : ''}`,
+                    type: 'chat',
+                  });
+                }
+                if (genResponse.data.ttsInteraction) {
+                  const tts = genResponse.data.ttsInteraction;
+                  const timestamp = Date.now();
+                  addMessage({
+                    id: `tts-card-input-${timestamp}`,
+                    role: 'assistant',
+                    align: 'left',
+                    content: `**🔊 TTS音频生成 - 输入**\n\n**输入文本:** ${tts.input.substring(0, 100)}${tts.input.length > 100 ? '...' : ''}\n\n**假名文本:** ${tts.kanaText?.substring(0, 100) || 'N/A'}`,
+                    type: 'chat',
+                  });
+                  addMessage({
+                    id: `tts-card-output-${timestamp}`,
+                    role: 'assistant',
+                    align: 'right',
+                    content: `**🔊 TTS音频生成 - 结果**\n\n**音频URL:** ${tts.audioUrl ? '✅ 已生成' : '❌ 未生成'}`,
+                    type: 'chat',
+                  });
+                }
+              }
+              return { success: true, card: genResponse.data.card };
+            } else {
+              const errorMsg = genResponse.error?.message || genResponse.message || `HTTP ${genRes.status}`;
+              if (attempt === retries) return { success: false, error: errorMsg };
+            }
+          } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : '网络错误';
+            if (attempt === retries) return { success: false, error: errorMsg };
+          }
+        }
+        return { success: false, error: '重试失败' };
+      };
 
       // 获取选中来源的最新内容
       const res = await fetch(`/api/sources/${selectedSourceId}`, { headers });
@@ -731,7 +893,8 @@ export function WorkspacePageContent() {
       const isPdfSource = isPdfByType || isPdfByExtension;
 
       if (isPdfSource && (source.contentUrl || source.fileUrl)) {
-        const pdfUrl = source.contentUrl || source.fileUrl;
+        // 使用带签名的代理 URL，后端会处理 OSS 签名和预览权限
+        const pdfUrl = `/api/sources/${source.id}/view`;
         const pdfStatusMessageId = `pdf-${Date.now()}`;
         
         // Show initial progress immediately
@@ -912,10 +1075,21 @@ export function WorkspacePageContent() {
             // Display LLM interaction for image parsing
             if (parseData.data.llmInteraction) {
               const interaction = parseData.data.llmInteraction;
+              const timestamp = Date.now();
+              // 1. Prompt on the left
               addMessage({
-                id: `llm-parse-${page}-${Date.now()}`,
+                id: `llm-parse-prompt-${page}-${timestamp}`,
                 role: 'assistant',
-                content: `**📷 图片解析 (Page ${page})**\n\n**输入图片:** ${imageUrl ? `[${source.name}_page_${page}]` : 'base64'}\n\n**提示词:** \`${interaction.prompt}\`\n\n**模型:** ${interaction.model}\n\n**输出:**\n${pageContent.substring(0, 500)}${pageContent.length > 500 ? '...' : ''}`,
+                align: 'left',
+                content: `**📷 图片解析 (Page ${page}) - 提示词**\n\n**输入图片:** ${imageUrl ? `[${source.name}_page_${page}]` : 'base64'}\n\n**提示词:** \`${interaction.prompt}\`\n\n**模型:** ${interaction.model}`,
+                type: 'chat',
+              });
+              // 2. Output on the right
+              addMessage({
+                id: `llm-parse-output-${page}-${timestamp}`,
+                role: 'assistant',
+                align: 'right',
+                content: `**📷 图片解析 (Page ${page}) - 输出**\n\n${stripFences(pageContent).substring(0, 1000)}${pageContent.length > 1000 ? '...' : ''}`,
                 type: 'chat',
               });
             }
@@ -940,16 +1114,27 @@ export function WorkspacePageContent() {
             
             const refineData = await refineRes.json();
             if (refineRes.ok && refineData.success) {
-              // Display LLM interaction for PDF page refinement
-              if (refineData.data.llmInteraction) {
-                const llm = refineData.data.llmInteraction;
-                addMessage({
-                  id: `pdf-refine-${page}-${Date.now()}`,
-                  role: 'assistant',
-                  content: `**🧠 第${page}页 单词/句子提炼**\n\n**模型:** ${llm.model}\n\n**LLM输出:**\n${llm.response?.substring(0, 500) || ''}${(llm.response?.length || 0) > 500 ? '...' : ''}`,
-                  type: 'chat',
-                });
-              }
+            // Display LLM interaction for PDF page refinement
+            if (refineData.data.llmInteraction) {
+              const llm = refineData.data.llmInteraction;
+              const timestamp = Date.now();
+              // 1. Prompt on the left
+              addMessage({
+                id: `pdf-refine-prompt-${page}-${timestamp}`,
+                role: 'assistant',
+                align: 'left',
+                content: `**🧠 第${page}页 单词/句子提炼 - 提示词**\n\n**提示词:** \`${llm.userPrompt}\`\n\n**模型:** ${llm.model}`,
+                type: 'chat',
+              });
+              // 2. Output on the right
+              addMessage({
+                id: `pdf-refine-output-${page}-${timestamp}`,
+                role: 'assistant',
+                align: 'right',
+                content: `**🧠 第${page}页 单词/句子提炼 - 输出**\n\n${stripFences(llm.response || '').substring(0, 1000)}${(llm.response?.length || 0) > 1000 ? '...' : ''}`,
+                type: 'chat',
+              });
+            }
               
               vocabulary = refineData.data.vocabulary || [];
               sentences = refineData.data.sentences || [];
@@ -963,37 +1148,95 @@ export function WorkspacePageContent() {
               }
             }
 
-            // Step 6: Save page content as NOTE (auto-save with markdown, vocabulary, sentences)
+            // Step 6: Save page content as separate NOTEs (Original and Knowledge Points)
             updatePdfProgress(page, '保存页面笔记', skippedPages);
-            const noteContent = [
-              pageContent,
-              '',
-              '',  // Extra blank line to ensure markdown parsing
-              vocabulary.length > 0 ? `---\n\n**提取的单词 (${vocabulary.length})**\n\n${vocabulary.map(v => `- ${v}`).join('\n')}` : '',
-              '',
-              sentences.length > 0 ? `---\n\n**提取的句子 (${sentences.length})**\n\n${sentences.map(s => `- ${s}`).join('\n')}` : '',
-            ].filter(Boolean).join('\n');
             
             try {
-              const noteRes = await fetch('/api/cards/generate', {
+              // 1. 保存原文笔记
+              await fetch('/api/cards/generate', {
                 method: 'POST',
                 headers: { ...headers, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: `${source.name} - 第${page}页`,
+                  text: `${source.name} - 第${page}页 (原文)`,
                   category: 'NOTE',
                   cardType: '笔记',
-                  deckName: currentWorkspaceDeck.trim() || 'default',
+                  deckId: currentWorkspaceDeckId,
+                  deckName: currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default' ? currentWorkspaceDeckName : (source.deckName || 'default'),
                   includePronunciation: false,
                   sourceId: selectedSourceId,
                   pageNumber: page,
                   analysis: {
-                    html: noteContent,
+                    html: pageContent,
                   }
                 }),
               });
+
+            // 2. 保存知识点笔记 (单词和句子)
+            if (vocabulary.length > 0 || sentences.length > 0) {
+              const currentDeckName = currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default' ? currentWorkspaceDeckName : (source.deckName || 'default');
+              
+              const knowledgeNoteContent = [
+                vocabulary.length > 0 ? `### 提炼的单词 (${vocabulary.length})\n\n${vocabulary.map(v => `- ${v}`).join('\n')}` : '',
+                '',
+                sentences.length > 0 ? `### 提炼的句子 (${sentences.length})\n\n${sentences.map(s => `- ${s}`).join('\n')}` : '',
+              ].filter(Boolean).join('\n\n');
+
+              const noteRes = await fetch('/api/cards/generate', {
+                method: 'POST',
+                headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: `${source.name} - 第${page}页 (知识点)`,
+                  category: 'NOTE',
+                  cardType: '笔记',
+                  deckId: currentWorkspaceDeckId,
+                  deckName: currentDeckName,
+                  includePronunciation: false,
+                  sourceId: selectedSourceId,
+                  pageNumber: page,
+                  analysis: {
+                    html: knowledgeNoteContent,
+                  }
+                }),
+              });
+              
               if (noteRes.ok) {
                 savedNotes++;
               }
+
+              // --- 立即为该页生成的单词和句子创建卡片 (确保一页一页输出) ---
+              const pageItems = [
+                ...vocabulary.map(v => ({ text: v, type: 'WORD' })),
+                ...sentences.map(s => ({ text: s, type: 'SENTENCE' }))
+              ];
+
+              for (let i = 0; i < pageItems.length; i++) {
+                // 检查是否取消
+                if (pdfGenerationCancelledRef.current || cardGenerationCancelledRef.current) {
+                  break;
+                }
+
+                const item = pageItems[i];
+                updatePdfProgress(page, `生成卡片 (${i + 1}/${pageItems.length}): ${item.text.substring(0, 20)}...`, skippedPages);
+                
+                const result = await generateSingleCard(item, currentDeckName);
+                if (result.success && result.card) {
+                  successCount++;
+                  generatedCards.push(result.card);
+                } else {
+                  failCount++;
+                  failedItems.push({
+                    text: item.text,
+                    type: item.type,
+                    reason: result.error || '未知错误',
+                  });
+                }
+
+                // 节流
+                if (i < pageItems.length - 1) {
+                  await new Promise(resolve => setTimeout(resolve, 300));
+                }
+              }
+            }
             } catch (noteErr) {
               console.warn(`Page ${page} note save failed:`, noteErr);
               // Continue even if note save fails
@@ -1022,29 +1265,23 @@ export function WorkspacePageContent() {
 
         // If cancelled, check if we should continue with partial results
         if (pdfGenerationCancelledRef.current) {
-          if (targetItems.length === 0) {
+          if (successCount === 0 && savedNotes === 0) {
             setCardLoading(false);
             return;
           }
-          // Continue with partial results
+          // Continue to summary
         } else {
           // Show PDF processing summary (only if not cancelled)
           addMessage({
             id: Date.now().toString(),
             role: 'assistant',
-            content: `PDF 处理完成\n处理页数: ${processedPages}/${totalPages}\n跳过页数: ${skippedPages}\n保存笔记: ${savedNotes}\n提取项目: ${targetItems.filter(i => i.type === 'WORD').length} 个单词, ${targetItems.filter(i => i.type === 'SENTENCE').length} 个句子`,
+            content: `PDF 处理完成\n处理页数: ${processedPages}/${totalPages}\n跳过页数: ${skippedPages}\n保存笔记: ${savedNotes}\n生成卡片: ${successCount} 个成功, ${failCount} 个失败`,
             type: 'analysis',
           });
         }
 
-        // Skip to card generation (don't process as image/audio)
-        if (targetItems.length > 0) {
-          // Continue to card generation below
-        } else {
-          alert('未能从 PDF 中识别出有效的日文内容');
-          setCardLoading(false);
-          return;
-        }
+        // Clear targetItems for PDF so they don't get processed again below
+        targetItems = [];
       }
 
       // Step 0: If audio source, first convert to text using ASR
@@ -1191,10 +1428,21 @@ export function WorkspacePageContent() {
           // Display LLM interaction for image parsing
           if (parseData.data.llmInteraction) {
             const interaction = parseData.data.llmInteraction;
+            const timestamp = Date.now();
+            // 1. Prompt on the left
             addMessage({
-              id: `llm-img-${Date.now()}`,
+              id: `llm-img-prompt-${timestamp}`,
               role: 'assistant',
-              content: `**📷 图片解析**\n\n**输入图片:** [${source.name}](${imageUrl})\n\n**提示词:** \`${interaction.prompt}\`\n\n**模型:** ${interaction.model}\n\n**输出预览:**\n${(content || '').substring(0, 300)}${(content || '').length > 300 ? '...' : ''}`,
+              align: 'left',
+              content: `**📷 图片解析 - 提示词**\n\n**输入图片:** [${source.name}](${imageUrl})\n\n**提示词:** \`${interaction.prompt}\`\n\n**模型:** ${interaction.model}`,
+              type: 'chat',
+            });
+            // 2. Output on the right
+            addMessage({
+              id: `llm-img-output-${timestamp}`,
+              role: 'assistant',
+              align: 'right',
+              content: `**📷 图片解析 - 输出预览**\n\n${stripFences(content || '').substring(0, 1000)}${(content || '').length > 1000 ? '...' : ''}`,
               type: 'chat',
             });
           }
@@ -1237,10 +1485,21 @@ export function WorkspacePageContent() {
           
           // Display LLM interaction for transparency
           if (llmInteraction) {
+            const timestamp = Date.now();
+            // 1. Prompt on the left
             addMessage({
-              id: `refine-llm-${Date.now()}`,
+              id: `refine-llm-prompt-${timestamp}`,
               role: 'assistant',
-              content: `**🧠 单词/句子提炼 LLM交互**\n\n**模型:** ${llmInteraction.model}\n\n**提示词:**\n${llmInteraction.systemPrompt?.substring(0, 300) || ''}...\n\n**LLM输出:**\n${llmInteraction.response?.substring(0, 800) || ''}${(llmInteraction.response?.length || 0) > 800 ? '...' : ''}`,
+              align: 'left',
+              content: `**🧠 单词/句子提炼 LLM交互 - 提示词**\n\n**模型:** ${llmInteraction.model}\n\n**提示词:**\n${llmInteraction.userPrompt || llmInteraction.systemPrompt?.substring(0, 300) || ''}...`,
+              type: 'chat',
+            });
+            // 2. Output on the right
+            addMessage({
+              id: `refine-llm-output-${timestamp}`,
+              role: 'assistant',
+              align: 'right',
+              content: `**🧠 单词/句子提炼 LLM交互 - 输出**\n\n${stripFences(llmInteraction.response || '').substring(0, 1000)}${(llmInteraction.response?.length || 0) > 1000 ? '...' : ''}`,
               type: 'chat',
             });
           }
@@ -1257,197 +1516,144 @@ export function WorkspacePageContent() {
             content: `提炼结果：\n\n**核心单词：**\n${vocabulary.map((v: string) => `- ${v}`).join('\n')}\n\n**练习句子：**\n${sentences.map((s: string) => `- ${s}`).join('\n')}`,
             type: 'analysis',
           });
+
+          // Step 2b: Save as separate NOTEs (Original and Knowledge Points)
+          try {
+            // 1. 保存原文笔记
+            await fetch('/api/cards/generate', {
+              method: 'POST',
+              headers: { ...headers, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: `${source.name} (原文)`,
+                category: 'NOTE',
+                cardType: '笔记',
+                deckId: currentWorkspaceDeckId,
+                deckName: currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default' ? currentWorkspaceDeckName : (source.deckName || 'default'),
+                includePronunciation: false,
+                sourceId: selectedSourceId,
+                analysis: {
+                  html: content,
+                }
+              }),
+            });
+
+            // 2. 保存知识点笔记
+            if (vocabulary.length > 0 || sentences.length > 0) {
+              const knowledgeNoteContent = [
+                vocabulary.length > 0 ? `### 提炼的单词 (${vocabulary.length})\n\n${vocabulary.map((v: string) => `- ${v}`).join('\n')}` : '',
+                '',
+                sentences.length > 0 ? `### 提炼的句子 (${sentences.length})\n\n${sentences.map((s: string) => `- ${s}`).join('\n')}` : '',
+              ].filter(Boolean).join('\n\n');
+
+              await fetch('/api/cards/generate', {
+                method: 'POST',
+                headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: `${source.name} (知识点)`,
+                  category: 'NOTE',
+                  cardType: '笔记',
+                  deckId: currentWorkspaceDeckId,
+                  deckName: currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default' ? currentWorkspaceDeckName : (source.deckName || 'default'),
+                  includePronunciation: false,
+                  sourceId: selectedSourceId,
+                  analysis: {
+                    html: knowledgeNoteContent,
+                  }
+                }),
+              });
+            }
+          } catch (noteErr) {
+            console.warn('Note save failed:', noteErr);
+          }
         } else {
           console.warn('Refinement failed, falling back to direct split');
         }
       }
 
       // 步骤 3: 确定最终要生成卡片的列表
-      if (targetItems.length === 0) {
+      if (targetItems.length === 0 && !isPdfSource) {
         const { splitJapaneseSentences } = await import('@/lib/llm-utils');
         const sentences = splitJapaneseSentences(content || '');
         targetItems = sentences.map(s => ({ text: s, type: 'SENTENCE' as const }));
       }
 
-      if (targetItems.length === 0) {
+      if (targetItems.length === 0 && !isPdfSource) {
         alert('未能从来源中识别出有效的日文内容');
         setCardLoading(false);
         return;
       }
 
-      if (!confirm(`识别出 ${targetItems.filter(i => i.type === 'WORD').length} 个单词和 ${targetItems.filter(i => i.type === 'SENTENCE').length} 个句子，是否开始批量生成卡片？`)) {
-        setCardLoading(false);
-        return;
-      }
-
-      // 在对话框中添加一个提示消息
-      const statusMessageId = Date.now().toString();
-      addMessage({
-        id: statusMessageId,
-        role: 'assistant',
-        content: `正在生成 ${targetItems.length} 张卡片...`,
-        type: 'chat',
-      });
-
-      let successCount = 0;
-      let failCount = 0;
-      const generatedCards: Card[] = [];
-      const failedItems: Array<{ text: string; type?: string; reason: string }> = [];
-
-      // Reset cancellation flag and set generating state
-      cardGenerationCancelledRef.current = false;
-      setIsCardGenerating(true);
-
-      // 更新进度的函数
-      const updateProgress = (current: number, total: number, currentItem: string) => {
-        setMessages(prev => {
-          const newMessages = prev.filter(m => m.id !== statusMessageId);
-          const progressMsg: ChatMessage = {
-            id: statusMessageId,
-            role: 'assistant',
-            content: `正在生成卡片 (${current}/${total})...\n\n当前: ${currentItem}`,
-            type: 'chat',
-            timestamp: Date.now(),
-          };
-          return [...newMessages, progressMsg].slice(-50);
+      if (targetItems.length > 0) {
+        // 在对话框中添加一个提示消息
+        addMessage({
+          id: statusMessageId,
+          role: 'assistant',
+          content: `正在生成 ${targetItems.length} 张卡片...`,
+          type: 'chat',
         });
-      };
 
-      // 带重试的单个卡片生成函数
-      const generateSingleCard = async (item: { text: string; type: string; pageNumber?: number }, retries = 2): Promise<{ success: boolean; card?: Card; error?: string }> => {
-        for (let attempt = 0; attempt <= retries; attempt++) {
-          try {
-            if (attempt > 0) {
-              // 重试前等待，指数退避
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-            }
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
-            
-            const genRes = await fetch('/api/cards/generate', {
-              method: 'POST',
-              headers: { ...headers, 'Content-Type': 'application/json', 'Connection': 'keep-alive' },
-              body: JSON.stringify({
-                text: item.text,
-                cardType: item.type === 'WORD' ? '单词' : '问答题（附翻转卡片）',
-                deckName: currentWorkspaceDeck.trim() || 'default',
-                sourceId: selectedSourceId,
-                pageNumber: item.pageNumber, // PDF page number for page-level association
-                includePronunciation: true,
-              }),
-              signal: controller.signal,
-              keepalive: true,
+        // Reset cancellation flag and set generating state
+        cardGenerationCancelledRef.current = false;
+        setIsCardGenerating(true);
+
+        const currentDeckName = currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default' ? currentWorkspaceDeckName : (source.deckName || 'default');
+
+        for (let i = 0; i < targetItems.length; i++) {
+          // Check if cancelled
+          if (cardGenerationCancelledRef.current) {
+            setMessages(prev => prev.filter(m => m.id !== statusMessageId));
+            addMessage({
+              id: Date.now().toString(),
+              role: 'assistant',
+              content: `卡片生成已取消\n已生成: ${successCount}\n失败: ${failCount}\n未处理: ${targetItems.length - i}`,
+              type: 'flashcards',
+              data: { successCount, failCount, cards: generatedCards, failedItems },
             });
-            
-            clearTimeout(timeoutId);
-
-            const genResponse = await genRes.json();
-            if (genRes.ok && genResponse.success) {
-              // Check if this was from cache (no LLM/TTS calls needed)
-              if (genResponse.data.cachedFromExisting) {
-                addMessage({
-                  id: `cache-hit-${Date.now()}`,
-                  role: 'assistant',
-                  content: `**♻️ 复用现有卡片数据**\n\n**文本:** ${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}\n\n✅ 已存在相同内容的卡片，跳过LLM分析和TTS生成，直接复用已有数据。`,
-                  type: 'chat',
-                });
-              } else {
-                // Display LLM interaction for card generation
-                if (genResponse.data.llmInteraction) {
-                  const llm = genResponse.data.llmInteraction;
-                  addMessage({
-                    id: `llm-card-${Date.now()}`,
-                    role: 'assistant',
-                    content: `**🧠 卡片LLM分析**\n\n**输入:** ${item.text.substring(0, 100)}${item.text.length > 100 ? '...' : ''}\n\n**模型:** ${llm.model}\n\n**System Prompt:** ${llm.systemPrompt.substring(0, 100)}...\n\n**User Prompt:** ${llm.userPrompt.substring(0, 200)}...\n\n**输出:**\n${llm.response.substring(0, 500)}${llm.response.length > 500 ? '...' : ''}`,
-                    type: 'chat',
-                  });
-                }
-                // Display TTS interaction
-                if (genResponse.data.ttsInteraction) {
-                  const tts = genResponse.data.ttsInteraction;
-                  addMessage({
-                    id: `tts-card-${Date.now()}`,
-                    role: 'assistant',
-                    content: `**🔊 TTS音频生成**\n\n**输入文本:** ${tts.input.substring(0, 100)}${tts.input.length > 100 ? '...' : ''}\n\n**假名文本:** ${tts.kanaText?.substring(0, 100) || 'N/A'}\n\n**音频URL:** ${tts.audioUrl ? '✅ 已生成' : '❌ 未生成'}`,
-                    type: 'chat',
-                  });
-                }
-              }
-              return { success: true, card: genResponse.data.card };
-            } else {
-              const errorMsg = genResponse.error?.message || genResponse.message || `HTTP ${genRes.status}`;
-              if (attempt === retries) {
-                return { success: false, error: errorMsg };
-              }
-              // 继续重试
-            }
-          } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : '网络错误';
-            if (attempt === retries) {
-              return { success: false, error: errorMsg };
-            }
-            // 继续重试
+            break;
+          }
+          
+          const item = targetItems[i];
+          
+          // 请求节流：每个请求之间添加延迟，避免服务器过载
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay between requests
+          }
+          
+          // 更新进度显示
+          updateProgress(i + 1, targetItems.length, item.text.substring(0, 30) + (item.text.length > 30 ? '...' : ''));
+          
+          const result = await generateSingleCard(item, currentDeckName);
+          if (result.success && result.card) {
+            successCount++;
+            generatedCards.push(result.card);
+          } else {
+            console.error(`第 ${i + 1} 个项目生成失败:`, result.error);
+            failCount++;
+            failedItems.push({
+              text: item.text,
+              type: item.type,
+              reason: result.error || '未知错误',
+            });
           }
         }
-        return { success: false, error: '重试失败' };
-      };
 
-      for (let i = 0; i < targetItems.length; i++) {
-        // Check if cancelled
-        if (cardGenerationCancelledRef.current) {
-          setMessages(prev => prev.filter(m => m.id !== statusMessageId));
-          addMessage({
+        // 更新对话框中的消息，显示结果
+        setMessages(prev => {
+          const newMessages = prev.filter(m => m.id !== statusMessageId);
+          const resultMsg: ChatMessage = {
             id: Date.now().toString(),
             role: 'assistant',
-            content: `卡片生成已取消\n已生成: ${successCount}\n失败: ${failCount}\n未处理: ${targetItems.length - i}`,
+            content: `批量生成完成！\n成功: ${successCount}\n失败: ${failCount}`,
             type: 'flashcards',
             data: { successCount, failCount, cards: generatedCards, failedItems },
-          });
-          break;
-        }
-        
-        const item = targetItems[i];
-        
-        // 请求节流：每个请求之间添加延迟，避免服务器过载
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay between requests
-        }
-        
-        // 更新进度显示
-        updateProgress(i + 1, targetItems.length, item.text.substring(0, 30) + (item.text.length > 30 ? '...' : ''));
-        
-        const result = await generateSingleCard(item);
-        if (result.success && result.card) {
-          successCount++;
-          generatedCards.push(result.card);
-        } else {
-          console.error(`第 ${i + 1} 个项目生成失败:`, result.error);
-          failCount++;
-          failedItems.push({
-            text: item.text,
-            type: item.type,
-            reason: result.error || '未知错误',
-          });
-        }
+            timestamp: Date.now(),
+          };
+          return [...newMessages, resultMsg].slice(-50);
+        });
       }
 
       await fetchCards();
       await fetchCredits();
-      
-      // 更新对话框中的消息，显示结果
-      setMessages(prev => {
-        const newMessages = prev.filter(m => m.id !== statusMessageId);
-        const resultMsg: ChatMessage = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: `批量生成完成！\n成功: ${successCount}\n失败: ${failCount}`,
-          type: 'flashcards',
-          data: { successCount, failCount, cards: generatedCards, failedItems },
-          timestamp: Date.now(),
-        };
-        return [...newMessages, resultMsg].slice(-50);
-      });
       
     } catch (err) {
       console.error('Batch generation error:', err);
@@ -1556,6 +1762,10 @@ export function WorkspacePageContent() {
       formData.append('file', renamedFile);
     } else {
       formData.append('file', file);
+    }
+
+    if (currentWorkspaceDeckId) {
+      formData.append('deckId', currentWorkspaceDeckId);
     }
 
     const res = await fetch('/api/sources', {
@@ -1739,6 +1949,9 @@ export function WorkspacePageContent() {
             
             const formData = new FormData();
             formData.append('file', file);
+            if (currentWorkspaceDeckId) {
+              formData.append('deckId', currentWorkspaceDeckId);
+            }
             
             const res = await fetch('/api/sources', {
               method: 'POST',
@@ -1746,29 +1959,20 @@ export function WorkspacePageContent() {
               body: formData,
             });
 
-            if (res.status === 413) {
-              throw new Error('File is too large. Please upload a file smaller than 50MB.');
+            let response;
+            try {
+              response = await res.json();
+            } catch (e) {
+              throw new Error(`服务器返回错误 (${res.status})`);
             }
 
-            if (!res.ok) {
-              const text = await res.text();
-              let errorMsg = 'Upload failed';
-              try {
-                const json = JSON.parse(text);
-                errorMsg = json.error?.message || errorMsg;
-              } catch {
-                errorMsg = text || `Upload failed (status ${res.status})`;
-              }
-              throw new Error(errorMsg);
-            }
-
-            const response = await res.json();
-            if (response.success) {
+            if (res.ok && response.success) {
               await fetchSources();
               setShowAddSourceModal(false);
               return;
             } else {
-              throw new Error(response.error?.message || 'Upload failed');
+              const errorMsg = response?.error?.message || response?.message || `上传失败 (${res.status})`;
+              throw new Error(errorMsg);
             }
           }
         }
@@ -1797,6 +2001,7 @@ export function WorkspacePageContent() {
           name: pastedText.trim().substring(0, 20) + (pastedText.trim().length > 20 ? '...' : ''),
           type: 'text',
           content: pastedText.trim(),
+          deckId: currentWorkspaceDeckId,
         }),
       });
 
@@ -1856,6 +2061,9 @@ export function WorkspacePageContent() {
 
         const formData = new FormData();
         formData.append('file', file);
+        if (currentWorkspaceDeckId) {
+          formData.append('deckId', currentWorkspaceDeckId);
+        }
         
         const res = await fetch('/api/sources', {
           method: 'POST',
@@ -1863,24 +2071,14 @@ export function WorkspacePageContent() {
           body: formData,
         });
 
-        if (res.status === 413) {
-          throw new Error(`文件太大: ${file.name}。请上传小于50MB的文件。`);
+        let response;
+        try {
+          response = await res.json();
+        } catch (e) {
+          throw new Error(`服务器返回错误 (${res.status})`);
         }
 
-        if (!res.ok) {
-          const text = await res.text();
-          let errorMsg = '上传失败';
-          try {
-            const json = JSON.parse(text);
-            errorMsg = json.error?.message || errorMsg;
-          } catch {
-            errorMsg = text || `上传失败 (status ${res.status})`;
-          }
-          throw new Error(errorMsg);
-        }
-
-        const response = await res.json();
-        if (response.success) {
+        if (res.ok && response.success) {
           uploadedSourceId = response.data.source.id;
           await fetchSources();
           
@@ -1891,7 +2089,8 @@ export function WorkspacePageContent() {
             type: 'chat',
           });
         } else {
-          throw new Error(response.error?.message || '上传失败');
+          const errorMsg = response?.error?.message || response?.message || `上传失败 (${res.status})`;
+          throw new Error(errorMsg);
         }
       }
 
@@ -1951,6 +2150,9 @@ export function WorkspacePageContent() {
 
           const formData = new FormData();
           formData.append('file', file);
+          if (currentWorkspaceDeckId) {
+            formData.append('deckId', currentWorkspaceDeckId);
+          }
           
           const res = await fetch('/api/sources', {
             method: 'POST',
@@ -1958,12 +2160,14 @@ export function WorkspacePageContent() {
             body: formData,
           });
 
-          if (!res.ok) {
-            throw new Error('上传失败');
+          let response;
+          try {
+            response = await res.json();
+          } catch (e) {
+            throw new Error(`服务器返回错误 (${res.status})`);
           }
 
-          const response = await res.json();
-          if (response.success) {
+          if (res.ok && response.success) {
             await fetchSources();
             setSelectedSourceId(response.data.source.id);
             
@@ -1973,6 +2177,9 @@ export function WorkspacePageContent() {
               content: '✅ 图片上传成功，已添加到来源列表。',
               type: 'chat',
             });
+          } else {
+            const errorMsg = response?.error?.message || response?.message || `上传失败 (${res.status})`;
+            throw new Error(errorMsg);
           }
         }
       } catch (err) {
@@ -2024,6 +2231,7 @@ export function WorkspacePageContent() {
           name: `粘贴的文字 ${new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`,
           type: 'text',
           content: text,
+          deckId: currentWorkspaceDeckId,
         }),
       });
 
@@ -2074,7 +2282,8 @@ export function WorkspacePageContent() {
           text: name || content.substring(0, 30).replace(/\n/g, ' ') + (content.length > 30 ? '...' : ''),
           category: 'NOTE',
           cardType: '笔记',
-          deckName: currentWorkspaceDeck.trim() || 'default',
+          deckId: currentWorkspaceDeckId,
+          deckName: currentWorkspaceDeckName,
           includePronunciation: false,
           sourceId: selectedSourceId,
           // 把笔记内容存放在 backContent 中
@@ -2140,7 +2349,8 @@ export function WorkspacePageContent() {
         body: JSON.stringify({
           text: text.trim(),
           cardType: '句子卡',
-          deckName: currentWorkspaceDeck?.trim() || 'default',
+          deckId: currentWorkspaceDeckId,
+          deckName: currentWorkspaceDeckName?.trim() || 'default',
           includePronunciation: true,
           ...(providedAnalysis && { analysis: providedAnalysis }),
         }),
@@ -2246,7 +2456,7 @@ export function WorkspacePageContent() {
               body: JSON.stringify({
                 text: item.text,
                 cardType: item.type === 'WORD' ? '单词' : '问答题（附翻转卡片）',
-                deckName: currentWorkspaceDeck.trim() || 'default',
+                deckName: currentWorkspaceDeckName && currentWorkspaceDeckName !== 'default' ? currentWorkspaceDeckName : (source.deckName || 'default'),
                 sourceId: selectedSourceId,
                 includePronunciation: true,
               }),
@@ -2438,7 +2648,8 @@ export function WorkspacePageContent() {
       workspaceT={workspaceT}
       cardT={cardT}
       
-      currentWorkspaceDeck={currentWorkspaceDeck}
+      currentWorkspaceDeckName={currentWorkspaceDeckName}
+      currentWorkspaceDeckId={currentWorkspaceDeckId}
       credits={credits}
       paymentSuccess={paymentSuccess}
       setPaymentSuccess={setPaymentSuccess}
@@ -2530,6 +2741,18 @@ export function WorkspacePageContent() {
       handleGenerateCardsFromText={handleGenerateCardsFromText}
       handleRetryFailedItems={handleRetryFailedItems}
       handleSaveNote={handleSaveNote}
+      handleStartDictationForCard={(card) => {
+        setSpecialStudyCard(card);
+        setSpecialStudyType('dictation');
+      }}
+      handleStartShadowingForCard={(card) => {
+        setSpecialStudyCard(card);
+        setSpecialStudyType('shadowing');
+      }}
+      specialStudyCard={specialStudyCard}
+      setSpecialStudyCard={setSpecialStudyCard}
+      specialStudyType={specialStudyType}
+      setSpecialStudyType={setSpecialStudyType}
       
       messages={messages}
       chatInput={chatInput}

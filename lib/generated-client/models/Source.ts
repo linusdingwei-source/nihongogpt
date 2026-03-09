@@ -50,6 +50,7 @@ export type SourceMinAggregateOutputType = {
   pageNumber: number | null
   mimeType: string | null
   size: number | null
+  deckId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +69,7 @@ export type SourceMaxAggregateOutputType = {
   pageNumber: number | null
   mimeType: string | null
   size: number | null
+  deckId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -86,6 +88,7 @@ export type SourceCountAggregateOutputType = {
   pageNumber: number
   mimeType: number
   size: number
+  deckId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -116,6 +119,7 @@ export type SourceMinAggregateInputType = {
   pageNumber?: true
   mimeType?: true
   size?: true
+  deckId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -134,6 +138,7 @@ export type SourceMaxAggregateInputType = {
   pageNumber?: true
   mimeType?: true
   size?: true
+  deckId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -152,6 +157,7 @@ export type SourceCountAggregateInputType = {
   pageNumber?: true
   mimeType?: true
   size?: true
+  deckId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -257,6 +263,7 @@ export type SourceGroupByOutputType = {
   pageNumber: number | null
   mimeType: string | null
   size: number | null
+  deckId: string | null
   createdAt: Date
   updatedAt: Date
   _count: SourceCountAggregateOutputType | null
@@ -298,6 +305,7 @@ export type SourceWhereInput = {
   pageNumber?: Prisma.IntNullableFilter<"Source"> | number | null
   mimeType?: Prisma.StringNullableFilter<"Source"> | string | null
   size?: Prisma.IntNullableFilter<"Source"> | number | null
+  deckId?: Prisma.StringNullableFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -305,6 +313,7 @@ export type SourceWhereInput = {
   parentSource?: Prisma.XOR<Prisma.SourceNullableScalarRelationFilter, Prisma.SourceWhereInput> | null
   childSources?: Prisma.SourceListRelationFilter
   cards?: Prisma.CardListRelationFilter
+  deck?: Prisma.XOR<Prisma.DeckNullableScalarRelationFilter, Prisma.DeckWhereInput> | null
 }
 
 export type SourceOrderByWithRelationInput = {
@@ -321,6 +330,7 @@ export type SourceOrderByWithRelationInput = {
   pageNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
+  deckId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -328,6 +338,7 @@ export type SourceOrderByWithRelationInput = {
   parentSource?: Prisma.SourceOrderByWithRelationInput
   childSources?: Prisma.SourceOrderByRelationAggregateInput
   cards?: Prisma.CardOrderByRelationAggregateInput
+  deck?: Prisma.DeckOrderByWithRelationInput
 }
 
 export type SourceWhereUniqueInput = Prisma.AtLeast<{
@@ -347,6 +358,7 @@ export type SourceWhereUniqueInput = Prisma.AtLeast<{
   pageNumber?: Prisma.IntNullableFilter<"Source"> | number | null
   mimeType?: Prisma.StringNullableFilter<"Source"> | string | null
   size?: Prisma.IntNullableFilter<"Source"> | number | null
+  deckId?: Prisma.StringNullableFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -354,6 +366,7 @@ export type SourceWhereUniqueInput = Prisma.AtLeast<{
   parentSource?: Prisma.XOR<Prisma.SourceNullableScalarRelationFilter, Prisma.SourceWhereInput> | null
   childSources?: Prisma.SourceListRelationFilter
   cards?: Prisma.CardListRelationFilter
+  deck?: Prisma.XOR<Prisma.DeckNullableScalarRelationFilter, Prisma.DeckWhereInput> | null
 }, "id">
 
 export type SourceOrderByWithAggregationInput = {
@@ -370,6 +383,7 @@ export type SourceOrderByWithAggregationInput = {
   pageNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
+  deckId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SourceCountOrderByAggregateInput
@@ -396,6 +410,7 @@ export type SourceScalarWhereWithAggregatesInput = {
   pageNumber?: Prisma.IntNullableWithAggregatesFilter<"Source"> | number | null
   mimeType?: Prisma.StringNullableWithAggregatesFilter<"Source"> | string | null
   size?: Prisma.IntNullableWithAggregatesFilter<"Source"> | number | null
+  deckId?: Prisma.StringNullableWithAggregatesFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Source"> | Date | string
 }
@@ -418,6 +433,7 @@ export type SourceCreateInput = {
   parentSource?: Prisma.SourceCreateNestedOneWithoutChildSourcesInput
   childSources?: Prisma.SourceCreateNestedManyWithoutParentSourceInput
   cards?: Prisma.CardCreateNestedManyWithoutSourceInput
+  deck?: Prisma.DeckCreateNestedOneWithoutSourcesInput
 }
 
 export type SourceUncheckedCreateInput = {
@@ -434,6 +450,7 @@ export type SourceUncheckedCreateInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   childSources?: Prisma.SourceUncheckedCreateNestedManyWithoutParentSourceInput
@@ -458,6 +475,7 @@ export type SourceUpdateInput = {
   parentSource?: Prisma.SourceUpdateOneWithoutChildSourcesNestedInput
   childSources?: Prisma.SourceUpdateManyWithoutParentSourceNestedInput
   cards?: Prisma.CardUpdateManyWithoutSourceNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutSourcesNestedInput
 }
 
 export type SourceUncheckedUpdateInput = {
@@ -474,6 +492,7 @@ export type SourceUncheckedUpdateInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   childSources?: Prisma.SourceUncheckedUpdateManyWithoutParentSourceNestedInput
@@ -494,6 +513,7 @@ export type SourceCreateManyInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -527,6 +547,7 @@ export type SourceUncheckedUpdateManyInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -560,6 +581,7 @@ export type SourceCountOrderByAggregateInput = {
   pageNumber?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  deckId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -583,6 +605,7 @@ export type SourceMaxOrderByAggregateInput = {
   pageNumber?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  deckId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -601,6 +624,7 @@ export type SourceMinOrderByAggregateInput = {
   pageNumber?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  deckId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -649,6 +673,48 @@ export type SourceUncheckedUpdateManyWithoutUserNestedInput = {
   connect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
   update?: Prisma.SourceUpdateWithWhereUniqueWithoutUserInput | Prisma.SourceUpdateWithWhereUniqueWithoutUserInput[]
   updateMany?: Prisma.SourceUpdateManyWithWhereWithoutUserInput | Prisma.SourceUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.SourceScalarWhereInput | Prisma.SourceScalarWhereInput[]
+}
+
+export type SourceCreateNestedManyWithoutDeckInput = {
+  create?: Prisma.XOR<Prisma.SourceCreateWithoutDeckInput, Prisma.SourceUncheckedCreateWithoutDeckInput> | Prisma.SourceCreateWithoutDeckInput[] | Prisma.SourceUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceCreateOrConnectWithoutDeckInput | Prisma.SourceCreateOrConnectWithoutDeckInput[]
+  createMany?: Prisma.SourceCreateManyDeckInputEnvelope
+  connect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+}
+
+export type SourceUncheckedCreateNestedManyWithoutDeckInput = {
+  create?: Prisma.XOR<Prisma.SourceCreateWithoutDeckInput, Prisma.SourceUncheckedCreateWithoutDeckInput> | Prisma.SourceCreateWithoutDeckInput[] | Prisma.SourceUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceCreateOrConnectWithoutDeckInput | Prisma.SourceCreateOrConnectWithoutDeckInput[]
+  createMany?: Prisma.SourceCreateManyDeckInputEnvelope
+  connect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+}
+
+export type SourceUpdateManyWithoutDeckNestedInput = {
+  create?: Prisma.XOR<Prisma.SourceCreateWithoutDeckInput, Prisma.SourceUncheckedCreateWithoutDeckInput> | Prisma.SourceCreateWithoutDeckInput[] | Prisma.SourceUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceCreateOrConnectWithoutDeckInput | Prisma.SourceCreateOrConnectWithoutDeckInput[]
+  upsert?: Prisma.SourceUpsertWithWhereUniqueWithoutDeckInput | Prisma.SourceUpsertWithWhereUniqueWithoutDeckInput[]
+  createMany?: Prisma.SourceCreateManyDeckInputEnvelope
+  set?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  disconnect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  delete?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  connect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  update?: Prisma.SourceUpdateWithWhereUniqueWithoutDeckInput | Prisma.SourceUpdateWithWhereUniqueWithoutDeckInput[]
+  updateMany?: Prisma.SourceUpdateManyWithWhereWithoutDeckInput | Prisma.SourceUpdateManyWithWhereWithoutDeckInput[]
+  deleteMany?: Prisma.SourceScalarWhereInput | Prisma.SourceScalarWhereInput[]
+}
+
+export type SourceUncheckedUpdateManyWithoutDeckNestedInput = {
+  create?: Prisma.XOR<Prisma.SourceCreateWithoutDeckInput, Prisma.SourceUncheckedCreateWithoutDeckInput> | Prisma.SourceCreateWithoutDeckInput[] | Prisma.SourceUncheckedCreateWithoutDeckInput[]
+  connectOrCreate?: Prisma.SourceCreateOrConnectWithoutDeckInput | Prisma.SourceCreateOrConnectWithoutDeckInput[]
+  upsert?: Prisma.SourceUpsertWithWhereUniqueWithoutDeckInput | Prisma.SourceUpsertWithWhereUniqueWithoutDeckInput[]
+  createMany?: Prisma.SourceCreateManyDeckInputEnvelope
+  set?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  disconnect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  delete?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  connect?: Prisma.SourceWhereUniqueInput | Prisma.SourceWhereUniqueInput[]
+  update?: Prisma.SourceUpdateWithWhereUniqueWithoutDeckInput | Prisma.SourceUpdateWithWhereUniqueWithoutDeckInput[]
+  updateMany?: Prisma.SourceUpdateManyWithWhereWithoutDeckInput | Prisma.SourceUpdateManyWithWhereWithoutDeckInput[]
   deleteMany?: Prisma.SourceScalarWhereInput | Prisma.SourceScalarWhereInput[]
 }
 
@@ -785,6 +851,7 @@ export type SourceCreateWithoutUserInput = {
   parentSource?: Prisma.SourceCreateNestedOneWithoutChildSourcesInput
   childSources?: Prisma.SourceCreateNestedManyWithoutParentSourceInput
   cards?: Prisma.CardCreateNestedManyWithoutSourceInput
+  deck?: Prisma.DeckCreateNestedOneWithoutSourcesInput
 }
 
 export type SourceUncheckedCreateWithoutUserInput = {
@@ -800,6 +867,7 @@ export type SourceUncheckedCreateWithoutUserInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   childSources?: Prisma.SourceUncheckedCreateNestedManyWithoutParentSourceInput
@@ -849,8 +917,75 @@ export type SourceScalarWhereInput = {
   pageNumber?: Prisma.IntNullableFilter<"Source"> | number | null
   mimeType?: Prisma.StringNullableFilter<"Source"> | string | null
   size?: Prisma.IntNullableFilter<"Source"> | number | null
+  deckId?: Prisma.StringNullableFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
+}
+
+export type SourceCreateWithoutDeckInput = {
+  id?: string
+  name: string
+  type?: string
+  content?: string | null
+  contentUrl?: string | null
+  fileUrl?: string | null
+  fileName?: string | null
+  pageNumber?: number | null
+  mimeType?: string | null
+  size?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSourcesInput
+  folder?: Prisma.SourceFolderCreateNestedOneWithoutSourcesInput
+  parentSource?: Prisma.SourceCreateNestedOneWithoutChildSourcesInput
+  childSources?: Prisma.SourceCreateNestedManyWithoutParentSourceInput
+  cards?: Prisma.CardCreateNestedManyWithoutSourceInput
+}
+
+export type SourceUncheckedCreateWithoutDeckInput = {
+  id?: string
+  userId: string
+  folderId?: string | null
+  parentSourceId?: string | null
+  name: string
+  type?: string
+  content?: string | null
+  contentUrl?: string | null
+  fileUrl?: string | null
+  fileName?: string | null
+  pageNumber?: number | null
+  mimeType?: string | null
+  size?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  childSources?: Prisma.SourceUncheckedCreateNestedManyWithoutParentSourceInput
+  cards?: Prisma.CardUncheckedCreateNestedManyWithoutSourceInput
+}
+
+export type SourceCreateOrConnectWithoutDeckInput = {
+  where: Prisma.SourceWhereUniqueInput
+  create: Prisma.XOR<Prisma.SourceCreateWithoutDeckInput, Prisma.SourceUncheckedCreateWithoutDeckInput>
+}
+
+export type SourceCreateManyDeckInputEnvelope = {
+  data: Prisma.SourceCreateManyDeckInput | Prisma.SourceCreateManyDeckInput[]
+  skipDuplicates?: boolean
+}
+
+export type SourceUpsertWithWhereUniqueWithoutDeckInput = {
+  where: Prisma.SourceWhereUniqueInput
+  update: Prisma.XOR<Prisma.SourceUpdateWithoutDeckInput, Prisma.SourceUncheckedUpdateWithoutDeckInput>
+  create: Prisma.XOR<Prisma.SourceCreateWithoutDeckInput, Prisma.SourceUncheckedCreateWithoutDeckInput>
+}
+
+export type SourceUpdateWithWhereUniqueWithoutDeckInput = {
+  where: Prisma.SourceWhereUniqueInput
+  data: Prisma.XOR<Prisma.SourceUpdateWithoutDeckInput, Prisma.SourceUncheckedUpdateWithoutDeckInput>
+}
+
+export type SourceUpdateManyWithWhereWithoutDeckInput = {
+  where: Prisma.SourceScalarWhereInput
+  data: Prisma.XOR<Prisma.SourceUpdateManyMutationInput, Prisma.SourceUncheckedUpdateManyWithoutDeckInput>
 }
 
 export type SourceCreateWithoutCardsInput = {
@@ -870,6 +1005,7 @@ export type SourceCreateWithoutCardsInput = {
   folder?: Prisma.SourceFolderCreateNestedOneWithoutSourcesInput
   parentSource?: Prisma.SourceCreateNestedOneWithoutChildSourcesInput
   childSources?: Prisma.SourceCreateNestedManyWithoutParentSourceInput
+  deck?: Prisma.DeckCreateNestedOneWithoutSourcesInput
 }
 
 export type SourceUncheckedCreateWithoutCardsInput = {
@@ -886,6 +1022,7 @@ export type SourceUncheckedCreateWithoutCardsInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   childSources?: Prisma.SourceUncheckedCreateNestedManyWithoutParentSourceInput
@@ -924,6 +1061,7 @@ export type SourceUpdateWithoutCardsInput = {
   folder?: Prisma.SourceFolderUpdateOneWithoutSourcesNestedInput
   parentSource?: Prisma.SourceUpdateOneWithoutChildSourcesNestedInput
   childSources?: Prisma.SourceUpdateManyWithoutParentSourceNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutSourcesNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutCardsInput = {
@@ -940,6 +1078,7 @@ export type SourceUncheckedUpdateWithoutCardsInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   childSources?: Prisma.SourceUncheckedUpdateManyWithoutParentSourceNestedInput
@@ -962,6 +1101,7 @@ export type SourceCreateWithoutChildSourcesInput = {
   folder?: Prisma.SourceFolderCreateNestedOneWithoutSourcesInput
   parentSource?: Prisma.SourceCreateNestedOneWithoutChildSourcesInput
   cards?: Prisma.CardCreateNestedManyWithoutSourceInput
+  deck?: Prisma.DeckCreateNestedOneWithoutSourcesInput
 }
 
 export type SourceUncheckedCreateWithoutChildSourcesInput = {
@@ -978,6 +1118,7 @@ export type SourceUncheckedCreateWithoutChildSourcesInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutSourceInput
@@ -1005,6 +1146,7 @@ export type SourceCreateWithoutParentSourceInput = {
   folder?: Prisma.SourceFolderCreateNestedOneWithoutSourcesInput
   childSources?: Prisma.SourceCreateNestedManyWithoutParentSourceInput
   cards?: Prisma.CardCreateNestedManyWithoutSourceInput
+  deck?: Prisma.DeckCreateNestedOneWithoutSourcesInput
 }
 
 export type SourceUncheckedCreateWithoutParentSourceInput = {
@@ -1020,6 +1162,7 @@ export type SourceUncheckedCreateWithoutParentSourceInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   childSources?: Prisma.SourceUncheckedCreateNestedManyWithoutParentSourceInput
@@ -1064,6 +1207,7 @@ export type SourceUpdateWithoutChildSourcesInput = {
   folder?: Prisma.SourceFolderUpdateOneWithoutSourcesNestedInput
   parentSource?: Prisma.SourceUpdateOneWithoutChildSourcesNestedInput
   cards?: Prisma.CardUpdateManyWithoutSourceNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutSourcesNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutChildSourcesInput = {
@@ -1080,6 +1224,7 @@ export type SourceUncheckedUpdateWithoutChildSourcesInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutSourceNestedInput
@@ -1118,6 +1263,7 @@ export type SourceCreateWithoutFolderInput = {
   parentSource?: Prisma.SourceCreateNestedOneWithoutChildSourcesInput
   childSources?: Prisma.SourceCreateNestedManyWithoutParentSourceInput
   cards?: Prisma.CardCreateNestedManyWithoutSourceInput
+  deck?: Prisma.DeckCreateNestedOneWithoutSourcesInput
 }
 
 export type SourceUncheckedCreateWithoutFolderInput = {
@@ -1133,6 +1279,7 @@ export type SourceUncheckedCreateWithoutFolderInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   childSources?: Prisma.SourceUncheckedCreateNestedManyWithoutParentSourceInput
@@ -1178,6 +1325,7 @@ export type SourceCreateManyUserInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1199,10 +1347,88 @@ export type SourceUpdateWithoutUserInput = {
   parentSource?: Prisma.SourceUpdateOneWithoutChildSourcesNestedInput
   childSources?: Prisma.SourceUpdateManyWithoutParentSourceNestedInput
   cards?: Prisma.CardUpdateManyWithoutSourceNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutSourcesNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  childSources?: Prisma.SourceUncheckedUpdateManyWithoutParentSourceNestedInput
+  cards?: Prisma.CardUncheckedUpdateManyWithoutSourceNestedInput
+}
+
+export type SourceUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SourceCreateManyDeckInput = {
+  id?: string
+  userId: string
+  folderId?: string | null
+  parentSourceId?: string | null
+  name: string
+  type?: string
+  content?: string | null
+  contentUrl?: string | null
+  fileUrl?: string | null
+  fileName?: string | null
+  pageNumber?: number | null
+  mimeType?: string | null
+  size?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SourceUpdateWithoutDeckInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSourcesNestedInput
+  folder?: Prisma.SourceFolderUpdateOneWithoutSourcesNestedInput
+  parentSource?: Prisma.SourceUpdateOneWithoutChildSourcesNestedInput
+  childSources?: Prisma.SourceUpdateManyWithoutParentSourceNestedInput
+  cards?: Prisma.CardUpdateManyWithoutSourceNestedInput
+}
+
+export type SourceUncheckedUpdateWithoutDeckInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1220,8 +1446,9 @@ export type SourceUncheckedUpdateWithoutUserInput = {
   cards?: Prisma.CardUncheckedUpdateManyWithoutSourceNestedInput
 }
 
-export type SourceUncheckedUpdateManyWithoutUserInput = {
+export type SourceUncheckedUpdateManyWithoutDeckInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1250,6 +1477,7 @@ export type SourceCreateManyParentSourceInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1271,6 +1499,7 @@ export type SourceUpdateWithoutParentSourceInput = {
   folder?: Prisma.SourceFolderUpdateOneWithoutSourcesNestedInput
   childSources?: Prisma.SourceUpdateManyWithoutParentSourceNestedInput
   cards?: Prisma.CardUpdateManyWithoutSourceNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutSourcesNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutParentSourceInput = {
@@ -1286,6 +1515,7 @@ export type SourceUncheckedUpdateWithoutParentSourceInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   childSources?: Prisma.SourceUncheckedUpdateManyWithoutParentSourceNestedInput
@@ -1305,6 +1535,7 @@ export type SourceUncheckedUpdateManyWithoutParentSourceInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1322,6 +1553,7 @@ export type SourceCreateManyFolderInput = {
   pageNumber?: number | null
   mimeType?: string | null
   size?: number | null
+  deckId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1343,6 +1575,7 @@ export type SourceUpdateWithoutFolderInput = {
   parentSource?: Prisma.SourceUpdateOneWithoutChildSourcesNestedInput
   childSources?: Prisma.SourceUpdateManyWithoutParentSourceNestedInput
   cards?: Prisma.CardUpdateManyWithoutSourceNestedInput
+  deck?: Prisma.DeckUpdateOneWithoutSourcesNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutFolderInput = {
@@ -1358,6 +1591,7 @@ export type SourceUncheckedUpdateWithoutFolderInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   childSources?: Prisma.SourceUncheckedUpdateManyWithoutParentSourceNestedInput
@@ -1377,6 +1611,7 @@ export type SourceUncheckedUpdateManyWithoutFolderInput = {
   pageNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1435,6 +1670,7 @@ export type SourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   pageNumber?: boolean
   mimeType?: boolean
   size?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1442,6 +1678,7 @@ export type SourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   parentSource?: boolean | Prisma.Source$parentSourceArgs<ExtArgs>
   childSources?: boolean | Prisma.Source$childSourcesArgs<ExtArgs>
   cards?: boolean | Prisma.Source$cardsArgs<ExtArgs>
+  deck?: boolean | Prisma.Source$deckArgs<ExtArgs>
   _count?: boolean | Prisma.SourceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["source"]>
 
@@ -1459,11 +1696,13 @@ export type SourceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   pageNumber?: boolean
   mimeType?: boolean
   size?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   folder?: boolean | Prisma.Source$folderArgs<ExtArgs>
   parentSource?: boolean | Prisma.Source$parentSourceArgs<ExtArgs>
+  deck?: boolean | Prisma.Source$deckArgs<ExtArgs>
 }, ExtArgs["result"]["source"]>
 
 export type SourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1480,11 +1719,13 @@ export type SourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   pageNumber?: boolean
   mimeType?: boolean
   size?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   folder?: boolean | Prisma.Source$folderArgs<ExtArgs>
   parentSource?: boolean | Prisma.Source$parentSourceArgs<ExtArgs>
+  deck?: boolean | Prisma.Source$deckArgs<ExtArgs>
 }, ExtArgs["result"]["source"]>
 
 export type SourceSelectScalar = {
@@ -1501,28 +1742,32 @@ export type SourceSelectScalar = {
   pageNumber?: boolean
   mimeType?: boolean
   size?: boolean
+  deckId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "folderId" | "parentSourceId" | "name" | "type" | "content" | "contentUrl" | "fileUrl" | "fileName" | "pageNumber" | "mimeType" | "size" | "createdAt" | "updatedAt", ExtArgs["result"]["source"]>
+export type SourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "folderId" | "parentSourceId" | "name" | "type" | "content" | "contentUrl" | "fileUrl" | "fileName" | "pageNumber" | "mimeType" | "size" | "deckId" | "createdAt" | "updatedAt", ExtArgs["result"]["source"]>
 export type SourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   folder?: boolean | Prisma.Source$folderArgs<ExtArgs>
   parentSource?: boolean | Prisma.Source$parentSourceArgs<ExtArgs>
   childSources?: boolean | Prisma.Source$childSourcesArgs<ExtArgs>
   cards?: boolean | Prisma.Source$cardsArgs<ExtArgs>
+  deck?: boolean | Prisma.Source$deckArgs<ExtArgs>
   _count?: boolean | Prisma.SourceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SourceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   folder?: boolean | Prisma.Source$folderArgs<ExtArgs>
   parentSource?: boolean | Prisma.Source$parentSourceArgs<ExtArgs>
+  deck?: boolean | Prisma.Source$deckArgs<ExtArgs>
 }
 export type SourceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   folder?: boolean | Prisma.Source$folderArgs<ExtArgs>
   parentSource?: boolean | Prisma.Source$parentSourceArgs<ExtArgs>
+  deck?: boolean | Prisma.Source$deckArgs<ExtArgs>
 }
 
 export type $SourcePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1533,6 +1778,7 @@ export type $SourcePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     parentSource: Prisma.$SourcePayload<ExtArgs> | null
     childSources: Prisma.$SourcePayload<ExtArgs>[]
     cards: Prisma.$CardPayload<ExtArgs>[]
+    deck: Prisma.$DeckPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1548,6 +1794,7 @@ export type $SourcePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     pageNumber: number | null
     mimeType: string | null
     size: number | null
+    deckId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["source"]>
@@ -1949,6 +2196,7 @@ export interface Prisma__SourceClient<T, Null = never, ExtArgs extends runtime.T
   parentSource<T extends Prisma.Source$parentSourceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Source$parentSourceArgs<ExtArgs>>): Prisma.Prisma__SourceClient<runtime.Types.Result.GetResult<Prisma.$SourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   childSources<T extends Prisma.Source$childSourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Source$childSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cards<T extends Prisma.Source$cardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Source$cardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deck<T extends Prisma.Source$deckArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Source$deckArgs<ExtArgs>>): Prisma.Prisma__DeckClient<runtime.Types.Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1991,6 +2239,7 @@ export interface SourceFieldRefs {
   readonly pageNumber: Prisma.FieldRef<"Source", 'Int'>
   readonly mimeType: Prisma.FieldRef<"Source", 'String'>
   readonly size: Prisma.FieldRef<"Source", 'Int'>
+  readonly deckId: Prisma.FieldRef<"Source", 'String'>
   readonly createdAt: Prisma.FieldRef<"Source", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Source", 'DateTime'>
 }
@@ -2472,6 +2721,25 @@ export type Source$cardsArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.CardScalarFieldEnum | Prisma.CardScalarFieldEnum[]
+}
+
+/**
+ * Source.deck
+ */
+export type Source$deckArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Deck
+   */
+  select?: Prisma.DeckSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Deck
+   */
+  omit?: Prisma.DeckOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeckInclude<ExtArgs> | null
+  where?: Prisma.DeckWhereInput
 }
 
 /**

@@ -1,4 +1,4 @@
-import { PrismaClient } from './generated-client/client'
+import { PrismaClient } from './generated-client'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 
@@ -15,12 +15,20 @@ if (!databaseUrl) {
 }
 
 // 创建 PostgreSQL connection pool
-const pool = new Pool({ connectionString: databaseUrl })
+const pool = new Pool({ 
+  connectionString: databaseUrl,
+  max: 10, // 连接池最大连接数
+  idleTimeoutMillis: 30000, // 空闲连接超时时间
+  connectionTimeoutMillis: 5000, // 连接超时时间
+})
 const adapter = new PrismaPg(pool)
 
 // Prisma 7 要求使用 adapter 或 accelerateUrl
 // 我们使用 adapter 来连接 PostgreSQL
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter })
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ 
+  adapter,
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+})
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 

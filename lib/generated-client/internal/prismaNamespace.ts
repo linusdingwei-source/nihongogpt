@@ -1414,6 +1414,7 @@ export const SourceScalarFieldEnum = {
   pageNumber: 'pageNumber',
   mimeType: 'mimeType',
   size: 'size',
+  deckId: 'deckId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1426,6 +1427,7 @@ export const SourceFolderScalarFieldEnum = {
   userId: 'userId',
   name: 'name',
   parentId: 'parentId',
+  deckId: 'deckId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

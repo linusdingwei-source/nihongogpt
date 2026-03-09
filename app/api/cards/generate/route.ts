@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { getUserId, getBearerTokenFromRequest } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
 import { extractKanaFromLLMResult, markdownToHtml } from '@/lib/llm-utils';
+import { getSignedUrlForStorageUrl } from '@/lib/storage';
 import OpenAI from 'openai';
 
 const CARD_GENERATION_CREDITS_COST = 3; // 完整卡片生成消耗 3 credits (LLM 2 + TTS 1)
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { text, cardType, deckName, includePronunciation, sourceId, pageNumber, category = 'CARD', analysis: providedAnalysis } = await request.json();
+    const { text, cardType, deckId, deckName, includePronunciation, sourceId, pageNumber, category = 'CARD', analysis: providedAnalysis } = await request.json();
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
         userId,
         frontContent: text.trim(),
         category: 'CARD',
-        deckName: finalDeckName,
+        ...(deckId ? { deckId } : { deckName: finalDeckName }),
       },
       select: {
         frontContent: true,
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
         where: {
           userId,
           category: 'CARD',
-          deckName: finalDeckName,
+          ...(deckId ? { deckId } : { deckName: finalDeckName }),
           frontContent: {
             startsWith: normalizedInput.substring(0, Math.min(10, normalizedInput.length)),
           },
@@ -90,14 +91,23 @@ export async function POST(request: NextRequest) {
       console.log(`Found existing card for text: ${text.substring(0, 30)}... - reusing cached data`);
       
       // 确保牌组存在
-      let deck = await prisma.deck.findUnique({
-        where: {
-          userId_name: {
-            userId,
-            name: finalDeckName,
+      let deck;
+      if (deckId) {
+        deck = await prisma.deck.findFirst({
+          where: { id: deckId, userId },
+        });
+      }
+
+      if (!deck) {
+        deck = await prisma.deck.findUnique({
+          where: {
+            userId_name: {
+              userId,
+              name: finalDeckName,
+            },
           },
-        },
-      });
+        });
+      }
 
       if (!deck) {
         deck = await prisma.deck.create({
@@ -123,12 +133,13 @@ export async function POST(request: NextRequest) {
           audioFilename: existingCard.audioFilename,
           timestamps: existingCard.timestamps ? JSON.parse(JSON.stringify(existingCard.timestamps)) : null,
           kanaText: existingCard.kanaText,
-          deckName: finalDeckName,
+          deckName: deck.name,
           tags: [],
         },
       });
 
       const remainingCredits = await getCredits(userId);
+      const signedAudioUrl = await getSignedUrlForStorageUrl(card.audioUrl);
 
       return NextResponse.json(
         successResponse({
@@ -137,7 +148,7 @@ export async function POST(request: NextRequest) {
             frontContent: card.frontContent,
             backContent: card.backContent,
             cardType: card.cardType,
-            audioUrl: card.audioUrl,
+            audioUrl: signedAudioUrl,
             timestamps: card.timestamps,
             kanaText: card.kanaText,
             deckName: card.deckName,
@@ -294,14 +305,23 @@ ${text}`;
     }
 
     // 3. 确保牌组存在
-    let deck = await prisma.deck.findUnique({
-      where: {
-        userId_name: {
-          userId,
-          name: finalDeckName,
+    let deck;
+    if (deckId) {
+      deck = await prisma.deck.findFirst({
+        where: { id: deckId, userId },
+      });
+    }
+
+    if (!deck) {
+      deck = await prisma.deck.findUnique({
+        where: {
+          userId_name: {
+            userId,
+            name: finalDeckName,
+          },
         },
-      },
-    });
+      });
+    }
 
     if (!deck) {
       deck = await prisma.deck.create({
@@ -327,12 +347,13 @@ ${text}`;
         audioFilename,
         timestamps: timestamps ? JSON.parse(JSON.stringify(timestamps)) : null,
         kanaText: analysis.kanaText,
-        deckName: finalDeckName,
+        deckName: deck.name,
         tags: [],
       },
     });
 
     const remainingCredits = await getCredits(userId);
+    const signedAudioUrl = await getSignedUrlForStorageUrl(card.audioUrl);
 
     return NextResponse.json(
       successResponse({
@@ -341,7 +362,7 @@ ${text}`;
           frontContent: card.frontContent,
           backContent: card.backContent,
           cardType: card.cardType,
-          audioUrl: card.audioUrl,
+          audioUrl: signedAudioUrl,
           timestamps: card.timestamps,
           kanaText: card.kanaText,
           deckName: card.deckName,
@@ -354,7 +375,7 @@ ${text}`;
         ttsInteraction: includePronunciation ? {
           input: text,
           kanaText: analysis.kanaText,
-          audioUrl: audioUrl,
+          audioUrl: signedAudioUrl,
         } : null,
       })
     );

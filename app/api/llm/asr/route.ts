@@ -104,13 +104,11 @@ async function checkTaskStatus(taskId: string): Promise<{
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
-    // DashScope requires POST for task status query
+    // DashScope requires GET for task status query
     const response = await fetch(`https://dashscope.aliyuncs.com/api/v1/tasks/${taskId}`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'X-DashScope-Async': 'enable',
       },
       signal: controller.signal,
     });
@@ -119,6 +117,11 @@ async function checkTaskStatus(taskId: string): Promise<{
 
     const data = await response.json();
     const taskStatus = data.output?.task_status;
+    console.log(`[ASR] Check task ${taskId} response status:`, response.status);
+    if (!response.ok) {
+      console.error(`[ASR] Task status check failed:`, JSON.stringify(data));
+      return { status: 'FAILED', error: data.message || `HTTP ${response.status}` };
+    }
     console.log(`[ASR] Check task ${taskId} status:`, taskStatus);
 
     if (taskStatus === 'SUCCEEDED') {
@@ -209,13 +212,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { audioUrl, languageHints } = await request.json();
+    let { audioUrl, languageHints } = await request.json();
 
     if (!audioUrl) {
       return NextResponse.json(
         errorResponse(ErrorCodes.BAD_REQUEST, 'Audio URL is required'),
         { status: 400 }
       );
+    }
+
+    // 确保传入 ASR 的是签名 URL（如果它是我们的 OSS URL）
+    const { getSignedUrlForStorageUrl } = await import('@/lib/storage');
+    const signedAudioUrl = await getSignedUrlForStorageUrl(audioUrl);
+    if (signedAudioUrl) {
+      audioUrl = signedAudioUrl;
     }
 
     // Check credits
@@ -329,10 +339,10 @@ export async function GET(request: NextRequest) {
         })
       );
     }
-  } catch (error) {
+    } catch (error) {
     console.error('[ASR] Status check error:', error);
     return NextResponse.json(
-      errorResponse(ErrorCodes.INTERNAL_ERROR, 'Failed to check ASR status'),
+      errorResponse(ErrorCodes.INTERNAL_ERROR, `Failed to check ASR status: ${error instanceof Error ? error.message : String(error)}`),
       { status: 500 }
     );
   }

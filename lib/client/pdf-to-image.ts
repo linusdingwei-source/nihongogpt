@@ -2,19 +2,28 @@
  * PDF to Image Conversion Utility (Client-side)
  * 
  * Uses pdf.js to render PDF pages to canvas and convert to image blobs.
- * This is preferred over server-side rendering because:
- * 1. Vercel serverless has limitations with native PDF libraries
- * 2. Client-side rendering is faster for user
- * 3. No server memory overhead for large PDFs
+ * 
+ * NOTE: This uses dynamic imports for pdfjs-dist to avoid Webpack/Next.js dev mode
+ * compatibility issues (Object.defineProperty errors).
  */
 
-import * as pdfjs from 'pdfjs-dist';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import type { TextItem } from 'pdfjs-dist/types/src/display/api';
 
-// Set worker source path - use unpkg CDN for version matching
-// Must match the installed pdfjs-dist version (5.4.624)
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.624/build/pdf.worker.min.mjs`;
+/**
+ * Dynamically load PDF.js legacy build
+ */
+async function getPdfJS() {
+  // Use the legacy minified ESM build which is most compatible with Next.js dev mode
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.min.mjs');
+  
+  // Set worker source path - use unpkg CDN for version matching (5.4.394 for Next.js dev compatibility)
+  if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.394/legacy/build/pdf.worker.min.mjs`;
+  }
+  
+  return pdfjs;
+}
 
 // Cache for loaded PDF documents to avoid re-fetching
 const pdfCache = new Map<string, PDFDocumentProxy>();
@@ -61,6 +70,7 @@ export async function loadPdfDocument(pdfUrl: string, retries = 3): Promise<PDFD
     return cached;
   }
 
+  const pdfjs = await getPdfJS();
   let lastError: Error | null = null;
   
   for (let attempt = 0; attempt < retries; attempt++) {
@@ -72,14 +82,16 @@ export async function loadPdfDocument(pdfUrl: string, retries = 3): Promise<PDFD
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }
       
+      // 获取 PDF 数据
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      
       const loadingTask = pdfjs.getDocument({
-        url: pdfUrl,
-        // Disable range requests to avoid connection issues with some servers
-        disableRange: true,
-        // Disable streaming to ensure complete download
-        disableStream: true,
-        // Disable auto-fetch for better control over loading
-        disableAutoFetch: true,
+        data: arrayBuffer,
+        // 其他选项保持默认
       });
       
       // Add progress tracking for long loads
@@ -226,6 +238,9 @@ export async function uploadImageBlob(
   }
   if (options?.pageNumber !== undefined) {
     formData.append('pageNumber', options.pageNumber.toString());
+  }
+  if (options?.deckId) {
+    formData.append('deckId', options.deckId);
   }
   
   // Filter out Content-Type from headers - let browser set it for FormData

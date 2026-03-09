@@ -7,7 +7,8 @@ export interface WorkspaceViewProps {
   cardT: any;
   
   // State
-  currentWorkspaceDeck: string;
+  currentWorkspaceDeckName: string;
+  currentWorkspaceDeckId: string;
   credits: number | null;
   paymentSuccess: boolean;
   setPaymentSuccess: (v: boolean) => void;
@@ -109,6 +110,12 @@ export interface WorkspaceViewProps {
   handleGenerateCardsFromText: (text: string, providedAnalysis?: { markdown: string; html: string; kanaText: string }) => Promise<void>;
   handleRetryFailedItems: (failedItems: Array<{ text: string; type?: string }>) => Promise<void>;
   handleSaveNote: (content: string, options?: { name?: string; audioUrl?: string; timestamps?: Array<{ begin_time: number; end_time: number; text: string }> }) => Promise<void>;
+  handleStartDictationForCard?: (card: any) => void;
+  handleStartShadowingForCard?: (card: any) => void;
+  specialStudyCard?: any;
+  setSpecialStudyCard?: (card: any) => void;
+  specialStudyType?: 'dictation' | 'shadowing' | null;
+  setSpecialStudyType?: (type: 'dictation' | 'shadowing' | null) => void;
   
   // Chat
   messages: any[];

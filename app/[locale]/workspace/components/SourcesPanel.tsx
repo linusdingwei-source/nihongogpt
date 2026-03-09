@@ -64,7 +64,11 @@ export function SourcesPanel(props: WorkspaceViewProps) {
     try {
       const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
       const headers = getAnonymousHeaders();
-      const res = await fetch('/api/folders', { headers });
+      const params = new URLSearchParams();
+      if (props.currentWorkspaceDeckId) {
+        params.append('deckId', props.currentWorkspaceDeckId);
+      }
+      const res = await fetch(`/api/folders?${params.toString()}`, { headers });
       const response = await res.json();
       if (response.success) {
         setFolders(response.data.folders);
@@ -72,7 +76,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
     } catch (error) {
       console.error('Failed to fetch folders:', error);
     }
-  }, []);
+  }, [props.currentWorkspaceDeckId]);
 
   useEffect(() => {
     fetchFolders();
@@ -87,7 +91,10 @@ export function SourcesPanel(props: WorkspaceViewProps) {
       const res = await fetch('/api/folders', {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newFolderName.trim() }),
+        body: JSON.stringify({ 
+          name: newFolderName.trim(),
+          deckId: props.currentWorkspaceDeckId 
+        }),
       });
       if (res.ok) {
         await fetchFolders();
