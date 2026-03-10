@@ -36,6 +36,8 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# 确保 prisma schema 在运行时存在，以便执行迁移
+COPY --from=builder /app/prisma ./prisma
 # 确保动态加载的 OSS 依赖在镜像中（standalone 可能未包含）
 RUN npm install ali-oss --omit=dev --ignore-scripts && rm -rf /root/.npm
 RUN chown -R nextjs:nodejs /app
