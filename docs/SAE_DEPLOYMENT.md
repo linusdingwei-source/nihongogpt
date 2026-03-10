@@ -182,7 +182,7 @@ export DIRECT_URL="$DATABASE_URL"
 # 若有 migrations 目录，使用迁移
 npx prisma migrate deploy
 
-# 若无迁移文件、仅需建表，可使用
+# 若无迁移文件（开发阶段或仅同步 Schema），可使用
 # npx prisma db push
 ```
 
