@@ -32,11 +32,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   // 在 Vercel 上需要信任主机
   trustHost: true,
-  // Cookie 配置：本地开发用普通名称（__Host- / __Secure- 要求 HTTPS），生产环境用安全前缀
+  // Cookie 配置：当通过 HTTP 访问（如本地/Docker localhost）时使用非 Secure 和普通名称，
+  // 否则生产环境用安全前缀（__Host- 要求 HTTPS）
   cookies: (function () {
     const isDev = process.env.NODE_ENV !== 'production';
-    const prefix = isDev ? 'authjs' : '__Secure-authjs';
-    const hostPrefix = isDev ? 'authjs' : '__Host-authjs';
+    const baseUrl = process.env.NEXTAUTH_URL ?? '';
+    const isInsecureOrigin = baseUrl.startsWith('http://') || !baseUrl;
+    const useSecureCookies = !isDev && !isInsecureOrigin;
+    const prefix = useSecureCookies ? '__Secure-authjs' : 'authjs';
+    const hostPrefix = useSecureCookies ? '__Host-authjs' : 'authjs';
     return {
       pkceCodeVerifier: {
         name: `${prefix}.pkce.code_verifier`,
@@ -44,7 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           httpOnly: true,
           sameSite: 'lax',
           path: '/',
-          secure: !isDev,
+          secure: useSecureCookies,
         },
       },
       state: {
@@ -53,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           httpOnly: true,
           sameSite: 'lax',
           path: '/',
-          secure: !isDev,
+          secure: useSecureCookies,
         },
       },
       callbackUrl: {
@@ -62,7 +66,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           httpOnly: true,
           sameSite: 'lax',
           path: '/',
-          secure: !isDev,
+          secure: useSecureCookies,
         },
       },
       csrfToken: {
@@ -71,7 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           httpOnly: true,
           sameSite: 'lax',
           path: '/',
-          secure: !isDev,
+          secure: useSecureCookies,
         },
       },
     };
