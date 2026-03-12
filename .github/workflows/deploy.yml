@@ -26,14 +26,22 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Serverless Devs
+        run: npm install -g @serverless-devs/s
+
       - name: Deploy to SAE
-        uses: aliyun/sae-deploy@v1
-        with:
-          region: 'cn-hongkong'
-          namespace: 'default'
-          app-name: 'nihongogpt'
-          image: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/nihongogpt:latest'
-          # 使用双引号包裹 env 内容，防止特殊字符导致解析异常
-          env: "PORT=3000,DATABASE_URL=${{ secrets.DATABASE_URL }},AUTH_SECRET=${{ secrets.AUTH_SECRET }},NEXTAUTH_URL=http://43.99.24.238"
-          access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
-          access-key-secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+        env:
+          ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+          ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+        run: |
+          # 这一步会自动读取项目里的 s.yaml 配置文件
+          # 如果你没有 s.yaml，我们可以使用命令直接部署：
+          s cli sae deploy \
+            --region cn-hongkong \
+            --app-name nihongogpt \
+            --image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/nihongogpt:latest \
+            --env "PORT=3000,DATABASE_URL=${{ secrets.DATABASE_URL }},AUTH_SECRET=${{ secrets.AUTH_SECRET }},NEXTAUTH_URL=http://43.99.24.238" \
+            -a ${{ secrets.ALIYUN_ACCESS_KEY_ID }} \
+            -s ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
