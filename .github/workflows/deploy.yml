@@ -1,4 +1,5 @@
 name: Deploy to SAE
+
 on:
   push:
     branches: [ main ]
@@ -8,11 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -26,10 +29,11 @@ jobs:
       - name: Deploy to SAE
         uses: aliyun/sae-deploy@v1
         with:
-          region: 'cn-hongkong'  # 如果部署在香港就填 cn-hongkong
+          region: 'cn-hongkong'
           namespace: 'default'
           app-name: 'nihongogpt'
           image: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/nihongogpt:latest'
-          env: 'DATABASE_URL=${{ secrets.DATABASE_URL }}'
+          # 使用双引号包裹 env 内容，防止特殊字符导致解析异常
+          env: "PORT=3000,DATABASE_URL=${{ secrets.DATABASE_URL }},AUTH_SECRET=${{ secrets.AUTH_SECRET }},NEXTAUTH_URL=http://43.99.24.238"
           access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
           access-key-secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
