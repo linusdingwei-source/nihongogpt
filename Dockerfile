@@ -3,8 +3,9 @@
 # 指定 ACR 基础镜像: docker build --build-arg BASE_IMAGE=bgil-pai-eas-registry.cn-shanghai.cr.aliyuncs.com/<namespace>/node:20-alpine -t nihongogpt-cn .
 # 运行: docker run -p 3000:3000 --env-file .env.aliyun nihongogpt-cn
 
-ARG BASE_IMAGE=bgil-pai-eas-registry.cn-shanghai.cr.aliyuncs.com/qwen-vl-7b/node:20-alpine
-FROM ${BASE_IMAGE} AS base
+#ARG BASE_IMAGE=bgil-pai-eas-registry.cn-shanghai.cr.aliyuncs.com/qwen-vl-7b/node:20-alpine
+#FROM ${BASE_IMAGE} AS base
+FROM node:20-alpine AS base
 
 # 依赖阶段
 FROM base AS deps
