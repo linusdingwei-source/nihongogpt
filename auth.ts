@@ -32,15 +32,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   // 在 Vercel 上需要信任主机
   trustHost: true,
-  // Cookie 配置：当通过 HTTP 访问（如本地/Docker localhost）时使用非 Secure 和普通名称，
-  // 否则生产环境用安全前缀（__Host- 要求 HTTPS）
+  // Cookie 配置：适配 FC/SAE 的多种环境（HTTP/HTTPS, IP/域名）
   cookies: (function () {
     const isDev = process.env.NODE_ENV !== 'production';
     const baseUrl = process.env.NEXTAUTH_URL ?? '';
+    
+    // 在 FC 环境下，即使 baseUrl 是 http，如果通过 https 访问，网关会带上 x-forwarded-proto
+    // 但为了最稳妥的 HTTP IP 访问，我们主要参考 baseUrl
     const isInsecureOrigin = baseUrl.startsWith('http://') || !baseUrl;
     const useSecureCookies = !isDev && !isInsecureOrigin;
+    
     const prefix = useSecureCookies ? '__Secure-authjs' : 'authjs';
     const hostPrefix = useSecureCookies ? '__Host-authjs' : 'authjs';
+    
     return {
       pkceCodeVerifier: {
         name: `${prefix}.pkce.code_verifier`,

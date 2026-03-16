@@ -6,6 +6,7 @@
 #ARG BASE_IMAGE=bgil-pai-eas-registry.cn-shanghai.cr.aliyuncs.com/qwen-vl-7b/node:20-alpine
 #FROM ${BASE_IMAGE} AS base
 FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
 
 # 依赖阶段
 FROM base AS deps
