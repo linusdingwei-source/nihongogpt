@@ -9,24 +9,17 @@ resources:
       region: cn-hongkong
       functionName: nihongogpt-web
       description: 'Next.js standalone app on FC 3.0'
-
       runtime: custom-container
+      # 确保 customContainerConfig 对齐
       customContainerConfig:
         image: docker.io/nihongogpt/nihongogpt:latest
         port: 3000
-
-      # === ⚠️ 必须开启临时磁盘 (上一步的修复) ===
+      # 确保以下配置与 customContainerConfig 对齐（同级）
       diskSize: 512
-
-      # === 🔥 核心修改在这里 🔥 ===
-      # CPU 设为 1.0 时，内存必须至少是 1024MB (1GB)
-      # 为了 Next.js 的稳定运行，强烈建议设为 2048MB (2GB)
       cpu: 1.0
       memory: 2048
-
       timeout: 60
       internetAccess: true
-
       environmentVariables:
         NODE_ENV: production
         DATABASE_URL: ${env.DATABASE_URL}
@@ -37,7 +30,6 @@ resources:
         GOOGLE_CLIENT_SECRET: ${env.GOOGLE_CLIENT_SECRET}
         STRIPE_SECRET_KEY: ${env.STRIPE_SECRET_KEY}
         STRIPE_WEBHOOK_SECRET: ${env.STRIPE_WEBHOOK_SECRET}
-
       triggers:
         - triggerName: httpTrigger
           triggerType: http

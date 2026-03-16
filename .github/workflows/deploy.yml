@@ -91,6 +91,9 @@ jobs:
             
         print("✅ s.yaml successfully patched with real secrets.")
 
+    - name: Debug s.yaml
+      run: cat s.yaml
+
     # 部署 (此时 s.yaml 已经是纯文本，无需任何 env 参数)
     - name: Deploy to FC
       run: s deploy -y --use-local
