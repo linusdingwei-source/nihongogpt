@@ -10,23 +10,28 @@ resources:
       functionName: nihongogpt-web
       description: 'Next.js standalone app on FC 3.0'
 
+      # 运行时配置
       runtime: custom-container
       customContainerConfig:
         image: docker.io/nihongogpt/nihongogpt:latest
         port: 3000
 
-      # 建议配置：增加内存以避免 OOM 或冷启动过慢
+      # === 修复核心 ===
+      # FC 3.0 强制要求配置临时磁盘大小
+      # 单位是 MB，512 是默认最小值，最大可达 10240
+      diskSize: 512
+
+      # 强烈建议的性能配置 (Next.js 在 0.5 CPU 下会很慢)
       cpu: 1.0
       memory: 2048
       timeout: 60
 
-      # 必须开启公网访问，否则无法连接 Stripe 或 数据库
+      # 必须开启，否则无法拉取 Docker Hub 镜像，也连不上 Stripe
       internetAccess: true
 
-      # 环境变量映射
+      # 环境变量 (保持原样，Python 脚本会替换这里的 ${env.XXX})
       environmentVariables:
         NODE_ENV: production
-        # 这里读取的是上面 GitHub Workflow 中 'env:' 下定义的变量
         DATABASE_URL: ${env.DATABASE_URL}
         AUTH_SECRET: ${env.AUTH_SECRET}
         AUTH_TRUST_HOST: "true"
