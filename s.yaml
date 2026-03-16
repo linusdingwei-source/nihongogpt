@@ -10,26 +10,23 @@ resources:
       functionName: nihongogpt-web
       description: 'Next.js standalone app on FC 3.0'
 
-      # 运行时配置
       runtime: custom-container
       customContainerConfig:
         image: docker.io/nihongogpt/nihongogpt:latest
         port: 3000
 
-      # === 修复核心 ===
-      # FC 3.0 强制要求配置临时磁盘大小
-      # 单位是 MB，512 是默认最小值，最大可达 10240
+      # === ⚠️ 必须开启临时磁盘 (上一步的修复) ===
       diskSize: 512
 
-      # 强烈建议的性能配置 (Next.js 在 0.5 CPU 下会很慢)
+      # === 🔥 核心修改在这里 🔥 ===
+      # CPU 设为 1.0 时，内存必须至少是 1024MB (1GB)
+      # 为了 Next.js 的稳定运行，强烈建议设为 2048MB (2GB)
       cpu: 1.0
       memory: 2048
-      timeout: 60
 
-      # 必须开启，否则无法拉取 Docker Hub 镜像，也连不上 Stripe
+      timeout: 60
       internetAccess: true
 
-      # 环境变量 (保持原样，Python 脚本会替换这里的 ${env.XXX})
       environmentVariables:
         NODE_ENV: production
         DATABASE_URL: ${env.DATABASE_URL}
