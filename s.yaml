@@ -19,12 +19,12 @@ resources:
       handler: handler
       environmentVariables:
         NODE_ENV: production
-        DATABASE_URL: ${env.DATABASE_URL}
-        AUTH_SECRET: ${env.AUTH_SECRET}
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        AUTH_SECRET: ${{ env.AUTH_SECRET }}
         AUTH_TRUST_HOST: "true"
-        NEXTAUTH_URL: ${env.NEXTAUTH_URL} 
-        GOOGLE_CLIENT_ID: ${env.GOOGLE_CLIENT_ID}
-        GOOGLE_CLIENT_SECRET: ${env.GOOGLE_CLIENT_SECRET}
+        NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }} 
+        GOOGLE_CLIENT_ID: ${{ env.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ env.GOOGLE_CLIENT_SECRET }}
       triggers:
         - triggerName: httpTrigger
           triggerType: http
