@@ -13,6 +13,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
     # 1. 设置 Docker 环境
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -39,7 +44,7 @@ jobs:
 
     # 4. 安装 Serverless Devs 工具
     - name: Install Serverless Devs
-      run: curl -o- -L https://setup.serverless-devs.com/setup.sh | bash
+      run: npm install -g @serverless-devs/s
 
     # 5. 配置阿里云密钥
     - name: Config Aliyun Credentials
