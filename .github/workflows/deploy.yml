@@ -1,21 +1,58 @@
-name: Build and Push
+name: Build and Deploy to Aliyun FC
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nihongogpt:latest
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 1. 设置 Docker 环境
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # 2. 登录 Docker Hub
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # 3. 构建并推送镜像
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: nihongogpt/nihongogpt:latest
+        cache-from: type=registry,ref=nihongogpt/nihongogpt:buildcache
+        cache-to: type=registry,ref=nihongogpt/nihongogpt:buildcache,mode=max
+
+    # 4. 安装 Serverless Devs 工具
+    - name: Install Serverless Devs
+      run: curl -o- -L https://setup.serverless-devs.com/setup.sh | bash
+
+    # 5. 配置阿里云密钥
+    - name: Config Aliyun Credentials
+      run: |
+        s config add --AccessKeyID "${{ secrets.ALIYUN_ACCESS_KEY_ID }}" --AccessKeySecret "${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}" --AccountID "${{ secrets.ALIYUN_ACCOUNT_ID }}" -a default -f
+
+    # 6. 部署到 FC
+    # 注意：这里我们将 GitHub Secrets 注入为环境变量，以便 s.yaml 中的 ${env.XXX} 可以读取到
+    - name: Deploy to FC
+      run: s deploy -y
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+        NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
