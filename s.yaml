@@ -9,22 +9,37 @@ resources:
       region: cn-hongkong
       functionName: nihongogpt-web
       description: 'Next.js standalone app on FC 3.0'
+
+      # 运行时配置
       runtime: custom-container
       customContainerConfig:
         image: docker.io/nihongogpt/nihongogpt:latest
         port: 3000
-      cpu: 0.5
-      memory: 1024
+
+      # === 性能优化建议 ===
+      # Next.js 启动和 SSR 渲染比较吃 CPU
+      # 建议 CPU 至少 1.0，内存 2GB (2048)，否则并发稍微一高或冷启动时会很慢
+      cpu: 1.0       # 原来是 0.5，建议改为 1.0
+      memory: 2048   # 原来是 1024，建议改为 2048
       timeout: 60
-      handler: handler
+
+      # 确保函数可以访问公网 (拉取镜像、连接 Stripe/数据库)
+      internetAccess: true
+
+      # 环境变量映射 (这里读取的是上面 GitHub Workflow 中 env 步骤注入的值)
       environmentVariables:
         NODE_ENV: production
-        DATABASE_URL: ${{ env('DATABASE_URL') }}
-        AUTH_SECRET: ${{ env('AUTH_SECRET') }}
         AUTH_TRUST_HOST: "true"
-        NEXTAUTH_URL: ${{ env('NEXTAUTH_URL') }}
-        GOOGLE_CLIENT_ID: ${{ env('GOOGLE_CLIENT_ID') }}
-        GOOGLE_CLIENT_SECRET: ${{ env('GOOGLE_CLIENT_SECRET') }}
+        # 数据库与认证
+        DATABASE_URL: ${env.DATABASE_URL}
+        AUTH_SECRET: ${env.AUTH_SECRET}
+        NEXTAUTH_URL: ${env.NEXTAUTH_URL}
+        GOOGLE_CLIENT_ID: ${env.GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${env.GOOGLE_CLIENT_SECRET}
+        # 支付 (记得在 GitHub Secrets 添加)
+        STRIPE_SECRET_KEY: ${env.STRIPE_SECRET_KEY}
+        STRIPE_WEBHOOK_SECRET: ${env.STRIPE_WEBHOOK_SECRET}
+
       triggers:
         - triggerName: httpTrigger
           triggerType: http
