@@ -17,7 +17,7 @@ resources:
       # 确保以下配置与 customContainerConfig 对齐（同级）
       diskSize: 512
       cpu: 1.0
-      memory: 2048
+      memorySize: 2048
       timeout: 60
       internetAccess: true
       environmentVariables:

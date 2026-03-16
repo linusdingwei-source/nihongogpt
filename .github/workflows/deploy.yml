@@ -96,4 +96,4 @@ jobs:
 
     # 部署 (此时 s.yaml 已经是纯文本，无需任何 env 参数)
     - name: Deploy to FC
-      run: s deploy -y --use-local
+      run: s deploy -y --use-local --debug
