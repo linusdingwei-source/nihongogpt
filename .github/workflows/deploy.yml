@@ -18,7 +18,7 @@ jobs:
       with:
         node-version: '20'
 
-    # === Docker 构建部分 ===
+    # === Docker 构建部分 (保持不变) ===
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
 
@@ -40,27 +40,57 @@ jobs:
         cache-from: type=registry,ref=nihongogpt/nihongogpt:buildcache
         cache-to: type=registry,ref=nihongogpt/nihongogpt:buildcache,mode=max
 
-    # === Serverless Devs 部署部分 ===
+    # === 部署部分 ===
     - name: Install Serverless Devs
       run: npm install -g @serverless-devs/s
 
-    # 配置阿里云访问密钥 (使用 -f 强制覆盖旧配置)
     - name: Config Aliyun Credentials
       run: |
         s config add --AccessKeyID "${{ secrets.ALIYUN_ACCESS_KEY_ID }}" --AccessKeySecret "${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}" --AccountID "${{ secrets.ALIYUN_ACCOUNT_ID }}" -a default -f
 
-    # 🔴 核心修复步骤：部署并显式注入环境变量
-    # 这里不需要生成 .env 文件，直接用 env 关键字最安全
-    - name: Deploy to FC
-      run: s deploy -y --use-local
+    # 🔥🔥🔥 核心大招：使用 Python 强行替换 s.yaml 中的变量 🔥🔥🔥
+    # 这步运行完，s.yaml 里就全是真实的密码了，不存在 ${env.XXX} 了
+    - name: Inject Secrets into s.yaml
+      shell: python
       env:
-        # 左边: 对应 s.yaml 里 ${env.XXX} 的名字
-        # 右边: 对应 GitHub Secrets 里的名字
+        # 将 GitHub Secrets 传入 Python 环境
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
         NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        # 支付相关的密钥 (请确保 GitHub Secrets 里有这两个，否则填空值)
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
         STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      run: |
+        import os
+        import re
+        
+        print("🔄 Starting to replace variables in s.yaml...")
+        
+        # 读取 s.yaml
+        with open('s.yaml', 'r') as f:
+            content = f.read()
+        
+        # 定义替换函数：找到 ${env.XXX}，去环境变量里找对应的值并替换
+        def replace_env(match):
+            var_name = match.group(1) # 获取变量名，例如 DATABASE_URL
+            value = os.environ.get(var_name)
+            if value is None:
+                print(f"⚠️ Warning: Secret {var_name} is not set in GitHub Secrets! Replacing with empty string.")
+                return ""
+            # 简单的转义，防止 YAML 格式破裂（如果密码里有特殊字符）
+            # 注意：如果你的 s.yaml 里没有给变量加引号，这里直接替换值
+            return value
+
+        # 正则匹配 ${env.任何字母数字下划线}
+        new_content = re.sub(r'\$\{env\.([A-Za-z0-9_]+)\}', replace_env, content)
+        
+        # 覆写回 s.yaml
+        with open('s.yaml', 'w') as f:
+            f.write(new_content)
+            
+        print("✅ s.yaml successfully patched with real secrets.")
+
+    # 部署 (此时 s.yaml 已经是纯文本，无需任何 env 参数)
+    - name: Deploy to FC
+      run: s deploy -y --use-local
