@@ -49,6 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       pkceCodeVerifier: {
         name: `${prefix}.pkce.code_verifier`,
         options: {
+          //test
           httpOnly: true,
           sameSite: 'lax',
           path: '/',
