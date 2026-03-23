@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
       with:
         node-version: '20'
 
-    # === Docker 构建部分 (保持不变) ===
+    # === Docker 构建部分 ===
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
 
@@ -50,6 +50,7 @@ jobs:
 
     # 🔥🔥🔥 核心大招：使用 Python 强行替换 s.yaml 中的变量 🔥🔥🔥
     # 这步运行完，s.yaml 里就全是真实的密码了，不存在 ${env.XXX} 了
+    # 这能完美解决布尔值/字符串类型错误的问题
     - name: Inject Secrets into s.yaml
       shell: python
       env:
@@ -89,8 +90,7 @@ jobs:
             if value is None:
                 print(f"⚠️ Warning: Secret {var_name} is not set in GitHub Secrets! Replacing with empty string.")
                 return ""
-            # 简单的转义，防止 YAML 格式破裂（如果密码里有特殊字符）
-            # 注意：如果你的 s.yaml 里没有给变量加引号，这里直接替换值
+            # 直接返回字符串值，因为 s.yaml 里我们已经手动加了双引号
             return value
 
         # 正则匹配 ${env.任何字母数字下划线}
