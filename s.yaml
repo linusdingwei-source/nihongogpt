@@ -44,8 +44,8 @@ resources:
         OSS_ACCESS_KEY_ID: ${env.OSS_ACCESS_KEY_ID}
         OSS_ACCESS_KEY_SECRET: ${env.OSS_ACCESS_KEY_SECRET}
         OSS_PREFIX: ${env.OSS_PREFIX}
-        FREE_MODE: ${env.FREE_MODE}
-        NEXT_PUBLIC_FREE_MODE: ${env.NEXT_PUBLIC_FREE_MODE}
+        FREE_MODE: "${env.FREE_MODE}"
+        NEXT_PUBLIC_FREE_MODE: "${env.NEXT_PUBLIC_FREE_MODE}"
       triggers:
         - triggerName: httpTrigger
           triggerType: http
