@@ -35,6 +35,17 @@ resources:
         GOOGLE_CLIENT_SECRET: ${env.GOOGLE_CLIENT_SECRET}
         STRIPE_SECRET_KEY: ${env.STRIPE_SECRET_KEY}
         STRIPE_WEBHOOK_SECRET: ${env.STRIPE_WEBHOOK_SECRET}
+        RESEND_API_KEY: ${env.RESEND_API_KEY}
+        RESEND_FROM_EMAIL: ${env.RESEND_FROM_EMAIL}
+        DASHSCOPE_API_KEY: ${env.DASHSCOPE_API_KEY}
+        STORAGE_PROVIDER: ${env.STORAGE_PROVIDER}
+        OSS_REGION: ${env.OSS_REGION}
+        OSS_BUCKET: ${env.OSS_BUCKET}
+        OSS_ACCESS_KEY_ID: ${env.OSS_ACCESS_KEY_ID}
+        OSS_ACCESS_KEY_SECRET: ${env.OSS_ACCESS_KEY_SECRET}
+        OSS_PREFIX: ${env.OSS_PREFIX}
+        FREE_MODE: ${env.FREE_MODE}
+        NEXT_PUBLIC_FREE_MODE: ${env.NEXT_PUBLIC_FREE_MODE}
       triggers:
         - triggerName: httpTrigger
           triggerType: http

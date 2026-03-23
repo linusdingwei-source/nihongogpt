@@ -135,7 +135,13 @@ export default function UserMenu({ credits }: UserMenuProps) {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Credits</span>
                 <span className="text-sm font-semibold text-indigo-600">
-                  {credits}
+                  {process.env.NEXT_PUBLIC_FREE_MODE === 'true' ? (
+                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">
+                      Free Mode
+                    </span>
+                  ) : (
+                    credits
+                  )}
                 </span>
               </div>
             </div>

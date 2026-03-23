@@ -3,6 +3,9 @@ import { prisma } from './prisma';
 const INITIAL_CREDITS = 2;
 const TTS_COST = 1;
 
+// 免费模式开关：如果环境变量 FREE_MODE 为 true，则不消耗 credits
+const isFreeMode = () => process.env.FREE_MODE === 'true' || process.env.NEXT_PUBLIC_FREE_MODE === 'true';
+
 export async function initializeUserCredits(userId: string) {
   // Check if user already has credits (not a new user)
   const user = await prisma.user.findUnique({
@@ -32,6 +35,9 @@ export async function initializeUserCredits(userId: string) {
 }
 
 export async function consumeCredits(userId: string, amount: number = TTS_COST): Promise<boolean> {
+  if (isFreeMode()) {
+    return true;
+  }
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { credits: true },
@@ -65,6 +71,9 @@ export async function addCredits(userId: string, amount: number) {
 }
 
 export async function getCredits(userId: string): Promise<number> {
+  if (isFreeMode()) {
+    return 999; // 免费模式下返回充足的 credits
+  }
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { credits: true },
