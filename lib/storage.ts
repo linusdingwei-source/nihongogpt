@@ -7,6 +7,11 @@
 import { getStorageProvider } from './storage-config';
 import type { StorageProviderType } from './storage-config';
 
+export {
+  userStoragePathPrefix,
+  type UserStorageSegment,
+} from './storage-path';
+
 export interface StorageConfig {
   provider: StorageProviderType;
   // Vercel Blob 配置

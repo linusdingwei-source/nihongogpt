@@ -256,9 +256,17 @@ export async function getUserId(
   session: { user?: { id?: string } } | null, 
   request: Request
 ): Promise<string | null> {
-  // 如果是登录用户（通过 cookie），直接返回
+  // JWT 策略下 session.user.id 可能对应已删除的用户（如库被 reset 后仍带着旧 cookie）
   if (session?.user?.id) {
-    return session.user.id as string;
+    const sessionUserId = session.user.id as string;
+    const dbUser = await prisma.user.findUnique({
+      where: { id: sessionUserId },
+      select: { id: true },
+    });
+    if (dbUser) {
+      return sessionUserId;
+    }
+    // 当作未登录，继续走 Bearer / 匿名，避免 OSS 路径用幽灵 id、写库时外键失败
   }
 
   // 尝试从 Bearer Token 获取用户 ID

@@ -54,6 +54,11 @@ export type RateLimit = $Result.DefaultSelection<Prisma.$RateLimitPayload>
  */
 export type Deck = $Result.DefaultSelection<Prisma.$DeckPayload>
 /**
+ * Model CollectedDeck
+ * 
+ */
+export type CollectedDeck = $Result.DefaultSelection<Prisma.$CollectedDeckPayload>
+/**
  * Model Card
  * 
  */
@@ -269,6 +274,16 @@ export class PrismaClient<
     * ```
     */
   get deck(): Prisma.DeckDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.collectedDeck`: Exposes CRUD operations for the **CollectedDeck** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CollectedDecks
+    * const collectedDecks = await prisma.collectedDeck.findMany()
+    * ```
+    */
+  get collectedDeck(): Prisma.CollectedDeckDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.card`: Exposes CRUD operations for the **Card** model.
@@ -741,6 +756,7 @@ export namespace Prisma {
     Order: 'Order',
     RateLimit: 'RateLimit',
     Deck: 'Deck',
+    CollectedDeck: 'CollectedDeck',
     Card: 'Card',
     Source: 'Source',
     SourceFolder: 'SourceFolder'
@@ -759,7 +775,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "passwordResetToken" | "order" | "rateLimit" | "deck" | "card" | "source" | "sourceFolder"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "passwordResetToken" | "order" | "rateLimit" | "deck" | "collectedDeck" | "card" | "source" | "sourceFolder"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1355,6 +1371,80 @@ export namespace Prisma {
           }
         }
       }
+      CollectedDeck: {
+        payload: Prisma.$CollectedDeckPayload<ExtArgs>
+        fields: Prisma.CollectedDeckFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CollectedDeckFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CollectedDeckFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>
+          }
+          findFirst: {
+            args: Prisma.CollectedDeckFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CollectedDeckFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>
+          }
+          findMany: {
+            args: Prisma.CollectedDeckFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>[]
+          }
+          create: {
+            args: Prisma.CollectedDeckCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>
+          }
+          createMany: {
+            args: Prisma.CollectedDeckCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CollectedDeckCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>[]
+          }
+          delete: {
+            args: Prisma.CollectedDeckDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>
+          }
+          update: {
+            args: Prisma.CollectedDeckUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>
+          }
+          deleteMany: {
+            args: Prisma.CollectedDeckDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CollectedDeckUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CollectedDeckUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>[]
+          }
+          upsert: {
+            args: Prisma.CollectedDeckUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CollectedDeckPayload>
+          }
+          aggregate: {
+            args: Prisma.CollectedDeckAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCollectedDeck>
+          }
+          groupBy: {
+            args: Prisma.CollectedDeckGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CollectedDeckGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CollectedDeckCountArgs<ExtArgs>
+            result: $Utils.Optional<CollectedDeckCountAggregateOutputType> | number
+          }
+        }
+      }
       Card: {
         payload: Prisma.$CardPayload<ExtArgs>
         fields: Prisma.CardFieldRefs
@@ -1693,6 +1783,7 @@ export namespace Prisma {
     order?: OrderOmit
     rateLimit?: RateLimitOmit
     deck?: DeckOmit
+    collectedDeck?: CollectedDeckOmit
     card?: CardOmit
     source?: SourceOmit
     sourceFolder?: SourceFolderOmit
@@ -1781,6 +1872,7 @@ export namespace Prisma {
     orders: number
     cards: number
     decks: number
+    collectedDecks: number
     sources: number
     sourceFolders: number
   }
@@ -1791,6 +1883,7 @@ export namespace Prisma {
     orders?: boolean | UserCountOutputTypeCountOrdersArgs
     cards?: boolean | UserCountOutputTypeCountCardsArgs
     decks?: boolean | UserCountOutputTypeCountDecksArgs
+    collectedDecks?: boolean | UserCountOutputTypeCountCollectedDecksArgs
     sources?: boolean | UserCountOutputTypeCountSourcesArgs
     sourceFolders?: boolean | UserCountOutputTypeCountSourceFoldersArgs
   }
@@ -1844,6 +1937,13 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountCollectedDecksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CollectedDeckWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountSourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SourceWhereInput
   }
@@ -1864,12 +1964,14 @@ export namespace Prisma {
     cards: number
     sources: number
     folders: number
+    collections: number
   }
 
   export type DeckCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cards?: boolean | DeckCountOutputTypeCountCardsArgs
     sources?: boolean | DeckCountOutputTypeCountSourcesArgs
     folders?: boolean | DeckCountOutputTypeCountFoldersArgs
+    collections?: boolean | DeckCountOutputTypeCountCollectionsArgs
   }
 
   // Custom InputTypes
@@ -1902,6 +2004,13 @@ export namespace Prisma {
    */
   export type DeckCountOutputTypeCountFoldersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SourceFolderWhereInput
+  }
+
+  /**
+   * DeckCountOutputType without action
+   */
+  export type DeckCountOutputTypeCountCollectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CollectedDeckWhereInput
   }
 
 
@@ -2248,6 +2357,7 @@ export namespace Prisma {
     orders?: boolean | User$ordersArgs<ExtArgs>
     cards?: boolean | User$cardsArgs<ExtArgs>
     decks?: boolean | User$decksArgs<ExtArgs>
+    collectedDecks?: boolean | User$collectedDecksArgs<ExtArgs>
     sources?: boolean | User$sourcesArgs<ExtArgs>
     sourceFolders?: boolean | User$sourceFoldersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2305,6 +2415,7 @@ export namespace Prisma {
     orders?: boolean | User$ordersArgs<ExtArgs>
     cards?: boolean | User$cardsArgs<ExtArgs>
     decks?: boolean | User$decksArgs<ExtArgs>
+    collectedDecks?: boolean | User$collectedDecksArgs<ExtArgs>
     sources?: boolean | User$sourcesArgs<ExtArgs>
     sourceFolders?: boolean | User$sourceFoldersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2320,6 +2431,7 @@ export namespace Prisma {
       orders: Prisma.$OrderPayload<ExtArgs>[]
       cards: Prisma.$CardPayload<ExtArgs>[]
       decks: Prisma.$DeckPayload<ExtArgs>[]
+      collectedDecks: Prisma.$CollectedDeckPayload<ExtArgs>[]
       sources: Prisma.$SourcePayload<ExtArgs>[]
       sourceFolders: Prisma.$SourceFolderPayload<ExtArgs>[]
     }
@@ -2735,6 +2847,7 @@ export namespace Prisma {
     orders<T extends User$ordersArgs<ExtArgs> = {}>(args?: Subset<T, User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     cards<T extends User$cardsArgs<ExtArgs> = {}>(args?: Subset<T, User$cardsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     decks<T extends User$decksArgs<ExtArgs> = {}>(args?: Subset<T, User$decksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    collectedDecks<T extends User$collectedDecksArgs<ExtArgs> = {}>(args?: Subset<T, User$collectedDecksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sources<T extends User$sourcesArgs<ExtArgs> = {}>(args?: Subset<T, User$sourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sourceFolders<T extends User$sourceFoldersArgs<ExtArgs> = {}>(args?: Subset<T, User$sourceFoldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SourceFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -3283,6 +3396,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: DeckScalarFieldEnum | DeckScalarFieldEnum[]
+  }
+
+  /**
+   * User.collectedDecks
+   */
+  export type User$collectedDecksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    where?: CollectedDeckWhereInput
+    orderBy?: CollectedDeckOrderByWithRelationInput | CollectedDeckOrderByWithRelationInput[]
+    cursor?: CollectedDeckWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CollectedDeckScalarFieldEnum | CollectedDeckScalarFieldEnum[]
   }
 
   /**
@@ -9749,6 +9886,9 @@ export namespace Prisma {
     userId: string | null
     name: string | null
     coverImageUrl: string | null
+    isPublic: boolean | null
+    shareToken: string | null
+    description: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9758,6 +9898,9 @@ export namespace Prisma {
     userId: string | null
     name: string | null
     coverImageUrl: string | null
+    isPublic: boolean | null
+    shareToken: string | null
+    description: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9767,6 +9910,9 @@ export namespace Prisma {
     userId: number
     name: number
     coverImageUrl: number
+    isPublic: number
+    shareToken: number
+    description: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -9778,6 +9924,9 @@ export namespace Prisma {
     userId?: true
     name?: true
     coverImageUrl?: true
+    isPublic?: true
+    shareToken?: true
+    description?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9787,6 +9936,9 @@ export namespace Prisma {
     userId?: true
     name?: true
     coverImageUrl?: true
+    isPublic?: true
+    shareToken?: true
+    description?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9796,6 +9948,9 @@ export namespace Prisma {
     userId?: true
     name?: true
     coverImageUrl?: true
+    isPublic?: true
+    shareToken?: true
+    description?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -9878,6 +10033,9 @@ export namespace Prisma {
     userId: string
     name: string
     coverImageUrl: string | null
+    isPublic: boolean
+    shareToken: string | null
+    description: string | null
     createdAt: Date
     updatedAt: Date
     _count: DeckCountAggregateOutputType | null
@@ -9904,12 +10062,16 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     coverImageUrl?: boolean
+    isPublic?: boolean
+    shareToken?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     cards?: boolean | Deck$cardsArgs<ExtArgs>
     sources?: boolean | Deck$sourcesArgs<ExtArgs>
     folders?: boolean | Deck$foldersArgs<ExtArgs>
+    collections?: boolean | Deck$collectionsArgs<ExtArgs>
     _count?: boolean | DeckCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["deck"]>
 
@@ -9918,6 +10080,9 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     coverImageUrl?: boolean
+    isPublic?: boolean
+    shareToken?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -9928,6 +10093,9 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     coverImageUrl?: boolean
+    isPublic?: boolean
+    shareToken?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -9938,16 +10106,20 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     coverImageUrl?: boolean
+    isPublic?: boolean
+    shareToken?: boolean
+    description?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DeckOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "coverImageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
+  export type DeckOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "coverImageUrl" | "isPublic" | "shareToken" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
   export type DeckInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     cards?: boolean | Deck$cardsArgs<ExtArgs>
     sources?: boolean | Deck$sourcesArgs<ExtArgs>
     folders?: boolean | Deck$foldersArgs<ExtArgs>
+    collections?: boolean | Deck$collectionsArgs<ExtArgs>
     _count?: boolean | DeckCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DeckIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9964,12 +10136,16 @@ export namespace Prisma {
       cards: Prisma.$CardPayload<ExtArgs>[]
       sources: Prisma.$SourcePayload<ExtArgs>[]
       folders: Prisma.$SourceFolderPayload<ExtArgs>[]
+      collections: Prisma.$CollectedDeckPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
       name: string
       coverImageUrl: string | null
+      isPublic: boolean
+      shareToken: string | null
+      description: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["deck"]>
@@ -10370,6 +10546,7 @@ export namespace Prisma {
     cards<T extends Deck$cardsArgs<ExtArgs> = {}>(args?: Subset<T, Deck$cardsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sources<T extends Deck$sourcesArgs<ExtArgs> = {}>(args?: Subset<T, Deck$sourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     folders<T extends Deck$foldersArgs<ExtArgs> = {}>(args?: Subset<T, Deck$foldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SourceFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    collections<T extends Deck$collectionsArgs<ExtArgs> = {}>(args?: Subset<T, Deck$collectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10403,6 +10580,9 @@ export namespace Prisma {
     readonly userId: FieldRef<"Deck", 'String'>
     readonly name: FieldRef<"Deck", 'String'>
     readonly coverImageUrl: FieldRef<"Deck", 'String'>
+    readonly isPublic: FieldRef<"Deck", 'Boolean'>
+    readonly shareToken: FieldRef<"Deck", 'String'>
+    readonly description: FieldRef<"Deck", 'String'>
     readonly createdAt: FieldRef<"Deck", 'DateTime'>
     readonly updatedAt: FieldRef<"Deck", 'DateTime'>
   }
@@ -10873,6 +11053,30 @@ export namespace Prisma {
   }
 
   /**
+   * Deck.collections
+   */
+  export type Deck$collectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    where?: CollectedDeckWhereInput
+    orderBy?: CollectedDeckOrderByWithRelationInput | CollectedDeckOrderByWithRelationInput[]
+    cursor?: CollectedDeckWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CollectedDeckScalarFieldEnum | CollectedDeckScalarFieldEnum[]
+  }
+
+  /**
    * Deck without action
    */
   export type DeckDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10888,6 +11092,1059 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: DeckInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CollectedDeck
+   */
+
+  export type AggregateCollectedDeck = {
+    _count: CollectedDeckCountAggregateOutputType | null
+    _min: CollectedDeckMinAggregateOutputType | null
+    _max: CollectedDeckMaxAggregateOutputType | null
+  }
+
+  export type CollectedDeckMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    deckId: string | null
+    createdAt: Date | null
+  }
+
+  export type CollectedDeckMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    deckId: string | null
+    createdAt: Date | null
+  }
+
+  export type CollectedDeckCountAggregateOutputType = {
+    id: number
+    userId: number
+    deckId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type CollectedDeckMinAggregateInputType = {
+    id?: true
+    userId?: true
+    deckId?: true
+    createdAt?: true
+  }
+
+  export type CollectedDeckMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    deckId?: true
+    createdAt?: true
+  }
+
+  export type CollectedDeckCountAggregateInputType = {
+    id?: true
+    userId?: true
+    deckId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type CollectedDeckAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CollectedDeck to aggregate.
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CollectedDecks to fetch.
+     */
+    orderBy?: CollectedDeckOrderByWithRelationInput | CollectedDeckOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CollectedDeckWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CollectedDecks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CollectedDecks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CollectedDecks
+    **/
+    _count?: true | CollectedDeckCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CollectedDeckMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CollectedDeckMaxAggregateInputType
+  }
+
+  export type GetCollectedDeckAggregateType<T extends CollectedDeckAggregateArgs> = {
+        [P in keyof T & keyof AggregateCollectedDeck]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCollectedDeck[P]>
+      : GetScalarType<T[P], AggregateCollectedDeck[P]>
+  }
+
+
+
+
+  export type CollectedDeckGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CollectedDeckWhereInput
+    orderBy?: CollectedDeckOrderByWithAggregationInput | CollectedDeckOrderByWithAggregationInput[]
+    by: CollectedDeckScalarFieldEnum[] | CollectedDeckScalarFieldEnum
+    having?: CollectedDeckScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CollectedDeckCountAggregateInputType | true
+    _min?: CollectedDeckMinAggregateInputType
+    _max?: CollectedDeckMaxAggregateInputType
+  }
+
+  export type CollectedDeckGroupByOutputType = {
+    id: string
+    userId: string
+    deckId: string
+    createdAt: Date
+    _count: CollectedDeckCountAggregateOutputType | null
+    _min: CollectedDeckMinAggregateOutputType | null
+    _max: CollectedDeckMaxAggregateOutputType | null
+  }
+
+  type GetCollectedDeckGroupByPayload<T extends CollectedDeckGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CollectedDeckGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CollectedDeckGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CollectedDeckGroupByOutputType[P]>
+            : GetScalarType<T[P], CollectedDeckGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CollectedDeckSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    deckId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    deck?: boolean | DeckDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["collectedDeck"]>
+
+  export type CollectedDeckSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    deckId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    deck?: boolean | DeckDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["collectedDeck"]>
+
+  export type CollectedDeckSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    deckId?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    deck?: boolean | DeckDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["collectedDeck"]>
+
+  export type CollectedDeckSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    deckId?: boolean
+    createdAt?: boolean
+  }
+
+  export type CollectedDeckOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "deckId" | "createdAt", ExtArgs["result"]["collectedDeck"]>
+  export type CollectedDeckInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    deck?: boolean | DeckDefaultArgs<ExtArgs>
+  }
+  export type CollectedDeckIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    deck?: boolean | DeckDefaultArgs<ExtArgs>
+  }
+  export type CollectedDeckIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    deck?: boolean | DeckDefaultArgs<ExtArgs>
+  }
+
+  export type $CollectedDeckPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CollectedDeck"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      deck: Prisma.$DeckPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      deckId: string
+      createdAt: Date
+    }, ExtArgs["result"]["collectedDeck"]>
+    composites: {}
+  }
+
+  type CollectedDeckGetPayload<S extends boolean | null | undefined | CollectedDeckDefaultArgs> = $Result.GetResult<Prisma.$CollectedDeckPayload, S>
+
+  type CollectedDeckCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CollectedDeckFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CollectedDeckCountAggregateInputType | true
+    }
+
+  export interface CollectedDeckDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CollectedDeck'], meta: { name: 'CollectedDeck' } }
+    /**
+     * Find zero or one CollectedDeck that matches the filter.
+     * @param {CollectedDeckFindUniqueArgs} args - Arguments to find a CollectedDeck
+     * @example
+     * // Get one CollectedDeck
+     * const collectedDeck = await prisma.collectedDeck.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CollectedDeckFindUniqueArgs>(args: SelectSubset<T, CollectedDeckFindUniqueArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CollectedDeck that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CollectedDeckFindUniqueOrThrowArgs} args - Arguments to find a CollectedDeck
+     * @example
+     * // Get one CollectedDeck
+     * const collectedDeck = await prisma.collectedDeck.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CollectedDeckFindUniqueOrThrowArgs>(args: SelectSubset<T, CollectedDeckFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CollectedDeck that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckFindFirstArgs} args - Arguments to find a CollectedDeck
+     * @example
+     * // Get one CollectedDeck
+     * const collectedDeck = await prisma.collectedDeck.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CollectedDeckFindFirstArgs>(args?: SelectSubset<T, CollectedDeckFindFirstArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CollectedDeck that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckFindFirstOrThrowArgs} args - Arguments to find a CollectedDeck
+     * @example
+     * // Get one CollectedDeck
+     * const collectedDeck = await prisma.collectedDeck.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CollectedDeckFindFirstOrThrowArgs>(args?: SelectSubset<T, CollectedDeckFindFirstOrThrowArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CollectedDecks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CollectedDecks
+     * const collectedDecks = await prisma.collectedDeck.findMany()
+     * 
+     * // Get first 10 CollectedDecks
+     * const collectedDecks = await prisma.collectedDeck.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const collectedDeckWithIdOnly = await prisma.collectedDeck.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CollectedDeckFindManyArgs>(args?: SelectSubset<T, CollectedDeckFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CollectedDeck.
+     * @param {CollectedDeckCreateArgs} args - Arguments to create a CollectedDeck.
+     * @example
+     * // Create one CollectedDeck
+     * const CollectedDeck = await prisma.collectedDeck.create({
+     *   data: {
+     *     // ... data to create a CollectedDeck
+     *   }
+     * })
+     * 
+     */
+    create<T extends CollectedDeckCreateArgs>(args: SelectSubset<T, CollectedDeckCreateArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CollectedDecks.
+     * @param {CollectedDeckCreateManyArgs} args - Arguments to create many CollectedDecks.
+     * @example
+     * // Create many CollectedDecks
+     * const collectedDeck = await prisma.collectedDeck.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CollectedDeckCreateManyArgs>(args?: SelectSubset<T, CollectedDeckCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CollectedDecks and returns the data saved in the database.
+     * @param {CollectedDeckCreateManyAndReturnArgs} args - Arguments to create many CollectedDecks.
+     * @example
+     * // Create many CollectedDecks
+     * const collectedDeck = await prisma.collectedDeck.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CollectedDecks and only return the `id`
+     * const collectedDeckWithIdOnly = await prisma.collectedDeck.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CollectedDeckCreateManyAndReturnArgs>(args?: SelectSubset<T, CollectedDeckCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CollectedDeck.
+     * @param {CollectedDeckDeleteArgs} args - Arguments to delete one CollectedDeck.
+     * @example
+     * // Delete one CollectedDeck
+     * const CollectedDeck = await prisma.collectedDeck.delete({
+     *   where: {
+     *     // ... filter to delete one CollectedDeck
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CollectedDeckDeleteArgs>(args: SelectSubset<T, CollectedDeckDeleteArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CollectedDeck.
+     * @param {CollectedDeckUpdateArgs} args - Arguments to update one CollectedDeck.
+     * @example
+     * // Update one CollectedDeck
+     * const collectedDeck = await prisma.collectedDeck.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CollectedDeckUpdateArgs>(args: SelectSubset<T, CollectedDeckUpdateArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CollectedDecks.
+     * @param {CollectedDeckDeleteManyArgs} args - Arguments to filter CollectedDecks to delete.
+     * @example
+     * // Delete a few CollectedDecks
+     * const { count } = await prisma.collectedDeck.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CollectedDeckDeleteManyArgs>(args?: SelectSubset<T, CollectedDeckDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CollectedDecks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CollectedDecks
+     * const collectedDeck = await prisma.collectedDeck.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CollectedDeckUpdateManyArgs>(args: SelectSubset<T, CollectedDeckUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CollectedDecks and returns the data updated in the database.
+     * @param {CollectedDeckUpdateManyAndReturnArgs} args - Arguments to update many CollectedDecks.
+     * @example
+     * // Update many CollectedDecks
+     * const collectedDeck = await prisma.collectedDeck.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CollectedDecks and only return the `id`
+     * const collectedDeckWithIdOnly = await prisma.collectedDeck.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CollectedDeckUpdateManyAndReturnArgs>(args: SelectSubset<T, CollectedDeckUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CollectedDeck.
+     * @param {CollectedDeckUpsertArgs} args - Arguments to update or create a CollectedDeck.
+     * @example
+     * // Update or create a CollectedDeck
+     * const collectedDeck = await prisma.collectedDeck.upsert({
+     *   create: {
+     *     // ... data to create a CollectedDeck
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CollectedDeck we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CollectedDeckUpsertArgs>(args: SelectSubset<T, CollectedDeckUpsertArgs<ExtArgs>>): Prisma__CollectedDeckClient<$Result.GetResult<Prisma.$CollectedDeckPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CollectedDecks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckCountArgs} args - Arguments to filter CollectedDecks to count.
+     * @example
+     * // Count the number of CollectedDecks
+     * const count = await prisma.collectedDeck.count({
+     *   where: {
+     *     // ... the filter for the CollectedDecks we want to count
+     *   }
+     * })
+    **/
+    count<T extends CollectedDeckCountArgs>(
+      args?: Subset<T, CollectedDeckCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CollectedDeckCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CollectedDeck.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CollectedDeckAggregateArgs>(args: Subset<T, CollectedDeckAggregateArgs>): Prisma.PrismaPromise<GetCollectedDeckAggregateType<T>>
+
+    /**
+     * Group by CollectedDeck.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CollectedDeckGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CollectedDeckGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CollectedDeckGroupByArgs['orderBy'] }
+        : { orderBy?: CollectedDeckGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CollectedDeckGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCollectedDeckGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CollectedDeck model
+   */
+  readonly fields: CollectedDeckFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CollectedDeck.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CollectedDeckClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    deck<T extends DeckDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DeckDefaultArgs<ExtArgs>>): Prisma__DeckClient<$Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CollectedDeck model
+   */
+  interface CollectedDeckFieldRefs {
+    readonly id: FieldRef<"CollectedDeck", 'String'>
+    readonly userId: FieldRef<"CollectedDeck", 'String'>
+    readonly deckId: FieldRef<"CollectedDeck", 'String'>
+    readonly createdAt: FieldRef<"CollectedDeck", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CollectedDeck findUnique
+   */
+  export type CollectedDeckFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * Filter, which CollectedDeck to fetch.
+     */
+    where: CollectedDeckWhereUniqueInput
+  }
+
+  /**
+   * CollectedDeck findUniqueOrThrow
+   */
+  export type CollectedDeckFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * Filter, which CollectedDeck to fetch.
+     */
+    where: CollectedDeckWhereUniqueInput
+  }
+
+  /**
+   * CollectedDeck findFirst
+   */
+  export type CollectedDeckFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * Filter, which CollectedDeck to fetch.
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CollectedDecks to fetch.
+     */
+    orderBy?: CollectedDeckOrderByWithRelationInput | CollectedDeckOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CollectedDecks.
+     */
+    cursor?: CollectedDeckWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CollectedDecks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CollectedDecks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CollectedDecks.
+     */
+    distinct?: CollectedDeckScalarFieldEnum | CollectedDeckScalarFieldEnum[]
+  }
+
+  /**
+   * CollectedDeck findFirstOrThrow
+   */
+  export type CollectedDeckFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * Filter, which CollectedDeck to fetch.
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CollectedDecks to fetch.
+     */
+    orderBy?: CollectedDeckOrderByWithRelationInput | CollectedDeckOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CollectedDecks.
+     */
+    cursor?: CollectedDeckWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CollectedDecks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CollectedDecks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CollectedDecks.
+     */
+    distinct?: CollectedDeckScalarFieldEnum | CollectedDeckScalarFieldEnum[]
+  }
+
+  /**
+   * CollectedDeck findMany
+   */
+  export type CollectedDeckFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * Filter, which CollectedDecks to fetch.
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CollectedDecks to fetch.
+     */
+    orderBy?: CollectedDeckOrderByWithRelationInput | CollectedDeckOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CollectedDecks.
+     */
+    cursor?: CollectedDeckWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CollectedDecks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CollectedDecks.
+     */
+    skip?: number
+    distinct?: CollectedDeckScalarFieldEnum | CollectedDeckScalarFieldEnum[]
+  }
+
+  /**
+   * CollectedDeck create
+   */
+  export type CollectedDeckCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CollectedDeck.
+     */
+    data: XOR<CollectedDeckCreateInput, CollectedDeckUncheckedCreateInput>
+  }
+
+  /**
+   * CollectedDeck createMany
+   */
+  export type CollectedDeckCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CollectedDecks.
+     */
+    data: CollectedDeckCreateManyInput | CollectedDeckCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CollectedDeck createManyAndReturn
+   */
+  export type CollectedDeckCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * The data used to create many CollectedDecks.
+     */
+    data: CollectedDeckCreateManyInput | CollectedDeckCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CollectedDeck update
+   */
+  export type CollectedDeckUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CollectedDeck.
+     */
+    data: XOR<CollectedDeckUpdateInput, CollectedDeckUncheckedUpdateInput>
+    /**
+     * Choose, which CollectedDeck to update.
+     */
+    where: CollectedDeckWhereUniqueInput
+  }
+
+  /**
+   * CollectedDeck updateMany
+   */
+  export type CollectedDeckUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CollectedDecks.
+     */
+    data: XOR<CollectedDeckUpdateManyMutationInput, CollectedDeckUncheckedUpdateManyInput>
+    /**
+     * Filter which CollectedDecks to update
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * Limit how many CollectedDecks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CollectedDeck updateManyAndReturn
+   */
+  export type CollectedDeckUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * The data used to update CollectedDecks.
+     */
+    data: XOR<CollectedDeckUpdateManyMutationInput, CollectedDeckUncheckedUpdateManyInput>
+    /**
+     * Filter which CollectedDecks to update
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * Limit how many CollectedDecks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CollectedDeck upsert
+   */
+  export type CollectedDeckUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CollectedDeck to update in case it exists.
+     */
+    where: CollectedDeckWhereUniqueInput
+    /**
+     * In case the CollectedDeck found by the `where` argument doesn't exist, create a new CollectedDeck with this data.
+     */
+    create: XOR<CollectedDeckCreateInput, CollectedDeckUncheckedCreateInput>
+    /**
+     * In case the CollectedDeck was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CollectedDeckUpdateInput, CollectedDeckUncheckedUpdateInput>
+  }
+
+  /**
+   * CollectedDeck delete
+   */
+  export type CollectedDeckDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
+    /**
+     * Filter which CollectedDeck to delete.
+     */
+    where: CollectedDeckWhereUniqueInput
+  }
+
+  /**
+   * CollectedDeck deleteMany
+   */
+  export type CollectedDeckDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CollectedDecks to delete
+     */
+    where?: CollectedDeckWhereInput
+    /**
+     * Limit how many CollectedDecks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CollectedDeck without action
+   */
+  export type CollectedDeckDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CollectedDeck
+     */
+    select?: CollectedDeckSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CollectedDeck
+     */
+    omit?: CollectedDeckOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectedDeckInclude<ExtArgs> | null
   }
 
 
@@ -14948,11 +16205,24 @@ export namespace Prisma {
     userId: 'userId',
     name: 'name',
     coverImageUrl: 'coverImageUrl',
+    isPublic: 'isPublic',
+    shareToken: 'shareToken',
+    description: 'description',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type DeckScalarFieldEnum = (typeof DeckScalarFieldEnum)[keyof typeof DeckScalarFieldEnum]
+
+
+  export const CollectedDeckScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    deckId: 'deckId',
+    createdAt: 'createdAt'
+  };
+
+  export type CollectedDeckScalarFieldEnum = (typeof CollectedDeckScalarFieldEnum)[keyof typeof CollectedDeckScalarFieldEnum]
 
 
   export const CardScalarFieldEnum: {
@@ -15165,6 +16435,7 @@ export namespace Prisma {
     orders?: OrderListRelationFilter
     cards?: CardListRelationFilter
     decks?: DeckListRelationFilter
+    collectedDecks?: CollectedDeckListRelationFilter
     sources?: SourceListRelationFilter
     sourceFolders?: SourceFolderListRelationFilter
   }
@@ -15187,6 +16458,7 @@ export namespace Prisma {
     orders?: OrderOrderByRelationAggregateInput
     cards?: CardOrderByRelationAggregateInput
     decks?: DeckOrderByRelationAggregateInput
+    collectedDecks?: CollectedDeckOrderByRelationAggregateInput
     sources?: SourceOrderByRelationAggregateInput
     sourceFolders?: SourceFolderOrderByRelationAggregateInput
   }
@@ -15212,6 +16484,7 @@ export namespace Prisma {
     orders?: OrderListRelationFilter
     cards?: CardListRelationFilter
     decks?: DeckListRelationFilter
+    collectedDecks?: CollectedDeckListRelationFilter
     sources?: SourceListRelationFilter
     sourceFolders?: SourceFolderListRelationFilter
   }, "id" | "email" | "anonymousId">
@@ -15637,12 +16910,16 @@ export namespace Prisma {
     userId?: StringFilter<"Deck"> | string
     name?: StringFilter<"Deck"> | string
     coverImageUrl?: StringNullableFilter<"Deck"> | string | null
+    isPublic?: BoolFilter<"Deck"> | boolean
+    shareToken?: StringNullableFilter<"Deck"> | string | null
+    description?: StringNullableFilter<"Deck"> | string | null
     createdAt?: DateTimeFilter<"Deck"> | Date | string
     updatedAt?: DateTimeFilter<"Deck"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     cards?: CardListRelationFilter
     sources?: SourceListRelationFilter
     folders?: SourceFolderListRelationFilter
+    collections?: CollectedDeckListRelationFilter
   }
 
   export type DeckOrderByWithRelationInput = {
@@ -15650,16 +16927,21 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     coverImageUrl?: SortOrderInput | SortOrder
+    isPublic?: SortOrder
+    shareToken?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     cards?: CardOrderByRelationAggregateInput
     sources?: SourceOrderByRelationAggregateInput
     folders?: SourceFolderOrderByRelationAggregateInput
+    collections?: CollectedDeckOrderByRelationAggregateInput
   }
 
   export type DeckWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    shareToken?: string
     userId_name?: DeckUserIdNameCompoundUniqueInput
     AND?: DeckWhereInput | DeckWhereInput[]
     OR?: DeckWhereInput[]
@@ -15667,19 +16949,25 @@ export namespace Prisma {
     userId?: StringFilter<"Deck"> | string
     name?: StringFilter<"Deck"> | string
     coverImageUrl?: StringNullableFilter<"Deck"> | string | null
+    isPublic?: BoolFilter<"Deck"> | boolean
+    description?: StringNullableFilter<"Deck"> | string | null
     createdAt?: DateTimeFilter<"Deck"> | Date | string
     updatedAt?: DateTimeFilter<"Deck"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     cards?: CardListRelationFilter
     sources?: SourceListRelationFilter
     folders?: SourceFolderListRelationFilter
-  }, "id" | "userId_name">
+    collections?: CollectedDeckListRelationFilter
+  }, "id" | "shareToken" | "userId_name">
 
   export type DeckOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
     name?: SortOrder
     coverImageUrl?: SortOrderInput | SortOrder
+    isPublic?: SortOrder
+    shareToken?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: DeckCountOrderByAggregateInput
@@ -15695,8 +16983,65 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Deck"> | string
     name?: StringWithAggregatesFilter<"Deck"> | string
     coverImageUrl?: StringNullableWithAggregatesFilter<"Deck"> | string | null
+    isPublic?: BoolWithAggregatesFilter<"Deck"> | boolean
+    shareToken?: StringNullableWithAggregatesFilter<"Deck"> | string | null
+    description?: StringNullableWithAggregatesFilter<"Deck"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Deck"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Deck"> | Date | string
+  }
+
+  export type CollectedDeckWhereInput = {
+    AND?: CollectedDeckWhereInput | CollectedDeckWhereInput[]
+    OR?: CollectedDeckWhereInput[]
+    NOT?: CollectedDeckWhereInput | CollectedDeckWhereInput[]
+    id?: StringFilter<"CollectedDeck"> | string
+    userId?: StringFilter<"CollectedDeck"> | string
+    deckId?: StringFilter<"CollectedDeck"> | string
+    createdAt?: DateTimeFilter<"CollectedDeck"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    deck?: XOR<DeckScalarRelationFilter, DeckWhereInput>
+  }
+
+  export type CollectedDeckOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deckId?: SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    deck?: DeckOrderByWithRelationInput
+  }
+
+  export type CollectedDeckWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_deckId?: CollectedDeckUserIdDeckIdCompoundUniqueInput
+    AND?: CollectedDeckWhereInput | CollectedDeckWhereInput[]
+    OR?: CollectedDeckWhereInput[]
+    NOT?: CollectedDeckWhereInput | CollectedDeckWhereInput[]
+    userId?: StringFilter<"CollectedDeck"> | string
+    deckId?: StringFilter<"CollectedDeck"> | string
+    createdAt?: DateTimeFilter<"CollectedDeck"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    deck?: XOR<DeckScalarRelationFilter, DeckWhereInput>
+  }, "id" | "userId_deckId">
+
+  export type CollectedDeckOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deckId?: SortOrder
+    createdAt?: SortOrder
+    _count?: CollectedDeckCountOrderByAggregateInput
+    _max?: CollectedDeckMaxOrderByAggregateInput
+    _min?: CollectedDeckMinOrderByAggregateInput
+  }
+
+  export type CollectedDeckScalarWhereWithAggregatesInput = {
+    AND?: CollectedDeckScalarWhereWithAggregatesInput | CollectedDeckScalarWhereWithAggregatesInput[]
+    OR?: CollectedDeckScalarWhereWithAggregatesInput[]
+    NOT?: CollectedDeckScalarWhereWithAggregatesInput | CollectedDeckScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CollectedDeck"> | string
+    userId?: StringWithAggregatesFilter<"CollectedDeck"> | string
+    deckId?: StringWithAggregatesFilter<"CollectedDeck"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"CollectedDeck"> | Date | string
   }
 
   export type CardWhereInput = {
@@ -16070,6 +17415,7 @@ export namespace Prisma {
     orders?: OrderCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
@@ -16092,6 +17438,7 @@ export namespace Prisma {
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -16114,6 +17461,7 @@ export namespace Prisma {
     orders?: OrderUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
@@ -16136,6 +17484,7 @@ export namespace Prisma {
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -16585,12 +17934,16 @@ export namespace Prisma {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutDecksInput
     cards?: CardCreateNestedManyWithoutDeckInput
     sources?: SourceCreateNestedManyWithoutDeckInput
     folders?: SourceFolderCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckCreateNestedManyWithoutDeckInput
   }
 
   export type DeckUncheckedCreateInput = {
@@ -16598,23 +17951,31 @@ export namespace Prisma {
     userId: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cards?: CardUncheckedCreateNestedManyWithoutDeckInput
     sources?: SourceUncheckedCreateNestedManyWithoutDeckInput
     folders?: SourceFolderUncheckedCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckUncheckedCreateNestedManyWithoutDeckInput
   }
 
   export type DeckUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutDecksNestedInput
     cards?: CardUpdateManyWithoutDeckNestedInput
     sources?: SourceUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckUncheckedUpdateInput = {
@@ -16622,11 +17983,15 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cards?: CardUncheckedUpdateManyWithoutDeckNestedInput
     sources?: SourceUncheckedUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUncheckedUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUncheckedUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckCreateManyInput = {
@@ -16634,6 +17999,9 @@ export namespace Prisma {
     userId: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -16642,6 +18010,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16651,8 +18022,58 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutCollectedDecksInput
+    deck: DeckCreateNestedOneWithoutCollectionsInput
+  }
+
+  export type CollectedDeckUncheckedCreateInput = {
+    id?: string
+    userId: string
+    deckId: string
+    createdAt?: Date | string
+  }
+
+  export type CollectedDeckUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutCollectedDecksNestedInput
+    deck?: DeckUpdateOneRequiredWithoutCollectionsNestedInput
+  }
+
+  export type CollectedDeckUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    deckId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckCreateManyInput = {
+    id?: string
+    userId: string
+    deckId: string
+    createdAt?: Date | string
+  }
+
+  export type CollectedDeckUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    deckId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CardCreateInput = {
@@ -17137,6 +18558,12 @@ export namespace Prisma {
     none?: DeckWhereInput
   }
 
+  export type CollectedDeckListRelationFilter = {
+    every?: CollectedDeckWhereInput
+    some?: CollectedDeckWhereInput
+    none?: CollectedDeckWhereInput
+  }
+
   export type SourceListRelationFilter = {
     every?: SourceWhereInput
     some?: SourceWhereInput
@@ -17171,6 +18598,10 @@ export namespace Prisma {
   }
 
   export type DeckOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CollectedDeckOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -17604,6 +19035,9 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     coverImageUrl?: SortOrder
+    isPublic?: SortOrder
+    shareToken?: SortOrder
+    description?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17613,6 +19047,9 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     coverImageUrl?: SortOrder
+    isPublic?: SortOrder
+    shareToken?: SortOrder
+    description?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17622,8 +19059,42 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     coverImageUrl?: SortOrder
+    isPublic?: SortOrder
+    shareToken?: SortOrder
+    description?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type DeckScalarRelationFilter = {
+    is?: DeckWhereInput
+    isNot?: DeckWhereInput
+  }
+
+  export type CollectedDeckUserIdDeckIdCompoundUniqueInput = {
+    userId: string
+    deckId: string
+  }
+
+  export type CollectedDeckCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deckId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CollectedDeckMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deckId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CollectedDeckMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deckId?: SortOrder
+    createdAt?: SortOrder
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -17922,6 +19393,13 @@ export namespace Prisma {
     connect?: DeckWhereUniqueInput | DeckWhereUniqueInput[]
   }
 
+  export type CollectedDeckCreateNestedManyWithoutUserInput = {
+    create?: XOR<CollectedDeckCreateWithoutUserInput, CollectedDeckUncheckedCreateWithoutUserInput> | CollectedDeckCreateWithoutUserInput[] | CollectedDeckUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutUserInput | CollectedDeckCreateOrConnectWithoutUserInput[]
+    createMany?: CollectedDeckCreateManyUserInputEnvelope
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+  }
+
   export type SourceCreateNestedManyWithoutUserInput = {
     create?: XOR<SourceCreateWithoutUserInput, SourceUncheckedCreateWithoutUserInput> | SourceCreateWithoutUserInput[] | SourceUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SourceCreateOrConnectWithoutUserInput | SourceCreateOrConnectWithoutUserInput[]
@@ -17969,6 +19447,13 @@ export namespace Prisma {
     connectOrCreate?: DeckCreateOrConnectWithoutUserInput | DeckCreateOrConnectWithoutUserInput[]
     createMany?: DeckCreateManyUserInputEnvelope
     connect?: DeckWhereUniqueInput | DeckWhereUniqueInput[]
+  }
+
+  export type CollectedDeckUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<CollectedDeckCreateWithoutUserInput, CollectedDeckUncheckedCreateWithoutUserInput> | CollectedDeckCreateWithoutUserInput[] | CollectedDeckUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutUserInput | CollectedDeckCreateOrConnectWithoutUserInput[]
+    createMany?: CollectedDeckCreateManyUserInputEnvelope
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
   }
 
   export type SourceUncheckedCreateNestedManyWithoutUserInput = {
@@ -18083,6 +19568,20 @@ export namespace Prisma {
     deleteMany?: DeckScalarWhereInput | DeckScalarWhereInput[]
   }
 
+  export type CollectedDeckUpdateManyWithoutUserNestedInput = {
+    create?: XOR<CollectedDeckCreateWithoutUserInput, CollectedDeckUncheckedCreateWithoutUserInput> | CollectedDeckCreateWithoutUserInput[] | CollectedDeckUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutUserInput | CollectedDeckCreateOrConnectWithoutUserInput[]
+    upsert?: CollectedDeckUpsertWithWhereUniqueWithoutUserInput | CollectedDeckUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: CollectedDeckCreateManyUserInputEnvelope
+    set?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    disconnect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    delete?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    update?: CollectedDeckUpdateWithWhereUniqueWithoutUserInput | CollectedDeckUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: CollectedDeckUpdateManyWithWhereWithoutUserInput | CollectedDeckUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: CollectedDeckScalarWhereInput | CollectedDeckScalarWhereInput[]
+  }
+
   export type SourceUpdateManyWithoutUserNestedInput = {
     create?: XOR<SourceCreateWithoutUserInput, SourceUncheckedCreateWithoutUserInput> | SourceCreateWithoutUserInput[] | SourceUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SourceCreateOrConnectWithoutUserInput | SourceCreateOrConnectWithoutUserInput[]
@@ -18179,6 +19678,20 @@ export namespace Prisma {
     update?: DeckUpdateWithWhereUniqueWithoutUserInput | DeckUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: DeckUpdateManyWithWhereWithoutUserInput | DeckUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: DeckScalarWhereInput | DeckScalarWhereInput[]
+  }
+
+  export type CollectedDeckUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<CollectedDeckCreateWithoutUserInput, CollectedDeckUncheckedCreateWithoutUserInput> | CollectedDeckCreateWithoutUserInput[] | CollectedDeckUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutUserInput | CollectedDeckCreateOrConnectWithoutUserInput[]
+    upsert?: CollectedDeckUpsertWithWhereUniqueWithoutUserInput | CollectedDeckUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: CollectedDeckCreateManyUserInputEnvelope
+    set?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    disconnect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    delete?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    update?: CollectedDeckUpdateWithWhereUniqueWithoutUserInput | CollectedDeckUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: CollectedDeckUpdateManyWithWhereWithoutUserInput | CollectedDeckUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: CollectedDeckScalarWhereInput | CollectedDeckScalarWhereInput[]
   }
 
   export type SourceUncheckedUpdateManyWithoutUserNestedInput = {
@@ -18294,6 +19807,13 @@ export namespace Prisma {
     connect?: SourceFolderWhereUniqueInput | SourceFolderWhereUniqueInput[]
   }
 
+  export type CollectedDeckCreateNestedManyWithoutDeckInput = {
+    create?: XOR<CollectedDeckCreateWithoutDeckInput, CollectedDeckUncheckedCreateWithoutDeckInput> | CollectedDeckCreateWithoutDeckInput[] | CollectedDeckUncheckedCreateWithoutDeckInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutDeckInput | CollectedDeckCreateOrConnectWithoutDeckInput[]
+    createMany?: CollectedDeckCreateManyDeckInputEnvelope
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+  }
+
   export type CardUncheckedCreateNestedManyWithoutDeckInput = {
     create?: XOR<CardCreateWithoutDeckInput, CardUncheckedCreateWithoutDeckInput> | CardCreateWithoutDeckInput[] | CardUncheckedCreateWithoutDeckInput[]
     connectOrCreate?: CardCreateOrConnectWithoutDeckInput | CardCreateOrConnectWithoutDeckInput[]
@@ -18313,6 +19833,13 @@ export namespace Prisma {
     connectOrCreate?: SourceFolderCreateOrConnectWithoutDeckInput | SourceFolderCreateOrConnectWithoutDeckInput[]
     createMany?: SourceFolderCreateManyDeckInputEnvelope
     connect?: SourceFolderWhereUniqueInput | SourceFolderWhereUniqueInput[]
+  }
+
+  export type CollectedDeckUncheckedCreateNestedManyWithoutDeckInput = {
+    create?: XOR<CollectedDeckCreateWithoutDeckInput, CollectedDeckUncheckedCreateWithoutDeckInput> | CollectedDeckCreateWithoutDeckInput[] | CollectedDeckUncheckedCreateWithoutDeckInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutDeckInput | CollectedDeckCreateOrConnectWithoutDeckInput[]
+    createMany?: CollectedDeckCreateManyDeckInputEnvelope
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutDecksNestedInput = {
@@ -18365,6 +19892,20 @@ export namespace Prisma {
     deleteMany?: SourceFolderScalarWhereInput | SourceFolderScalarWhereInput[]
   }
 
+  export type CollectedDeckUpdateManyWithoutDeckNestedInput = {
+    create?: XOR<CollectedDeckCreateWithoutDeckInput, CollectedDeckUncheckedCreateWithoutDeckInput> | CollectedDeckCreateWithoutDeckInput[] | CollectedDeckUncheckedCreateWithoutDeckInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutDeckInput | CollectedDeckCreateOrConnectWithoutDeckInput[]
+    upsert?: CollectedDeckUpsertWithWhereUniqueWithoutDeckInput | CollectedDeckUpsertWithWhereUniqueWithoutDeckInput[]
+    createMany?: CollectedDeckCreateManyDeckInputEnvelope
+    set?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    disconnect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    delete?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    update?: CollectedDeckUpdateWithWhereUniqueWithoutDeckInput | CollectedDeckUpdateWithWhereUniqueWithoutDeckInput[]
+    updateMany?: CollectedDeckUpdateManyWithWhereWithoutDeckInput | CollectedDeckUpdateManyWithWhereWithoutDeckInput[]
+    deleteMany?: CollectedDeckScalarWhereInput | CollectedDeckScalarWhereInput[]
+  }
+
   export type CardUncheckedUpdateManyWithoutDeckNestedInput = {
     create?: XOR<CardCreateWithoutDeckInput, CardUncheckedCreateWithoutDeckInput> | CardCreateWithoutDeckInput[] | CardUncheckedCreateWithoutDeckInput[]
     connectOrCreate?: CardCreateOrConnectWithoutDeckInput | CardCreateOrConnectWithoutDeckInput[]
@@ -18405,6 +19946,48 @@ export namespace Prisma {
     update?: SourceFolderUpdateWithWhereUniqueWithoutDeckInput | SourceFolderUpdateWithWhereUniqueWithoutDeckInput[]
     updateMany?: SourceFolderUpdateManyWithWhereWithoutDeckInput | SourceFolderUpdateManyWithWhereWithoutDeckInput[]
     deleteMany?: SourceFolderScalarWhereInput | SourceFolderScalarWhereInput[]
+  }
+
+  export type CollectedDeckUncheckedUpdateManyWithoutDeckNestedInput = {
+    create?: XOR<CollectedDeckCreateWithoutDeckInput, CollectedDeckUncheckedCreateWithoutDeckInput> | CollectedDeckCreateWithoutDeckInput[] | CollectedDeckUncheckedCreateWithoutDeckInput[]
+    connectOrCreate?: CollectedDeckCreateOrConnectWithoutDeckInput | CollectedDeckCreateOrConnectWithoutDeckInput[]
+    upsert?: CollectedDeckUpsertWithWhereUniqueWithoutDeckInput | CollectedDeckUpsertWithWhereUniqueWithoutDeckInput[]
+    createMany?: CollectedDeckCreateManyDeckInputEnvelope
+    set?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    disconnect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    delete?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    connect?: CollectedDeckWhereUniqueInput | CollectedDeckWhereUniqueInput[]
+    update?: CollectedDeckUpdateWithWhereUniqueWithoutDeckInput | CollectedDeckUpdateWithWhereUniqueWithoutDeckInput[]
+    updateMany?: CollectedDeckUpdateManyWithWhereWithoutDeckInput | CollectedDeckUpdateManyWithWhereWithoutDeckInput[]
+    deleteMany?: CollectedDeckScalarWhereInput | CollectedDeckScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutCollectedDecksInput = {
+    create?: XOR<UserCreateWithoutCollectedDecksInput, UserUncheckedCreateWithoutCollectedDecksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCollectedDecksInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type DeckCreateNestedOneWithoutCollectionsInput = {
+    create?: XOR<DeckCreateWithoutCollectionsInput, DeckUncheckedCreateWithoutCollectionsInput>
+    connectOrCreate?: DeckCreateOrConnectWithoutCollectionsInput
+    connect?: DeckWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutCollectedDecksNestedInput = {
+    create?: XOR<UserCreateWithoutCollectedDecksInput, UserUncheckedCreateWithoutCollectedDecksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCollectedDecksInput
+    upsert?: UserUpsertWithoutCollectedDecksInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCollectedDecksInput, UserUpdateWithoutCollectedDecksInput>, UserUncheckedUpdateWithoutCollectedDecksInput>
+  }
+
+  export type DeckUpdateOneRequiredWithoutCollectionsNestedInput = {
+    create?: XOR<DeckCreateWithoutCollectionsInput, DeckUncheckedCreateWithoutCollectionsInput>
+    connectOrCreate?: DeckCreateOrConnectWithoutCollectionsInput
+    upsert?: DeckUpsertWithoutCollectionsInput
+    connect?: DeckWhereUniqueInput
+    update?: XOR<XOR<DeckUpdateToOneWithWhereWithoutCollectionsInput, DeckUpdateWithoutCollectionsInput>, DeckUncheckedUpdateWithoutCollectionsInput>
   }
 
   export type CardCreatetagsInput = {
@@ -19132,22 +20715,30 @@ export namespace Prisma {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cards?: CardCreateNestedManyWithoutDeckInput
     sources?: SourceCreateNestedManyWithoutDeckInput
     folders?: SourceFolderCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckCreateNestedManyWithoutDeckInput
   }
 
   export type DeckUncheckedCreateWithoutUserInput = {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cards?: CardUncheckedCreateNestedManyWithoutDeckInput
     sources?: SourceUncheckedCreateNestedManyWithoutDeckInput
     folders?: SourceFolderUncheckedCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckUncheckedCreateNestedManyWithoutDeckInput
   }
 
   export type DeckCreateOrConnectWithoutUserInput = {
@@ -19157,6 +20748,28 @@ export namespace Prisma {
 
   export type DeckCreateManyUserInputEnvelope = {
     data: DeckCreateManyUserInput | DeckCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CollectedDeckCreateWithoutUserInput = {
+    id?: string
+    createdAt?: Date | string
+    deck: DeckCreateNestedOneWithoutCollectionsInput
+  }
+
+  export type CollectedDeckUncheckedCreateWithoutUserInput = {
+    id?: string
+    deckId: string
+    createdAt?: Date | string
+  }
+
+  export type CollectedDeckCreateOrConnectWithoutUserInput = {
+    where: CollectedDeckWhereUniqueInput
+    create: XOR<CollectedDeckCreateWithoutUserInput, CollectedDeckUncheckedCreateWithoutUserInput>
+  }
+
+  export type CollectedDeckCreateManyUserInputEnvelope = {
+    data: CollectedDeckCreateManyUserInput | CollectedDeckCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -19401,8 +21014,37 @@ export namespace Prisma {
     userId?: StringFilter<"Deck"> | string
     name?: StringFilter<"Deck"> | string
     coverImageUrl?: StringNullableFilter<"Deck"> | string | null
+    isPublic?: BoolFilter<"Deck"> | boolean
+    shareToken?: StringNullableFilter<"Deck"> | string | null
+    description?: StringNullableFilter<"Deck"> | string | null
     createdAt?: DateTimeFilter<"Deck"> | Date | string
     updatedAt?: DateTimeFilter<"Deck"> | Date | string
+  }
+
+  export type CollectedDeckUpsertWithWhereUniqueWithoutUserInput = {
+    where: CollectedDeckWhereUniqueInput
+    update: XOR<CollectedDeckUpdateWithoutUserInput, CollectedDeckUncheckedUpdateWithoutUserInput>
+    create: XOR<CollectedDeckCreateWithoutUserInput, CollectedDeckUncheckedCreateWithoutUserInput>
+  }
+
+  export type CollectedDeckUpdateWithWhereUniqueWithoutUserInput = {
+    where: CollectedDeckWhereUniqueInput
+    data: XOR<CollectedDeckUpdateWithoutUserInput, CollectedDeckUncheckedUpdateWithoutUserInput>
+  }
+
+  export type CollectedDeckUpdateManyWithWhereWithoutUserInput = {
+    where: CollectedDeckScalarWhereInput
+    data: XOR<CollectedDeckUpdateManyMutationInput, CollectedDeckUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type CollectedDeckScalarWhereInput = {
+    AND?: CollectedDeckScalarWhereInput | CollectedDeckScalarWhereInput[]
+    OR?: CollectedDeckScalarWhereInput[]
+    NOT?: CollectedDeckScalarWhereInput | CollectedDeckScalarWhereInput[]
+    id?: StringFilter<"CollectedDeck"> | string
+    userId?: StringFilter<"CollectedDeck"> | string
+    deckId?: StringFilter<"CollectedDeck"> | string
+    createdAt?: DateTimeFilter<"CollectedDeck"> | Date | string
   }
 
   export type SourceUpsertWithWhereUniqueWithoutUserInput = {
@@ -19489,6 +21131,7 @@ export namespace Prisma {
     orders?: OrderCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
@@ -19510,6 +21153,7 @@ export namespace Prisma {
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -19547,6 +21191,7 @@ export namespace Prisma {
     orders?: OrderUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
@@ -19568,6 +21213,7 @@ export namespace Prisma {
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -19589,6 +21235,7 @@ export namespace Prisma {
     orders?: OrderCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
@@ -19610,6 +21257,7 @@ export namespace Prisma {
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -19647,6 +21295,7 @@ export namespace Prisma {
     orders?: OrderUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
@@ -19668,6 +21317,7 @@ export namespace Prisma {
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -19689,6 +21339,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
@@ -19710,6 +21361,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -19747,6 +21399,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
@@ -19768,6 +21421,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -19789,6 +21443,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
@@ -19810,6 +21465,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -19959,6 +21615,28 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CollectedDeckCreateWithoutDeckInput = {
+    id?: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutCollectedDecksInput
+  }
+
+  export type CollectedDeckUncheckedCreateWithoutDeckInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type CollectedDeckCreateOrConnectWithoutDeckInput = {
+    where: CollectedDeckWhereUniqueInput
+    create: XOR<CollectedDeckCreateWithoutDeckInput, CollectedDeckUncheckedCreateWithoutDeckInput>
+  }
+
+  export type CollectedDeckCreateManyDeckInputEnvelope = {
+    data: CollectedDeckCreateManyDeckInput | CollectedDeckCreateManyDeckInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutDecksInput = {
     update: XOR<UserUpdateWithoutDecksInput, UserUncheckedUpdateWithoutDecksInput>
     create: XOR<UserCreateWithoutDecksInput, UserUncheckedCreateWithoutDecksInput>
@@ -19987,6 +21665,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
@@ -20008,6 +21687,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -20060,6 +21740,202 @@ export namespace Prisma {
     data: XOR<SourceFolderUpdateManyMutationInput, SourceFolderUncheckedUpdateManyWithoutDeckInput>
   }
 
+  export type CollectedDeckUpsertWithWhereUniqueWithoutDeckInput = {
+    where: CollectedDeckWhereUniqueInput
+    update: XOR<CollectedDeckUpdateWithoutDeckInput, CollectedDeckUncheckedUpdateWithoutDeckInput>
+    create: XOR<CollectedDeckCreateWithoutDeckInput, CollectedDeckUncheckedCreateWithoutDeckInput>
+  }
+
+  export type CollectedDeckUpdateWithWhereUniqueWithoutDeckInput = {
+    where: CollectedDeckWhereUniqueInput
+    data: XOR<CollectedDeckUpdateWithoutDeckInput, CollectedDeckUncheckedUpdateWithoutDeckInput>
+  }
+
+  export type CollectedDeckUpdateManyWithWhereWithoutDeckInput = {
+    where: CollectedDeckScalarWhereInput
+    data: XOR<CollectedDeckUpdateManyMutationInput, CollectedDeckUncheckedUpdateManyWithoutDeckInput>
+  }
+
+  export type UserCreateWithoutCollectedDecksInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    password?: string | null
+    image?: string | null
+    credits?: number
+    isAnonymous?: boolean
+    anonymousId?: string | null
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    orders?: OrderCreateNestedManyWithoutUserInput
+    cards?: CardCreateNestedManyWithoutUserInput
+    decks?: DeckCreateNestedManyWithoutUserInput
+    sources?: SourceCreateNestedManyWithoutUserInput
+    sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutCollectedDecksInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    password?: string | null
+    image?: string | null
+    credits?: number
+    isAnonymous?: boolean
+    anonymousId?: string | null
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    orders?: OrderUncheckedCreateNestedManyWithoutUserInput
+    cards?: CardUncheckedCreateNestedManyWithoutUserInput
+    decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    sources?: SourceUncheckedCreateNestedManyWithoutUserInput
+    sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCollectedDecksInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCollectedDecksInput, UserUncheckedCreateWithoutCollectedDecksInput>
+  }
+
+  export type DeckCreateWithoutCollectionsInput = {
+    id?: string
+    name: string
+    coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDecksInput
+    cards?: CardCreateNestedManyWithoutDeckInput
+    sources?: SourceCreateNestedManyWithoutDeckInput
+    folders?: SourceFolderCreateNestedManyWithoutDeckInput
+  }
+
+  export type DeckUncheckedCreateWithoutCollectionsInput = {
+    id?: string
+    userId: string
+    name: string
+    coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cards?: CardUncheckedCreateNestedManyWithoutDeckInput
+    sources?: SourceUncheckedCreateNestedManyWithoutDeckInput
+    folders?: SourceFolderUncheckedCreateNestedManyWithoutDeckInput
+  }
+
+  export type DeckCreateOrConnectWithoutCollectionsInput = {
+    where: DeckWhereUniqueInput
+    create: XOR<DeckCreateWithoutCollectionsInput, DeckUncheckedCreateWithoutCollectionsInput>
+  }
+
+  export type UserUpsertWithoutCollectedDecksInput = {
+    update: XOR<UserUpdateWithoutCollectedDecksInput, UserUncheckedUpdateWithoutCollectedDecksInput>
+    create: XOR<UserCreateWithoutCollectedDecksInput, UserUncheckedCreateWithoutCollectedDecksInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCollectedDecksInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCollectedDecksInput, UserUncheckedUpdateWithoutCollectedDecksInput>
+  }
+
+  export type UserUpdateWithoutCollectedDecksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    credits?: FloatFieldUpdateOperationsInput | number
+    isAnonymous?: BoolFieldUpdateOperationsInput | boolean
+    anonymousId?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    orders?: OrderUpdateManyWithoutUserNestedInput
+    cards?: CardUpdateManyWithoutUserNestedInput
+    decks?: DeckUpdateManyWithoutUserNestedInput
+    sources?: SourceUpdateManyWithoutUserNestedInput
+    sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCollectedDecksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    credits?: FloatFieldUpdateOperationsInput | number
+    isAnonymous?: BoolFieldUpdateOperationsInput | boolean
+    anonymousId?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
+    cards?: CardUncheckedUpdateManyWithoutUserNestedInput
+    decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
+    sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type DeckUpsertWithoutCollectionsInput = {
+    update: XOR<DeckUpdateWithoutCollectionsInput, DeckUncheckedUpdateWithoutCollectionsInput>
+    create: XOR<DeckCreateWithoutCollectionsInput, DeckUncheckedCreateWithoutCollectionsInput>
+    where?: DeckWhereInput
+  }
+
+  export type DeckUpdateToOneWithWhereWithoutCollectionsInput = {
+    where?: DeckWhereInput
+    data: XOR<DeckUpdateWithoutCollectionsInput, DeckUncheckedUpdateWithoutCollectionsInput>
+  }
+
+  export type DeckUpdateWithoutCollectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDecksNestedInput
+    cards?: CardUpdateManyWithoutDeckNestedInput
+    sources?: SourceUpdateManyWithoutDeckNestedInput
+    folders?: SourceFolderUpdateManyWithoutDeckNestedInput
+  }
+
+  export type DeckUncheckedUpdateWithoutCollectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cards?: CardUncheckedUpdateManyWithoutDeckNestedInput
+    sources?: SourceUncheckedUpdateManyWithoutDeckNestedInput
+    folders?: SourceFolderUncheckedUpdateManyWithoutDeckNestedInput
+  }
+
   export type UserCreateWithoutCardsInput = {
     id?: string
     name?: string | null
@@ -20077,6 +21953,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
@@ -20098,6 +21975,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
@@ -20111,11 +21989,15 @@ export namespace Prisma {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutDecksInput
     sources?: SourceCreateNestedManyWithoutDeckInput
     folders?: SourceFolderCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckCreateNestedManyWithoutDeckInput
   }
 
   export type DeckUncheckedCreateWithoutCardsInput = {
@@ -20123,10 +22005,14 @@ export namespace Prisma {
     userId: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     sources?: SourceUncheckedCreateNestedManyWithoutDeckInput
     folders?: SourceFolderUncheckedCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckUncheckedCreateNestedManyWithoutDeckInput
   }
 
   export type DeckCreateOrConnectWithoutCardsInput = {
@@ -20207,6 +22093,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
@@ -20228,6 +22115,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -20247,11 +22135,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutDecksNestedInput
     sources?: SourceUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckUncheckedUpdateWithoutCardsInput = {
@@ -20259,10 +22151,14 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sources?: SourceUncheckedUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUncheckedUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUncheckedUpdateManyWithoutDeckNestedInput
   }
 
   export type SourceUpsertWithoutCardsInput = {
@@ -20334,6 +22230,7 @@ export namespace Prisma {
     orders?: OrderCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderCreateNestedManyWithoutUserInput
   }
 
@@ -20355,6 +22252,7 @@ export namespace Prisma {
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sourceFolders?: SourceFolderUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -20547,11 +22445,15 @@ export namespace Prisma {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutDecksInput
     cards?: CardCreateNestedManyWithoutDeckInput
     folders?: SourceFolderCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckCreateNestedManyWithoutDeckInput
   }
 
   export type DeckUncheckedCreateWithoutSourcesInput = {
@@ -20559,10 +22461,14 @@ export namespace Prisma {
     userId: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cards?: CardUncheckedCreateNestedManyWithoutDeckInput
     folders?: SourceFolderUncheckedCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckUncheckedCreateNestedManyWithoutDeckInput
   }
 
   export type DeckCreateOrConnectWithoutSourcesInput = {
@@ -20599,6 +22505,7 @@ export namespace Prisma {
     orders?: OrderUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUpdateManyWithoutUserNestedInput
   }
 
@@ -20620,6 +22527,7 @@ export namespace Prisma {
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sourceFolders?: SourceFolderUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -20754,11 +22662,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutDecksNestedInput
     cards?: CardUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckUncheckedUpdateWithoutSourcesInput = {
@@ -20766,10 +22678,14 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cards?: CardUncheckedUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUncheckedUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUncheckedUpdateManyWithoutDeckNestedInput
   }
 
   export type UserCreateWithoutSourceFoldersInput = {
@@ -20790,6 +22706,7 @@ export namespace Prisma {
     orders?: OrderCreateNestedManyWithoutUserInput
     cards?: CardCreateNestedManyWithoutUserInput
     decks?: DeckCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckCreateNestedManyWithoutUserInput
     sources?: SourceCreateNestedManyWithoutUserInput
   }
 
@@ -20811,6 +22728,7 @@ export namespace Prisma {
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     cards?: CardUncheckedCreateNestedManyWithoutUserInput
     decks?: DeckUncheckedCreateNestedManyWithoutUserInput
+    collectedDecks?: CollectedDeckUncheckedCreateNestedManyWithoutUserInput
     sources?: SourceUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -20882,11 +22800,15 @@ export namespace Prisma {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutDecksInput
     cards?: CardCreateNestedManyWithoutDeckInput
     sources?: SourceCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckCreateNestedManyWithoutDeckInput
   }
 
   export type DeckUncheckedCreateWithoutFoldersInput = {
@@ -20894,10 +22816,14 @@ export namespace Prisma {
     userId: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     cards?: CardUncheckedCreateNestedManyWithoutDeckInput
     sources?: SourceUncheckedCreateNestedManyWithoutDeckInput
+    collections?: CollectedDeckUncheckedCreateNestedManyWithoutDeckInput
   }
 
   export type DeckCreateOrConnectWithoutFoldersInput = {
@@ -20984,6 +22910,7 @@ export namespace Prisma {
     orders?: OrderUpdateManyWithoutUserNestedInput
     cards?: CardUpdateManyWithoutUserNestedInput
     decks?: DeckUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUpdateManyWithoutUserNestedInput
     sources?: SourceUpdateManyWithoutUserNestedInput
   }
 
@@ -21005,6 +22932,7 @@ export namespace Prisma {
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     cards?: CardUncheckedUpdateManyWithoutUserNestedInput
     decks?: DeckUncheckedUpdateManyWithoutUserNestedInput
+    collectedDecks?: CollectedDeckUncheckedUpdateManyWithoutUserNestedInput
     sources?: SourceUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -21072,11 +23000,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutDecksNestedInput
     cards?: CardUpdateManyWithoutDeckNestedInput
     sources?: SourceUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckUncheckedUpdateWithoutFoldersInput = {
@@ -21084,10 +23016,14 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cards?: CardUncheckedUpdateManyWithoutDeckNestedInput
     sources?: SourceUncheckedUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUncheckedUpdateManyWithoutDeckNestedInput
   }
 
   export type SourceUpsertWithWhereUniqueWithoutFolderInput = {
@@ -21165,8 +23101,17 @@ export namespace Prisma {
     id?: string
     name: string
     coverImageUrl?: string | null
+    isPublic?: boolean
+    shareToken?: string | null
+    description?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type CollectedDeckCreateManyUserInput = {
+    id?: string
+    deckId: string
+    createdAt?: Date | string
   }
 
   export type SourceCreateManyUserInput = {
@@ -21365,30 +23310,59 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cards?: CardUpdateManyWithoutDeckNestedInput
     sources?: SourceUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cards?: CardUncheckedUpdateManyWithoutDeckNestedInput
     sources?: SourceUncheckedUpdateManyWithoutDeckNestedInput
     folders?: SourceFolderUncheckedUpdateManyWithoutDeckNestedInput
+    collections?: CollectedDeckUncheckedUpdateManyWithoutDeckNestedInput
   }
 
   export type DeckUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     coverImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deck?: DeckUpdateOneRequiredWithoutCollectionsNestedInput
+  }
+
+  export type CollectedDeckUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deckId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deckId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SourceUpdateWithoutUserInput = {
@@ -21529,6 +23503,12 @@ export namespace Prisma {
     parentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type CollectedDeckCreateManyDeckInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
   }
 
   export type CardUpdateWithoutDeckInput = {
@@ -21690,6 +23670,24 @@ export namespace Prisma {
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckUpdateWithoutDeckInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutCollectedDecksNestedInput
+  }
+
+  export type CollectedDeckUncheckedUpdateWithoutDeckInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectedDeckUncheckedUpdateManyWithoutDeckInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SourceCreateManyParentSourceInput = {

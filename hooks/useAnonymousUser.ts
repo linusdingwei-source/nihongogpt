@@ -26,7 +26,9 @@ export function useAnonymousUser() {
 }
 
 /**
- * 获取请求头，包含临时用户 ID
+ * 获取请求头，包含临时用户 ID，并默认 `Content-Type: application/json`。
+ * 发送 FormData 时不要使用该默认头：先解构去掉 Content-Type，否则会覆盖
+ * 浏览器的 `multipart/form-data; boundary=...`，导致服务端误走 JSON 分支。
  */
 export function getAnonymousHeaders(): HeadersInit {
   const anonymousId = typeof window !== 'undefined' 

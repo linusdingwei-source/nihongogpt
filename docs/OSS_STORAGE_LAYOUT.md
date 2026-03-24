@@ -27,6 +27,7 @@
 
 ## 实现说明
 
-- 新上传（封面、新来源等）通过 `uploadToStorage(..., { pathPrefix: 'users/{userId}/{type}' })` 写入上述路径。
+- 路径前缀请使用 `userStoragePathPrefix(userId, 'sources' | 'covers' | 'audio')`（`lib/storage-path.ts`），再传给 `uploadToStorage(..., { pathPrefix })`。
+- 已接入：`/api/sources`（multipart 与文本）、`/api/upload/cover`、`/api/tts/generate-enhanced`（云存储上传分支）。
 - 历史数据可继续保留在原有路径（如顶层 `sources/`、`audio/`），不做迁移；新功能统一走 `users/{userId}/...`。
 - 按 `userId` 分目录便于后续做用量统计、按用户清理或合规导出。

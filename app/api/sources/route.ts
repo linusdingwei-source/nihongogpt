@@ -3,7 +3,11 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
-import { uploadToStorage, getSignedUrlForStorageUrl } from '@/lib/storage';
+import {
+  uploadToStorage,
+  getSignedUrlForStorageUrl,
+  userStoragePathPrefix,
+} from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -137,7 +141,7 @@ export async function POST(request: NextRequest) {
           buffer,
           filename,
           file.type,
-          { pathPrefix: 'sources' }
+          { pathPrefix: userStoragePathPrefix(userId, 'sources') }
         );
         contentUrl = uploadResult.url;
         console.log(`[POST /api/sources] Upload success: ${contentUrl}`);
@@ -210,7 +214,7 @@ export async function POST(request: NextRequest) {
     // 将文本内容转换为 Buffer 并上传到 Vercel Blob Storage
     const contentBuffer = Buffer.from(content, 'utf-8');
     const timestamp = Date.now();
-    const filename = `sources/${timestamp}-${name.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    const filename = `${timestamp}-${name.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
 
     let contentUrl: string | null = null;
     try {
@@ -218,7 +222,7 @@ export async function POST(request: NextRequest) {
         contentBuffer,
         filename,
         'text/plain; charset=utf-8',
-        { pathPrefix: 'sources' }
+        { pathPrefix: userStoragePathPrefix(userId, 'sources') }
       );
       contentUrl = uploadResult.url;
     } catch (uploadError) {

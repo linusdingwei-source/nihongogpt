@@ -117,11 +117,14 @@ export async function POST(request: NextRequest) {
             }
             
             // 上传到云存储
-            const { uploadToStorage } = await import('@/lib/storage');
+            const { uploadToStorage, userStoragePathPrefix } = await import(
+              '@/lib/storage'
+            );
             const uploadResult = await uploadToStorage(
               audioBuffer,
               originalFilename,
-              'audio/mpeg'
+              'audio/mpeg',
+              { pathPrefix: userStoragePathPrefix(userId, 'audio') }
             );
             
             finalAudioUrl = uploadResult.url;

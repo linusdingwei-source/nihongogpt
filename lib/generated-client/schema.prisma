@@ -14,25 +14,26 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String         @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  credits       Float          @default(0) // 支持小数计费，100次调用=1credit
-  isAnonymous   Boolean        @default(false) // 是否为临时匿名用户
-  anonymousId   String?        @unique // 临时用户 ID（用于 localStorage/cookie 识别）
-  role          String         @default("user") // 用户角色: user, admin
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  cards         Card[]
-  decks         Deck[]
-  sources       Source[]
-  sourceFolders SourceFolder[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String          @id @default(cuid())
+  name           String?
+  email          String          @unique
+  emailVerified  DateTime?
+  password       String?
+  image          String?
+  credits        Float           @default(0) // 支持小数计费，100次调用=1credit
+  isAnonymous    Boolean         @default(false) // 是否为临时匿名用户
+  anonymousId    String?         @unique // 临时用户 ID（用于 localStorage/cookie 识别）
+  role           String          @default("user") // 用户角色: user, admin
+  accounts       Account[]
+  sessions       Session[]
+  orders         Order[]
+  cards          Card[]
+  decks          Deck[]
+  collectedDecks CollectedDeck[]
+  sources        Source[]
+  sourceFolders  SourceFolder[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([isAnonymous])
   @@index([anonymousId])
@@ -110,19 +111,41 @@ model RateLimit {
 }
 
 model Deck {
-  id            String         @id @default(cuid())
+  id            String  @id @default(cuid())
   userId        String
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name          String // 牌组名称
   coverImageUrl String? // 牌组展示图（可选）
-  cards         Card[] // 关联的卡片
-  sources       Source[]
-  folders       SourceFolder[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+
+  // 共享与公开
+  isPublic    Boolean @default(false) // 是否公开
+  shareToken  String? @unique // 分享令牌（用于链接分享）
+  description String? @db.Text // 牌组描述
+
+  cards       Card[] // 关联的卡片
+  sources     Source[]
+  folders     SourceFolder[]
+  collections CollectedDeck[] // 收藏该牌组的用户
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, name]) // 每个用户的牌组名称唯一
   @@index([userId])
+  @@index([isPublic])
+}
+
+model CollectedDeck {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deckId    String
+  deck      Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, deckId])
+  @@index([userId])
+  @@index([deckId])
 }
 
 model Card {

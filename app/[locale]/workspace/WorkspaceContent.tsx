@@ -63,6 +63,8 @@ type ChatMessage = {
     audioUrl?: string;
     timestamps?: Array<{ begin_time: number; end_time: number; text: string }>;
     canSaveAsNote?: boolean;
+    /** 卡片生成流程中 TTS 返回的音频地址（多为签名 URL，供对话内播放） */
+    ttsAudioUrl?: string;
   };
   timestamp: number;
 };
@@ -857,8 +859,11 @@ export function WorkspacePageContent() {
                     id: `tts-card-output-${timestamp}`,
                     role: 'assistant',
                     align: 'right',
-                    content: `**🔊 TTS音频生成 - 结果**\n\n**音频URL:** ${tts.audioUrl ? '✅ 已生成' : '❌ 未生成'}`,
+                    content: tts.audioUrl
+                      ? '**🔊 TTS音频生成 - 结果**\n\n✅ 已生成，可在下方播放。'
+                      : '**🔊 TTS音频生成 - 结果**\n\n❌ 未能生成音频。',
                     type: 'chat',
+                    data: tts.audioUrl ? { ttsAudioUrl: tts.audioUrl } : undefined,
                   });
                 }
               }
@@ -2491,8 +2496,9 @@ export function WorkspacePageContent() {
                   addMessage({
                     id: `tts-retry-${Date.now()}`,
                     role: 'assistant',
-                    content: `**🔊 TTS音频生成**\n\n**输入文本:** ${tts.input.substring(0, 100)}${tts.input.length > 100 ? '...' : ''}\n\n**音频URL:** ${tts.audioUrl ? '✅ 已生成' : '❌ 未生成'}`,
+                    content: `**🔊 TTS音频生成**\n\n**输入文本:** ${tts.input.substring(0, 100)}${tts.input.length > 100 ? '...' : ''}\n\n${tts.audioUrl ? '✅ 已生成，可在下方播放。' : '❌ 未能生成音频。'}`,
                     type: 'chat',
+                    data: tts.audioUrl ? { ttsAudioUrl: tts.audioUrl } : undefined,
                   });
                 }
               }

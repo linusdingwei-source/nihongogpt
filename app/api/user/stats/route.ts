@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { getUserId } from '@/lib/anonymous-user';
 import { prisma } from '@/lib/prisma';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
@@ -11,7 +12,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getUserId(null, request);
+    const session = await auth();
+    const userId = await getUserId(session, request);
     
     if (!userId) {
       return NextResponse.json(

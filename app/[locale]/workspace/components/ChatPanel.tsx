@@ -334,6 +334,17 @@ export function ChatPanel(props: WorkspaceViewProps) {
                         >
                           {preprocessContent(message.content)}
                         </ReactMarkdown>
+                        {message.data?.ttsAudioUrl ? (
+                          <div className="not-prose w-full max-w-[min(100%,20rem)] mt-3">
+                            <audio
+                              controls
+                              playsInline
+                              preload="metadata"
+                              className="w-full h-9 rounded-md"
+                              src={message.data.ttsAudioUrl}
+                            />
+                          </div>
+                        ) : null}
                       </div>
                     )
                   ) : (
@@ -341,6 +352,17 @@ export function ChatPanel(props: WorkspaceViewProps) {
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {preprocessContent(message.content)}
                       </ReactMarkdown>
+                      {message.data?.ttsAudioUrl ? (
+                        <div className="not-prose w-full max-w-[min(100%,20rem)] mt-3">
+                          <audio
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-9 rounded-md"
+                            src={message.data.ttsAudioUrl}
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </div>

@@ -37,126 +37,100 @@ export async function POST(request: NextRequest) {
     // 只查询 CARD 类型，不包括 NOTE
     const finalDeckName = deckName?.trim() || 'default';
     
-    // 规范化文本用于比较：去除末尾标点符号以支持模糊匹配
-    const normalizeText = (t: string) => t.trim().replace(/[。！？、，.!?,]+$/g, '').trim();
+    // 规范化文本用于比较：空白折叠 + 去除末尾标点（同词不同标点视为同一卡）
+    const normalizeText = (t: string) =>
+      t
+        .normalize('NFKC')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/[。！？、，.!?,]+$/g, '')
+        .trim();
     const normalizedInput = normalizeText(text);
-    
-    // 先尝试精确匹配
+    const resolvedCardType = cardType || '问答题（附翻转卡片）';
+
+    const dedupeWhere = {
+      userId,
+      category: 'CARD' as const,
+      cardType: resolvedCardType,
+      ...(deckId ? { deckId } : { deckName: finalDeckName }),
+    };
+
+    // 先尝试精确匹配（牌组 + 卡片类型一致才算重复）
     let existingCard = await prisma.card.findFirst({
       where: {
-        userId,
+        ...dedupeWhere,
         frontContent: text.trim(),
-        category: 'CARD',
-        ...(deckId ? { deckId } : { deckName: finalDeckName }),
       },
+      orderBy: { createdAt: 'asc' },
       select: {
+        id: true,
         frontContent: true,
         backContent: true,
         kanaText: true,
         audioUrl: true,
         audioFilename: true,
         timestamps: true,
+        cardType: true,
+        deckName: true,
+        pageNumber: true,
+        createdAt: true,
       },
     });
-    
-    // 如果精确匹配失败，尝试模糊匹配（忽略末尾标点）
-    if (!existingCard) {
-      // 查找所有可能的匹配卡片
+
+    // 精确未命中时，按规范化正文模糊匹配（单字词 prefix 即首字）
+    if (!existingCard && normalizedInput.length > 0) {
+      const prefix = normalizedInput.substring(0, Math.min(10, normalizedInput.length));
       const candidates = await prisma.card.findMany({
         where: {
-          userId,
-          category: 'CARD',
-          ...(deckId ? { deckId } : { deckName: finalDeckName }),
-          frontContent: {
-            startsWith: normalizedInput.substring(0, Math.min(10, normalizedInput.length)),
-          },
+          ...dedupeWhere,
+          frontContent: { startsWith: prefix },
         },
+        orderBy: { createdAt: 'asc' },
         select: {
+          id: true,
           frontContent: true,
           backContent: true,
           kanaText: true,
           audioUrl: true,
           audioFilename: true,
           timestamps: true,
+          cardType: true,
+          deckName: true,
+          pageNumber: true,
+          createdAt: true,
         },
-        take: 20, // 限制候选数量
+        take: 40,
       });
-      
-      // 查找规范化后匹配的卡片
-      existingCard = candidates.find(c => normalizeText(c.frontContent) === normalizedInput) || null;
+
+      existingCard =
+        candidates.find((c) => normalizeText(c.frontContent) === normalizedInput) || null;
     }
 
-    // 如果找到现有卡片，复用其分析和音频数据
+    // 命中已有卡片：直接返回该记录，不再 insert（此前误行为「复用内容但仍新建行」导致同词多条）
     if (existingCard && existingCard.backContent) {
-      console.log(`Found existing card for text: ${text.substring(0, 30)}... - reusing cached data`);
-      
-      // 确保牌组存在
-      let deck;
-      if (deckId) {
-        deck = await prisma.deck.findFirst({
-          where: { id: deckId, userId },
-        });
-      }
-
-      if (!deck) {
-        deck = await prisma.deck.findUnique({
-          where: {
-            userId_name: {
-              userId,
-              name: finalDeckName,
-            },
-          },
-        });
-      }
-
-      if (!deck) {
-        deck = await prisma.deck.create({
-          data: {
-            userId,
-            name: finalDeckName,
-          },
-        });
-      }
-
-      // 创建新卡片，复用现有数据
-      const card = await prisma.card.create({
-        data: {
-          userId,
-          deckId: deck.id,
-          sourceId: sourceId || null,
-          pageNumber: pageNumber || null,
-          category,
-          frontContent: text,
-          backContent: existingCard.backContent,
-          cardType: cardType || '问答题（附翻转卡片）',
-          audioUrl: existingCard.audioUrl,
-          audioFilename: existingCard.audioFilename,
-          timestamps: existingCard.timestamps ? JSON.parse(JSON.stringify(existingCard.timestamps)) : null,
-          kanaText: existingCard.kanaText,
-          deckName: deck.name,
-          tags: [],
-        },
-      });
+      console.log(
+        `Dedupe: reuse existing card id=${existingCard.id} for text: ${text.substring(0, 30)}...`
+      );
 
       const remainingCredits = await getCredits(userId);
-      const signedAudioUrl = await getSignedUrlForStorageUrl(card.audioUrl);
+      const signedAudioUrl = await getSignedUrlForStorageUrl(existingCard.audioUrl);
 
       return NextResponse.json(
         successResponse({
           card: {
-            id: card.id,
-            frontContent: card.frontContent,
-            backContent: card.backContent,
-            cardType: card.cardType,
+            id: existingCard.id,
+            frontContent: existingCard.frontContent,
+            backContent: existingCard.backContent,
+            cardType: existingCard.cardType,
             audioUrl: signedAudioUrl,
-            timestamps: card.timestamps,
-            kanaText: card.kanaText,
-            deckName: card.deckName,
-            pageNumber: card.pageNumber,
-            createdAt: card.createdAt,
+            timestamps: existingCard.timestamps,
+            kanaText: existingCard.kanaText,
+            deckName: existingCard.deckName,
+            pageNumber: existingCard.pageNumber,
+            createdAt: existingCard.createdAt,
           },
           credits: remainingCredits,
-          cachedFromExisting: true, // 标记为复用现有数据
+          cachedFromExisting: true,
           llmInteraction: null,
           ttsInteraction: null,
         })

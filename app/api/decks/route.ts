@@ -19,30 +19,59 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const decks = await prisma.deck.findMany({
-      where: { userId },
-      include: {
-        _count: {
-          select: { cards: true },
+    const [myDecks, collectedDecks] = await Promise.all([
+      prisma.deck.findMany({
+        where: { userId },
+        include: {
+          _count: {
+            select: { cards: true },
+          },
+          user: {
+            select: { name: true, image: true }
+          }
         },
-      },
-      orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.collectedDeck.findMany({
+        where: { userId },
+        include: {
+          deck: {
+            include: {
+              _count: {
+                select: { cards: true },
+              },
+              user: {
+                select: { name: true, image: true }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    ]);
+
+    const formatDeck = async (deck: any, isCollected = false) => ({
+      id: deck.id,
+      name: deck.name,
+      coverImageUrl: await getSignedUrlForStorageUrl(deck.coverImageUrl ?? null),
+      cardCount: deck._count?.cards || 0,
+      isPublic: deck.isPublic,
+      description: deck.description,
+      shareToken: deck.shareToken,
+      author: deck.user?.name || 'Anonymous',
+      authorImage: deck.user?.image || null,
+      isCollected,
+      createdAt: deck.createdAt,
+      updatedAt: deck.updatedAt,
     });
 
-    const decksWithSignedUrls = await Promise.all(
-      decks.map(async (deck) => ({
-        id: deck.id,
-        name: deck.name,
-        coverImageUrl: await getSignedUrlForStorageUrl(deck.coverImageUrl ?? null),
-        cardCount: deck._count.cards,
-        createdAt: deck.createdAt,
-        updatedAt: deck.updatedAt,
-      }))
-    );
+    const formattedMyDecks = await Promise.all(myDecks.map(d => formatDeck(d)));
+    const formattedCollectedDecks = await Promise.all(collectedDecks.map(c => formatDeck(c.deck, true)));
 
     return NextResponse.json(
       successResponse({
-        decks: decksWithSignedUrls,
+        decks: formattedMyDecks,
+        collectedDecks: formattedCollectedDecks,
       })
     );
   } catch (error) {
@@ -66,7 +95,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, coverImageUrl } = await request.json();
+    const { name, coverImageUrl, isPublic, description } = await request.json();
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json(
@@ -77,20 +106,13 @@ export async function POST(request: NextRequest) {
     const deckName = name.trim();
     const cover = typeof coverImageUrl === 'string' && coverImageUrl.trim() ? coverImageUrl.trim() : null;
 
-    // 检查牌组是否已存在
-    const existingDeck = await prisma.deck.findUnique({
-      where: {
-        userId_name: {
-          userId,
-          name: deckName,
-        },
-      },
+    const nameTaken = await prisma.deck.findUnique({
+      where: { userId_name: { userId, name: deckName } },
     });
-
-    if (existingDeck) {
+    if (nameTaken) {
       return NextResponse.json(
-        errorResponse(ErrorCodes.BAD_REQUEST, 'Deck already exists'),
-        { status: 409 }
+        errorResponse(ErrorCodes.BAD_REQUEST, 'Deck name already exists'),
+        { status: 400 }
       );
     }
 
@@ -98,6 +120,9 @@ export async function POST(request: NextRequest) {
       data: {
         userId,
         name: deckName,
+        isPublic: !!isPublic,
+        description: description || null,
+        shareToken: isPublic ? Math.random().toString(36).substring(2, 15) : null,
         ...(cover !== null && { coverImageUrl: cover }),
       },
     });
@@ -130,7 +155,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { id, newName, coverImageUrl } = await request.json();
+    const { id, newName, coverImageUrl, isPublic, description } = await request.json();
 
     if (!id) {
       return NextResponse.json(
@@ -144,14 +169,13 @@ export async function PATCH(request: NextRequest) {
       ? undefined
       : (typeof coverImageUrl === 'string' && coverImageUrl.trim() ? coverImageUrl.trim() : null);
 
-    if (trimmedNewName === undefined && cover === undefined) {
+    if (trimmedNewName === undefined && cover === undefined && isPublic === undefined && description === undefined) {
       return NextResponse.json(
-        errorResponse(ErrorCodes.BAD_REQUEST, 'Provide newName and/or coverImageUrl to update'),
+        errorResponse(ErrorCodes.BAD_REQUEST, 'Provide updates (newName, cover, isPublic, or description)'),
         { status: 400 }
       );
     }
 
-    // 查找牌组
     const deck = await prisma.deck.findFirst({
       where: { id, userId },
     });
@@ -165,28 +189,16 @@ export async function PATCH(request: NextRequest) {
 
     const oldName = deck.name;
 
-    // 若仅更新封面，不重命名
-    if (trimmedNewName !== undefined && oldName !== trimmedNewName) {
-      const existingDeck = await prisma.deck.findUnique({
-        where: {
-          userId_name: {
-            userId,
-            name: trimmedNewName,
-          },
-        },
-      });
-
-      if (existingDeck) {
-        return NextResponse.json(
-          errorResponse(ErrorCodes.BAD_REQUEST, 'A deck with this name already exists'),
-          { status: 409 }
-        );
-      }
-    }
-
-    const updateData: { name?: string; coverImageUrl?: string | null } = {};
+    const updateData: { name?: string; coverImageUrl?: string | null; isPublic?: boolean; description?: string | null; shareToken?: string | null } = {};
     if (trimmedNewName !== undefined) updateData.name = trimmedNewName;
     if (cover !== undefined) updateData.coverImageUrl = cover;
+    if (isPublic !== undefined) {
+      updateData.isPublic = isPublic;
+      if (isPublic && !deck.shareToken) {
+        updateData.shareToken = Math.random().toString(36).substring(2, 15);
+      }
+    }
+    if (description !== undefined) updateData.description = description;
 
     const updatedDeck = await prisma.$transaction(async (tx) => {
       const updated = await tx.deck.update({
