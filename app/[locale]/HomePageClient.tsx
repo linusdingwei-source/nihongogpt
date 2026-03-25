@@ -93,10 +93,10 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
     return { storageUrl: data.url, previewUrl };
   }, []);
 
-  // 获取牌组列表
-  const fetchDecks = useCallback(async () => {
+  // 获取牌组列表（silent：切回标签页时刷新签名 URL，不闪全页 loading）
+  const fetchDecks = useCallback(async (options?: { silent?: boolean }) => {
     try {
-      setLoading(true);
+      if (!options?.silent) setLoading(true);
       const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
       const headers = getAnonymousHeaders();
       const res = await fetch('/api/decks', { headers });
@@ -111,14 +111,14 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
     } catch (err) {
       console.error('Failed to fetch decks:', err);
     } finally {
-      setLoading(false);
+      if (!options?.silent) setLoading(false);
     }
   }, []);
 
   // 获取公开牌组
-  const fetchPublicDecks = useCallback(async (query: string = '') => {
+  const fetchPublicDecks = useCallback(async (query: string = '', options?: { silent?: boolean }) => {
     try {
-      setPublicLoading(true);
+      if (!options?.silent) setPublicLoading(true);
       const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
       const headers = getAnonymousHeaders();
       const res = await fetch(`/api/decks/public?q=${encodeURIComponent(query)}`, { headers });
@@ -130,7 +130,7 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
     } catch (err) {
       console.error('Failed to fetch public decks:', err);
     } finally {
-      setPublicLoading(false);
+      if (!options?.silent) setPublicLoading(false);
     }
   }, []);
 
@@ -159,6 +159,19 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
     }
     trackPageViewEvent('HOME', { locale: routerLocale });
   }, [fetchDecks, fetchCredits, fetchPublicDecks, activeTab, status, routerLocale]);
+
+  // 私有 OSS 封面依赖短期签名：用户长时间挂页后再回来，静默重拉列表以换新签名
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+      void fetchDecks({ silent: true });
+      if (activeTab === 'public') {
+        void fetchPublicDecks('', { silent: true });
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [fetchDecks, fetchPublicDecks, activeTab]);
 
   // 处理牌组点击
   const handleDeckClick = (deckId: string) => {

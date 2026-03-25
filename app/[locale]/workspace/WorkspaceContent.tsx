@@ -10,6 +10,7 @@ import {
   trackAudioGenerationFailed,
 } from '@/lib/analytics';
 import { WorkspaceView } from './WorkspaceView';
+import { dedupeTargetCardItems } from '@/lib/card-front-normalize';
 
 interface Card {
   id: string;
@@ -1023,6 +1024,9 @@ export function WorkspacePageContent() {
           });
         };
 
+        // 跨页去重：同一单词/句子在 PDF 多页重复出现时只生成一张卡
+        const pdfSeenCardKeys = new Set<string>();
+
         // Process each page
         for (let page = 1; page <= totalPages; page++) {
           // Check if cancelled
@@ -1116,7 +1120,8 @@ export function WorkspacePageContent() {
 
             let vocabulary: string[] = [];
             let sentences: string[] = [];
-            
+            let pageCardItems: Array<{ text: string; type: 'WORD' | 'SENTENCE' }> = [];
+
             const refineData = await refineRes.json();
             if (refineRes.ok && refineData.success) {
             // Display LLM interaction for PDF page refinement
@@ -1144,12 +1149,15 @@ export function WorkspacePageContent() {
               vocabulary = refineData.data.vocabulary || [];
               sentences = refineData.data.sentences || [];
               
-              // Add items with page number
-              for (const v of vocabulary) {
-                targetItems.push({ text: v, type: 'WORD', pageNumber: page });
-              }
-              for (const s of sentences) {
-                targetItems.push({ text: s, type: 'SENTENCE', pageNumber: page });
+              pageCardItems = dedupeTargetCardItems(
+                [
+                  ...vocabulary.map((v) => ({ text: v, type: 'WORD' as const })),
+                  ...sentences.map((s) => ({ text: s, type: 'SENTENCE' as const })),
+                ],
+                pdfSeenCardKeys
+              );
+              for (const it of pageCardItems) {
+                targetItems.push({ text: it.text, type: it.type, pageNumber: page });
               }
             }
 
@@ -1208,20 +1216,15 @@ export function WorkspacePageContent() {
                 savedNotes++;
               }
 
-              // --- 立即为该页生成的单词和句子创建卡片 (确保一页一页输出) ---
-              const pageItems = [
-                ...vocabulary.map(v => ({ text: v, type: 'WORD' })),
-                ...sentences.map(s => ({ text: s, type: 'SENTENCE' }))
-              ];
-
-              for (let i = 0; i < pageItems.length; i++) {
+              // --- 立即为该页生成的单词和句子创建卡片 (与上文 pageCardItems 同一列表，避免对 Set 去重两次变空) ---
+              for (let i = 0; i < pageCardItems.length; i++) {
                 // 检查是否取消
                 if (pdfGenerationCancelledRef.current || cardGenerationCancelledRef.current) {
                   break;
                 }
 
-                const item = pageItems[i];
-                updatePdfProgress(page, `生成卡片 (${i + 1}/${pageItems.length}): ${item.text.substring(0, 20)}...`, skippedPages);
+                const item = pageCardItems[i];
+                updatePdfProgress(page, `生成卡片 (${i + 1}/${pageCardItems.length}): ${item.text.substring(0, 20)}...`, skippedPages);
                 
                 const result = await generateSingleCard(item, currentDeckName);
                 if (result.success && result.card) {
@@ -1237,7 +1240,7 @@ export function WorkspacePageContent() {
                 }
 
                 // 节流
-                if (i < pageItems.length - 1) {
+                if (i < pageCardItems.length - 1) {
                   await new Promise(resolve => setTimeout(resolve, 300));
                 }
               }
@@ -1587,6 +1590,9 @@ export function WorkspacePageContent() {
         setCardLoading(false);
         return;
       }
+
+      // 图片/文本来源：LLM 或切句可能产出重复项，与单词/句子卡 API 去重规则对齐
+      targetItems = dedupeTargetCardItems(targetItems);
 
       if (targetItems.length > 0) {
         // 在对话框中添加一个提示消息

@@ -3,7 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
-import { getSignedUrlForStorageUrl } from '@/lib/storage';
+import { getSignedDeckCoverUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +43,7 @@ export async function GET(
     const deckWithSignedUrl = {
       id: deck.id,
       name: deck.name,
-      coverImageUrl: await getSignedUrlForStorageUrl(deck.coverImageUrl ?? null),
+      coverImageUrl: await getSignedDeckCoverUrl(deck.coverImageUrl ?? null),
       cardCount: deck._count.cards,
       createdAt: deck.createdAt,
       updatedAt: deck.updatedAt,

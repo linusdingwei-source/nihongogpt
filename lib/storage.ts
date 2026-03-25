@@ -82,6 +82,7 @@ export async function uploadToStorage(
 
 /**
  * 若当前为阿里云 OSS 且 URL 为本 Bucket 的地址，则返回签名 URL（私有桶访问）；否则返回原 URL。
+ * @param expiresSeconds 默认 3600（1h），适合音频/临时下载；长期展示的封面请用 {@link getSignedDeckCoverUrl}
  */
 export async function getSignedUrlForStorageUrl(
   url: string | null,
@@ -94,4 +95,11 @@ export async function getSignedUrlForStorageUrl(
   const key = getOssKeyFromUrl(url);
   if (!key) return url;
   return ossGetSignedUrl(key, expiresSeconds);
+}
+
+/** 牌组封面在列表/详情中由 `<img>` 长期引用，签名过短会导致一段时间后裂图；OSS 侧常用最长约 7 天 */
+export const OSS_DECK_COVER_SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
+
+export async function getSignedDeckCoverUrl(url: string | null): Promise<string | null> {
+  return getSignedUrlForStorageUrl(url, OSS_DECK_COVER_SIGNED_URL_TTL_SECONDS);
 }

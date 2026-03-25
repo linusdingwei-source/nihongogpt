@@ -6,6 +6,7 @@ import { getUserId, getBearerTokenFromRequest } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
 import { extractKanaFromLLMResult, markdownToHtml } from '@/lib/llm-utils';
 import { getSignedUrlForStorageUrl } from '@/lib/storage';
+import { normalizeCardFrontForDedupe } from '@/lib/card-front-normalize';
 import OpenAI from 'openai';
 
 const CARD_GENERATION_CREDITS_COST = 3; // 完整卡片生成消耗 3 credits (LLM 2 + TTS 1)
@@ -37,15 +38,7 @@ export async function POST(request: NextRequest) {
     // 只查询 CARD 类型，不包括 NOTE
     const finalDeckName = deckName?.trim() || 'default';
     
-    // 规范化文本用于比较：空白折叠 + 去除末尾标点（同词不同标点视为同一卡）
-    const normalizeText = (t: string) =>
-      t
-        .normalize('NFKC')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .replace(/[。！？、，.!?,]+$/g, '')
-        .trim();
-    const normalizedInput = normalizeText(text);
+    const normalizedInput = normalizeCardFrontForDedupe(text);
     const resolvedCardType = cardType || '问答题（附翻转卡片）';
 
     const dedupeWhere = {
@@ -103,7 +96,9 @@ export async function POST(request: NextRequest) {
       });
 
       existingCard =
-        candidates.find((c) => normalizeText(c.frontContent) === normalizedInput) || null;
+        candidates.find(
+          (c) => normalizeCardFrontForDedupe(c.frontContent) === normalizedInput
+        ) || null;
     }
 
     // 命中已有卡片：直接返回该记录，不再 insert（此前误行为「复用内容但仍新建行」导致同词多条）

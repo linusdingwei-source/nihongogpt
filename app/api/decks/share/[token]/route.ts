@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
-import { getSignedUrlForStorageUrl } from '@/lib/storage';
+import { getSignedDeckCoverUrl } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +36,7 @@ export async function GET(
         deck: {
           id: deck.id,
           name: deck.name,
-          coverImageUrl: await getSignedUrlForStorageUrl(deck.coverImageUrl ?? null),
+          coverImageUrl: await getSignedDeckCoverUrl(deck.coverImageUrl ?? null),
           description: deck.description,
           cardCount: deck._count.cards,
           author: deck.user?.name || 'Anonymous',

@@ -774,11 +774,12 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                 className={`group relative p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all cursor-pointer ${viewingSourceId === source.id ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}
               >
                 {editingSourceId === source.id ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="text"
                       value={editingSourceName}
                       onChange={(e) => setEditingSourceName(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
                       onKeyDown={async (e) => {
                         if (e.key === 'Enter') {
                           // 保存重命名
@@ -807,7 +808,9 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                       autoFocus
                     />
           <button
-                      onClick={async () => {
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
                         try {
                           const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
                           const headers = getAnonymousHeaders();
@@ -830,7 +833,9 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                       ✓
           </button>
           <button
-                      onClick={() => {
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingSourceId(null);
                         setEditingSourceName('');
                       }}
@@ -876,6 +881,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                       </div>
                       <div className="relative source-menu-container">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowSourceMenuId(showSourceMenuId === source.id ? null : source.id);
@@ -887,8 +893,12 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                           </svg>
                         </button>
                         {showSourceMenuId === source.id && (
-                          <div className="absolute right-0 top-8 z-10 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1">
+                          <div
+                            className="absolute right-0 top-8 z-10 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button
+                              type="button"
                               onClick={async () => {
                                 try {
                                   const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
@@ -913,9 +923,10 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                               查看
                             </button>
                             <button
+                              type="button"
                               onClick={() => {
                                 setEditingSourceId(source.id);
-                                setEditingSourceName(source.name);
+                                setEditingSourceName(displayName);
                                 setShowSourceMenuId(null);
                               }}
                               className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
@@ -928,6 +939,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                             {/* Move to folder submenu */}
                             <div className="relative group/move">
                               <button
+                                type="button"
                                 className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 justify-between"
                               >
                                 <span className="flex items-center gap-2">
@@ -942,6 +954,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                               </button>
                               <div className="absolute right-full top-0 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 hidden group-hover/move:block before:content-[''] before:absolute before:top-0 before:left-full before:w-4 before:h-full">
                                 <button
+                                  type="button"
                                   onClick={(e) => { e.stopPropagation(); handleMoveSource(source.id, null); }}
                                   className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                 >
@@ -949,6 +962,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                 </button>
                                 {folders.map(folder => (
                                   <button
+                                    type="button"
                                     key={folder.id}
                                     onClick={(e) => { e.stopPropagation(); handleMoveSource(source.id, folder.id); }}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 truncate"
@@ -959,6 +973,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                               </div>
                             </div>
                             <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); handleDeleteSource(source.id); }}
                               className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                             >
@@ -1050,6 +1065,77 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                           }}
                           className={`group relative p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all cursor-pointer ${viewingSourceId === source.id ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}
                         >
+                          {editingSourceId === source.id ? (
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="text"
+                                value={editingSourceName}
+                                onChange={(e) => setEditingSourceName(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={async (e) => {
+                                  if (e.key === 'Enter') {
+                                    try {
+                                      const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+                                      const headers = getAnonymousHeaders();
+                                      const res = await fetch(`/api/sources/${source.id}`, {
+                                        method: 'PATCH',
+                                        headers: { ...headers, 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ name: editingSourceName }),
+                                      });
+                                      if (res.ok) {
+                                        await fetchSources();
+                                        setEditingSourceId(null);
+                                        setEditingSourceName('');
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to rename source:', error);
+                                    }
+                                  } else if (e.key === 'Escape') {
+                                    setEditingSourceId(null);
+                                    setEditingSourceName('');
+                                  }
+                                }}
+                                className="flex-1 px-2 py-1 text-sm border border-indigo-500 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                                autoFocus
+                              />
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+                                    const headers = getAnonymousHeaders();
+                                    const res = await fetch(`/api/sources/${source.id}`, {
+                                      method: 'PATCH',
+                                      headers: { ...headers, 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ name: editingSourceName }),
+                                    });
+                                    if (res.ok) {
+                                      await fetchSources();
+                                      setEditingSourceId(null);
+                                      setEditingSourceName('');
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to rename source:', error);
+                                  }
+                                }}
+                                className="px-2 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingSourceId(null);
+                                  setEditingSourceName('');
+                                }}
+                                className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
                           <div className="flex items-start gap-3">
                             <div className="mt-1 flex-shrink-0">
                               <input
@@ -1077,6 +1163,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                               </div>
                               <div className="relative source-menu-container">
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setShowSourceMenuId(showSourceMenuId === source.id ? null : source.id);
@@ -1088,8 +1175,12 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                   </svg>
                                 </button>
                                 {showSourceMenuId === source.id && (
-                                  <div className="absolute right-0 top-8 z-10 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1">
+                                  <div
+                                    className="absolute right-0 top-8 z-10 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <button
+                                      type="button"
                                       onClick={() => {
                                         setEditingSourceId(source.id);
                                         setEditingSourceName(source.name);
@@ -1103,7 +1194,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                       重命名
                                     </button>
                                     <div className="relative group/move">
-                                      <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 justify-between">
+                                      <button type="button" className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 justify-between">
                                         <span className="flex items-center gap-2">
                                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -1116,6 +1207,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                       </button>
                                       <div className="absolute right-full top-0 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 hidden group-hover/move:block before:content-[''] before:absolute before:top-0 before:left-full before:w-4 before:h-full">
                                         <button
+                                          type="button"
                                           onClick={(e) => { e.stopPropagation(); handleMoveSource(source.id, null); }}
                                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         >
@@ -1123,6 +1215,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                         </button>
                                         {folders.filter(f => f.id !== folder.id).map(f => (
                                           <button
+                                            type="button"
                                             key={f.id}
                                             onClick={(e) => { e.stopPropagation(); handleMoveSource(source.id, f.id); }}
                                             className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 truncate"
@@ -1133,6 +1226,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                       </div>
                                     </div>
                                     <button
+                                      type="button"
                                       onClick={(e) => { e.stopPropagation(); handleDeleteSource(source.id); }}
                                       className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                     >
@@ -1146,6 +1240,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                               </div>
                             </div>
                           </div>
+                          )}
                         </div>
                       ))
                     )}
@@ -1178,6 +1273,77 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                 }}
                 className={`group relative p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all cursor-pointer ${viewingSourceId === source.id ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}
               >
+                {editingSourceId === source.id ? (
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="text"
+                      value={editingSourceName}
+                      onChange={(e) => setEditingSourceName(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter') {
+                          try {
+                            const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+                            const headers = getAnonymousHeaders();
+                            const res = await fetch(`/api/sources/${source.id}`, {
+                              method: 'PATCH',
+                              headers: { ...headers, 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ name: editingSourceName }),
+                            });
+                            if (res.ok) {
+                              await fetchSources();
+                              setEditingSourceId(null);
+                              setEditingSourceName('');
+                            }
+                          } catch (error) {
+                            console.error('Failed to rename source:', error);
+                          }
+                        } else if (e.key === 'Escape') {
+                          setEditingSourceId(null);
+                          setEditingSourceName('');
+                        }
+                      }}
+                      className="flex-1 px-2 py-1 text-sm border border-indigo-500 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+                          const headers = getAnonymousHeaders();
+                          const res = await fetch(`/api/sources/${source.id}`, {
+                            method: 'PATCH',
+                            headers: { ...headers, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: editingSourceName }),
+                          });
+                          if (res.ok) {
+                            await fetchSources();
+                            setEditingSourceId(null);
+                            setEditingSourceName('');
+                          }
+                        } catch (error) {
+                          console.error('Failed to rename source:', error);
+                        }
+                      }}
+                      className="px-2 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingSourceId(null);
+                        setEditingSourceName('');
+                      }}
+                      className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
                 <div className="flex items-start gap-3">
                   <div className="mt-1 flex-shrink-0">
                     <input
@@ -1208,6 +1374,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                     </div>
                     <div className="relative source-menu-container">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowSourceMenuId(showSourceMenuId === source.id ? null : source.id);
@@ -1219,8 +1386,12 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                         </svg>
                       </button>
                       {showSourceMenuId === source.id && (
-                        <div className="absolute right-0 top-8 z-10 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1">
+                        <div
+                          className="absolute right-0 top-8 z-10 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
+                            type="button"
                             onClick={async () => {
                               try {
                                 const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
@@ -1245,6 +1416,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                             查看
                           </button>
                           <button
+                            type="button"
                             onClick={() => {
                               setEditingSourceId(source.id);
                               setEditingSourceName(source.name);
@@ -1258,7 +1430,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                             重命名
                           </button>
                           <div className="relative group/move">
-                            <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 justify-between">
+                            <button type="button" className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 justify-between">
                               <span className="flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -1285,6 +1457,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                             </div>
                           </div>
                           <button
+                            type="button"
                             onClick={(e) => { e.stopPropagation(); handleDeleteSource(source.id); }}
                             className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                           >
@@ -1298,6 +1471,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             ))}
           </div>

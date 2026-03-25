@@ -116,6 +116,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
   const [playbackRate, setPlaybackRate] = useState(1.0); // 默认1倍速
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const loopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const reviewLockRef = useRef(false);
 
   // 获取待学习的卡片（若左侧选中了资源，则只拉取该资源下的卡片和句子）
   const fetchStudyCards = useCallback(async () => {
@@ -159,10 +160,10 @@ export function StudioPanel(props: WorkspaceViewProps) {
   }, [currentWorkspaceDeckId, currentWorkspaceDeckName, studyType, selectedSourceId]);
 
   // 提交复习结果
-  const submitReview = async (rating: number) => {
+  const submitReview = useCallback(async (rating: number) => {
     const currentCard = studyCards[currentStudyIndex];
-    if (!currentCard) return;
-
+    if (!currentCard || reviewLockRef.current) return;
+    reviewLockRef.current = true;
     try {
       const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
       const headers = getAnonymousHeaders();
@@ -172,7 +173,6 @@ export function StudioPanel(props: WorkspaceViewProps) {
         body: JSON.stringify({ cardId: currentCard.id, rating }),
       });
 
-      // 移动到下一张卡片
       if (currentStudyIndex < studyCards.length - 1) {
         setCurrentStudyIndex(prev => prev + 1);
         setShowAnswer(false);
@@ -181,8 +181,40 @@ export function StudioPanel(props: WorkspaceViewProps) {
       }
     } catch (err) {
       console.error('Failed to submit review:', err);
+    } finally {
+      reviewLockRef.current = false;
     }
-  };
+  }, [studyCards, currentStudyIndex]);
+
+  /** 快捷键「上一张」：当前卡记为「记得」后回到上一张 */
+  const goPrevStudyWithRemember = useCallback(async () => {
+    const currentCard = studyCards[currentStudyIndex];
+    if (!currentCard || currentStudyIndex <= 0 || reviewLockRef.current) return;
+    reviewLockRef.current = true;
+    try {
+      const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+      const headers = getAnonymousHeaders();
+      await fetch('/api/cards/review', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId: currentCard.id, rating: 3 }),
+      });
+      setCurrentStudyIndex(prev => prev - 1);
+      setShowAnswer(false);
+    } catch (err) {
+      console.error('Failed to submit review (prev):', err);
+    } finally {
+      reviewLockRef.current = false;
+    }
+  }, [studyCards, currentStudyIndex]);
+
+  const handleStudyNextRemember = useCallback(() => {
+    void submitReview(3);
+  }, [submitReview]);
+
+  const handleStudyPrevRemember = useCallback(() => {
+    void goPrevStudyWithRemember();
+  }, [goPrevStudyWithRemember]);
 
   // 开始学习时获取卡片
   useEffect(() => {
@@ -250,6 +282,8 @@ export function StudioPanel(props: WorkspaceViewProps) {
           showAnswer={showAnswer}
           setShowAnswer={setShowAnswer}
           onReview={submitReview}
+          onNextRemember={handleStudyNextRemember}
+          onPrevRemember={handleStudyPrevRemember}
           stats={studyStats}
           completed={studyCompleted}
           loading={studyLoading}
@@ -352,6 +386,8 @@ export function StudioPanel(props: WorkspaceViewProps) {
         showAnswer={showAnswer}
         setShowAnswer={setShowAnswer}
         onReview={submitReview}
+        onNextRemember={handleStudyNextRemember}
+        onPrevRemember={handleStudyPrevRemember}
         stats={studyStats}
         completed={studyCompleted}
         loading={studyLoading}
@@ -1233,7 +1269,9 @@ function StudyModal({
   currentIndex, 
   showAnswer, 
   setShowAnswer, 
-  onReview, 
+  onReview,
+  onNextRemember,
+  onPrevRemember,
   stats,
   completed,
   loading,
@@ -1251,6 +1289,46 @@ function StudyModal({
   setPlaybackRate,
 }: any) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || loading || completed) return;
+    const card = cards[currentIndex];
+    if (!card) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+
+      const key = e.key;
+      if (key === ' ' || key === 'Spacebar') {
+        e.preventDefault();
+        playAudio();
+        return;
+      }
+      if (key === 'ArrowRight' || key === 'j' || key === 'J') {
+        e.preventDefault();
+        if (!showAnswer) {
+          setShowAnswer(true);
+        } else {
+          onNextRemember();
+        }
+        return;
+      }
+      if (key === 'ArrowLeft' || key === 'k' || key === 'K') {
+        e.preventDefault();
+        if (!showAnswer) {
+          setShowAnswer(true);
+        } else if (currentIndex > 0) {
+          onPrevRemember();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, loading, completed, cards, currentIndex, showAnswer, setShowAnswer, playAudio, onNextRemember, onPrevRemember]);
+
   if (!isOpen) return null;
 
   const currentCard = cards[currentIndex];
@@ -1337,11 +1415,16 @@ function StudyModal({
           <>
             {/* 进度与信息 */}
             <div className="px-6 py-3 flex items-center justify-between border-b border-gray-50 dark:border-gray-700 flex-shrink-0">
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-400 font-medium">{currentIndex + 1} / {cards.length}</span>
-                {sourceName && (
-                  <span className="text-[10px] text-gray-400">来源: {sourceName}</span>
-                )}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-4">
+                  <span className="text-xs text-gray-400 font-medium">{currentIndex + 1} / {cards.length}</span>
+                  {sourceName && (
+                    <span className="text-[10px] text-gray-400">来源: {sourceName}</span>
+                  )}
+                </div>
+                <span className="text-[10px] text-gray-400">
+                  快捷键：← / K、→ / J 未翻面时先显示答案，再按切换上一张 / 下一张（记为「记得」）· 空格 播放
+                </span>
               </div>
               <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">
                 {currentCard.cardType || '问答题'}
