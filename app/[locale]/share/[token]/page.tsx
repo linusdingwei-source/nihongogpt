@@ -141,6 +141,16 @@ export default function SharePage({ params }: { params: { token: string; locale:
             >
               {collectLoading ? '处理中...' : (session ? '收藏并导入我的空间' : '登录以收藏该牌组')}
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                trackButtonClick('PREVIEW_SHARED_DECK', 'share_page');
+                router.push(`/${locale}/workspace?deckId=${deck.id}`);
+              }}
+              className="w-full mt-3 border-2 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-semibold py-3 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+            >
+              在线预览资源与卡片（无需登录）
+            </button>
           </div>
         </div>
       </main>

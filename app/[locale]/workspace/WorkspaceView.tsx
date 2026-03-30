@@ -24,7 +24,8 @@ export function WorkspaceView(props: WorkspaceViewProps) {
     currentWorkspaceDeckName, currentWorkspaceDeckId, credits,
     showSourceViewModal, setShowSourceViewModal, selectedSourceId, setSelectedSourceId, sources, sourceContent, setSourceContent,
     selectedCard, setSelectedCardId, cardT, handleDeleteCard,
-    showComparisonView, setShowComparisonView, comparisonSource
+    showComparisonView, setShowComparisonView, comparisonSource,
+    viewerIsDeckOwner
   } = props;
 
   const [isFullscreenCard, setIsFullscreenCard] = useState(false);
@@ -299,16 +300,28 @@ export function WorkspaceView(props: WorkspaceViewProps) {
             {/* Content Area - 有原始资源时左右布局：左=原始资源，右=正面/背面/音频纵向；否则仅卡片内容纵向 */}
             <div className="flex-1 overflow-hidden flex flex-col">
               {(() => {
+                /** 对比视图右侧：压缩「正面」「音频&标签」，让「内容」占满中间 */
+                const cmpRight = showComparisonView;
                 const cardContentBlocks = (
-                  <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-                {/* 1. 正面部分 - 保证最小高度，便于阅读 */}
-                <div className="flex-1 min-h-[20vh] flex flex-col border-b border-gray-200 dark:border-gray-700/50 overflow-hidden">
-                  <div className="flex-shrink-0 px-4 py-2 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50">
+                  <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
+                {/* 1. 正面部分 */}
+                <div
+                  className={
+                    cmpRight
+                      ? 'flex-none max-h-[min(9rem,24svh)] flex flex-col border-b border-gray-200 dark:border-gray-700/50 overflow-hidden'
+                      : 'flex-1 min-h-[20vh] flex flex-col border-b border-gray-200 dark:border-gray-700/50 overflow-hidden'
+                  }
+                >
+                  <div
+                    className={`flex-shrink-0 px-4 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50 ${
+                      cmpRight ? 'py-1' : 'py-2'
+                    }`}
+                  >
                     <h3 className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       {cardT('frontContent')}
                     </h3>
                   </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar">
+                  <div className={`flex-1 min-h-0 overflow-y-auto custom-scrollbar ${cmpRight ? 'p-2' : 'p-4'}`}>
                     <div className="prose dark:prose-invert max-w-none prose-sm">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {preprocessContent(selectedCard.frontContent)}
@@ -317,14 +330,18 @@ export function WorkspaceView(props: WorkspaceViewProps) {
                   </div>
                 </div>
 
-                {/* 2. 背面部分 */}
+                {/* 2. 背面 / 笔记「内容」——对比模式下优先占满纵向剩余空间 */}
                 <div className="flex-1 min-h-0 flex flex-col border-b border-gray-200 dark:border-gray-700/50 overflow-hidden">
-                  <div className="flex-shrink-0 px-4 py-2 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50">
+                  <div
+                    className={`flex-shrink-0 px-4 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50 ${
+                      cmpRight ? 'py-1' : 'py-2'
+                    }`}
+                  >
                     <h3 className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       {selectedCard.category === 'NOTE' ? '内容' : cardT('backContent')}
                     </h3>
                   </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar">
+                  <div className={`flex-1 min-h-0 overflow-y-auto custom-scrollbar ${cmpRight ? 'p-3' : 'p-4'}`}>
                     <div className="prose dark:prose-invert max-w-none prose-sm">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm, remarkMath]} 
@@ -394,17 +411,35 @@ export function WorkspaceView(props: WorkspaceViewProps) {
                 </div>
 
                 {/* 3. 音频与详情部分 */}
-                <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-gray-50/20 dark:bg-gray-900/10">
-                  <div className="flex-shrink-0 px-4 py-2 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50">
+                <div
+                  className={
+                    cmpRight
+                      ? 'flex-none max-h-[min(14rem,32svh)] flex flex-col overflow-hidden bg-gray-50/20 dark:bg-gray-900/10'
+                      : 'flex-1 min-h-0 flex flex-col overflow-hidden bg-gray-50/20 dark:bg-gray-900/10'
+                  }
+                >
+                  <div
+                    className={`flex-shrink-0 px-4 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50 ${
+                      cmpRight ? 'py-1' : 'py-2'
+                    }`}
+                  >
                     <h3 className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       音频预览 & 标签
                     </h3>
                   </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar space-y-6">
+                  <div
+                    className={`flex-1 min-h-0 overflow-y-auto custom-scrollbar ${
+                      cmpRight ? 'p-2 space-y-2' : 'p-4 space-y-6'
+                    }`}
+                  >
                     {/* 音频播放器 */}
                     {selectedCard.audioUrl && (
-                      <div className="space-y-3">
-                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                      <div className={cmpRight ? 'space-y-1.5' : 'space-y-3'}>
+                        <h4
+                          className={`font-semibold text-gray-400 dark:text-gray-500 flex items-center gap-1.5 ${
+                            cmpRight ? 'text-[11px]' : 'text-xs'
+                          }`}
+                        >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                           </svg>
@@ -412,7 +447,11 @@ export function WorkspaceView(props: WorkspaceViewProps) {
                             ? '音频转写' 
                             : cardT('pronunciationPreview')}
                         </h4>
-                        <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <div
+                          className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm ${
+                            cmpRight ? 'p-2' : 'p-3'
+                          }`}
+                        >
                           {selectedCard.category === 'NOTE' && selectedCard.timestamps?.length > 0 ? (
                             <InteractiveTranscript
                               audioUrl={selectedCard.audioUrl}
@@ -430,7 +469,11 @@ export function WorkspaceView(props: WorkspaceViewProps) {
 
                     {/* 标签 */}
                     <div>
-                      <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-1.5">
+                      <h4
+                        className={`font-semibold text-gray-400 dark:text-gray-500 flex items-center gap-1.5 ${
+                          cmpRight ? 'text-[11px] mb-1' : 'text-xs mb-3'
+                        }`}
+                      >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
@@ -453,8 +496,12 @@ export function WorkspaceView(props: WorkspaceViewProps) {
                     </div>
 
                     {/* 其它元数据 */}
-                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                      <div className="grid grid-cols-2 gap-4">
+                    <div
+                      className={`border-t border-gray-100 dark:border-gray-700/50 ${
+                        cmpRight ? 'pt-2' : 'pt-4'
+                      }`}
+                    >
+                      <div className={`grid grid-cols-2 ${cmpRight ? 'gap-2' : 'gap-4'}`}>
                         <div>
                           <div className="text-[10px] text-gray-400 mb-1">所在牌组</div>
                           <div className="text-xs font-medium text-gray-600 dark:text-gray-300">{selectedCard.deckName}</div>
@@ -531,12 +578,14 @@ export function WorkspaceView(props: WorkspaceViewProps) {
               >
                 {t('common.cancel')}
               </button>
-              <button
-                onClick={() => handleDeleteCard(selectedCard.id)}
-                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                {cardT('delete')}
-              </button>
+              {viewerIsDeckOwner && (
+                <button
+                  onClick={() => handleDeleteCard(selectedCard.id)}
+                  className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  {cardT('delete')}
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -9,6 +9,8 @@ export interface WorkspaceViewProps {
   // State
   currentWorkspaceDeckName: string;
   currentWorkspaceDeckId: string;
+  /** 当前工作区牌组是否为登录/匿名用户本人所有；公开牌组访客预览时为 false */
+  viewerIsDeckOwner: boolean;
   credits: number | null;
   paymentSuccess: boolean;
   setPaymentSuccess: (v: boolean) => void;

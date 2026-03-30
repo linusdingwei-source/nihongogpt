@@ -39,7 +39,8 @@ export function SourcesPanel(props: WorkspaceViewProps) {
     viewingSourceId, setViewingSourceId,
     handleUploadFile, handleUploadAudio, handleUploadAudioFolder,
     handlePasteImage, handleInsertPastedText,
-    sourceContent
+    sourceContent,
+    viewerIsDeckOwner = true,
   } = props;
 
   // Track which folders are expanded
@@ -516,7 +517,8 @@ export function SourcesPanel(props: WorkspaceViewProps) {
       </div> */}
 
 
-      {/* 来源操作按钮 */}
+      {/* 来源操作按钮（仅牌组所有者） */}
+      {viewerIsDeckOwner ? (
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-3 gap-2">
           <button 
@@ -595,6 +597,13 @@ export function SourcesPanel(props: WorkspaceViewProps) {
           </button>
         </div>
       </div>
+      ) : (
+        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-amber-50/80 dark:bg-amber-950/20">
+          <p className="text-[11px] text-amber-800 dark:text-amber-200/90 leading-snug">
+            共享牌组预览：仅可查看来源，无法添加、重命名或删除。
+          </p>
+        </div>
+      )}
 
       {/* 创建目录弹窗 */}
       {showCreateFolderModal && (
@@ -846,6 +855,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
               </div>
                 ) : (
                   <div className="flex items-start gap-3">
+                    {viewerIsDeckOwner && (
                     <div className="mt-1 flex-shrink-0">
                       <input
                         type="checkbox"
@@ -858,6 +868,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                       />
                     </div>
+                    )}
                     <div className="flex items-start gap-2 flex-1 min-w-0">
                       {isAudio ? (
                         <svg className="w-4 h-4 text-violet-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -879,6 +890,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                           {new Date(source.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
                         </p>
                       </div>
+                      {viewerIsDeckOwner && (
                       <div className="relative source-menu-container">
                         <button
                           type="button"
@@ -985,6 +997,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                           </div>
                         )}
                       </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1023,6 +1036,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                   <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                     {folderSources[folder.id]?.length || 0} 个
                   </span>
+                  {viewerIsDeckOwner && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1035,6 +1049,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
+                  )}
                 </div>
 
                 {/* Folder contents */}
@@ -1137,6 +1152,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                             </div>
                           ) : (
                           <div className="flex items-start gap-3">
+                            {viewerIsDeckOwner && (
                             <div className="mt-1 flex-shrink-0">
                               <input
                                 type="checkbox"
@@ -1149,6 +1165,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                               />
                             </div>
+                            )}
                             <div className="flex items-start gap-2 flex-1 min-w-0">
                               <svg className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1161,6 +1178,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                   {new Date(source.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
                                 </p>
                               </div>
+                              {viewerIsDeckOwner && (
                               <div className="relative source-menu-container">
                                 <button
                                   type="button"
@@ -1238,6 +1256,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                                   </div>
                                 )}
                               </div>
+                              )}
                             </div>
                           </div>
                           )}
@@ -1345,6 +1364,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                   </div>
                 ) : (
                 <div className="flex items-start gap-3">
+                  {viewerIsDeckOwner && (
                   <div className="mt-1 flex-shrink-0">
                     <input
                       type="checkbox"
@@ -1357,6 +1377,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                     />
                   </div>
+                  )}
                   <div className="flex items-start gap-2 flex-1 min-w-0">
                     <svg className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1372,6 +1393,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                         {new Date(source.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
                       </p>
                     </div>
+                    {viewerIsDeckOwner && (
                     <div className="relative source-menu-container">
                       <button
                         type="button"
@@ -1469,6 +1491,7 @@ export function SourcesPanel(props: WorkspaceViewProps) {
                         </div>
                       )}
                     </div>
+                    )}
                   </div>
                 </div>
                 )}

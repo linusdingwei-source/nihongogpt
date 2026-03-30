@@ -11,20 +11,13 @@ export async function GET(
   try {
     const session = await auth();
     const userId = await getUserId(session, request);
-    
-    if (!userId) {
-      return NextResponse.json(
-        errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
-        { status: 401 }
-      );
-    }
 
     const { id } = await params;
 
     const card = await prisma.card.findFirst({
-      where: {
-        id,
-        userId,
+      where: { id },
+      include: {
+        deck: { select: { isPublic: true } },
       },
     });
 
@@ -35,7 +28,23 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(successResponse({ card }));
+    const isOwner = !!userId && card.userId === userId;
+    const isPublicDeckView = card.deckId && card.deck?.isPublic === true;
+    if (!isOwner && !isPublicDeckView) {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      return NextResponse.json(
+        errorResponse(ErrorCodes.FORBIDDEN, 'Forbidden'),
+        { status: 403 }
+      );
+    }
+
+    const { deck: _deck, ...cardOut } = card;
+    return NextResponse.json(successResponse({ card: cardOut }));
   } catch (error) {
     console.error('Get card error:', error);
     return NextResponse.json(

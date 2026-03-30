@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
+import { resolveDeckScopedDataOwner } from '@/lib/shared-deck-access';
 import {
   uploadToStorage,
   getSignedUrlForStorageUrl,
@@ -17,31 +18,45 @@ export async function GET(request: NextRequest) {
     const session = await auth();
     const userId = await getUserId(session, request);
 
-    if (!userId) {
-      return NextResponse.json(
-        errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const deckId = searchParams.get('deckId');
 
-    console.log(`[GET /api/sources] Fetching sources for userId: ${userId}, deckId: ${deckId}`);
+    let dataOwnerUserId: string;
+    if (deckId) {
+      const resolved = await resolveDeckScopedDataOwner(userId, deckId);
+      if (!resolved.ok) {
+        const status = resolved.status;
+        const code =
+          status === 401
+            ? ErrorCodes.UNAUTHORIZED
+            : status === 403
+              ? ErrorCodes.FORBIDDEN
+              : ErrorCodes.NOT_FOUND;
+        const msg =
+          status === 401 ? 'Unauthorized' : status === 403 ? 'Forbidden' : 'Deck not found';
+        return NextResponse.json(errorResponse(code, msg), { status });
+      }
+      dataOwnerUserId = resolved.dataOwnerUserId;
+    } else {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      dataOwnerUserId = userId;
+    }
 
-    const where: any = { 
-      userId,
+    const where: Record<string, unknown> = {
+      userId: dataOwnerUserId,
       parentSourceId: null, // Only show root sources, not page images
     };
 
     if (deckId) {
-      where.deckId = {
-        equals: deckId
-      };
+      where.deckId = { equals: deckId };
     }
 
     try {
-      console.log('[GET /api/sources] Calling prisma.source.findMany with:', JSON.stringify(where));
       const sources = await prisma.source.findMany({
         where,
         orderBy: { createdAt: 'desc' },
@@ -60,8 +75,6 @@ export async function GET(request: NextRequest) {
           updatedAt: true,
         },
       });
-      console.log(`[GET /api/sources] Found ${sources.length} sources`);
-
       const sourcesWithSignedUrls = await Promise.all(
         sources.map(async (s) => ({
           ...s,

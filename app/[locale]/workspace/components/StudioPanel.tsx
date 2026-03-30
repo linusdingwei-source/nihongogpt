@@ -58,6 +58,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
     handleGenerateCardsFromSource,
     handleDeleteCard,
     generateCardAudio,
+    viewerIsDeckOwner,
     currentWorkspaceDeckName,
     currentWorkspaceDeckId,
     specialStudyCard,
@@ -311,7 +312,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
           </svg>
         </button>
         <div className="flex-1 flex flex-col items-center gap-2 pt-2">
-          {/* 制作 */}
+          {viewerIsDeckOwner && (
           <button
             onClick={handleGenerateCardsFromSource}
             disabled={props.cardLoading}
@@ -330,6 +331,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
               </svg>
             )}
           </button>
+          )}
           {/* 学习 */}
           <button
             onClick={() => {
@@ -411,6 +413,8 @@ export function StudioPanel(props: WorkspaceViewProps) {
         cards={studyCards}
         currentIndex={currentStudyIndex}
         onReview={submitReview}
+        onNextRemember={handleStudyNextRemember}
+        onPrevRemember={handleStudyPrevRemember}
         stats={studyStats}
         completed={studyCompleted}
         loading={studyLoading}
@@ -463,8 +467,8 @@ export function StudioPanel(props: WorkspaceViewProps) {
 
       {/* Studio 输出选项网格 */}
       <div className="flex-shrink-0 p-4 border-b border-gray-100 dark:border-gray-700/50">
-        <div className="grid grid-cols-4 gap-3">
-          {/* 制作 */}
+        <div className={`grid gap-3 ${viewerIsDeckOwner ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          {viewerIsDeckOwner && (
           <button
             onClick={handleGenerateCardsFromSource}
             disabled={props.cardLoading}
@@ -485,6 +489,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
             </div>
             <span className="text-xs font-bold text-indigo-900 dark:text-indigo-100">制作</span>
           </button>
+          )}
 
           {/* 学习 */}
           <button
@@ -638,8 +643,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
                       key={card.id}
                       onClick={async () => {
                         setSelectedCardId(card.id);
-                        // 如果卡片没有音频，自动生成
-                        if (!card.audioUrl) {
+                        if (viewerIsDeckOwner && !card.audioUrl) {
                           await generateCardAudio(card);
                         }
                       }}
@@ -653,6 +657,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
                         <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2 flex-1">
                           {preprocessContent(card.frontContent)}
                         </p>
+                        {viewerIsDeckOwner && (
                         <div className="relative card-menu-container flex-shrink-0">
                           <button
                             onClick={(e) => {
@@ -683,6 +688,7 @@ export function StudioPanel(props: WorkspaceViewProps) {
                             </div>
                           )}
                         </div>
+                        )}
                       </div>
                       <div className="flex items-center justify-between mt-1">
                         <div className="flex items-center gap-2">
@@ -1080,7 +1086,8 @@ function DictationModal({
   cards,
   currentIndex,
   onReview,
-  stats,
+  onNextRemember,
+  onPrevRemember,
   completed,
   loading,
   playAudio,
@@ -1106,6 +1113,60 @@ function DictationModal({
     setUserInput('');
     setShowResult(false);
   }, [currentIndex]);
+
+  // 与学习一致的快捷键（capture：在输入框内拦截方向键，避免只移动光标）
+  useEffect(() => {
+    if (!isOpen || loading || completed) return;
+    if (!cards[currentIndex]) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.('textarea, select, [contenteditable="true"]')) return;
+
+      const inDictationInput =
+        !!inputRef.current &&
+        (el === inputRef.current || !!inputRef.current.contains(el as Node));
+
+      if (el?.closest?.('input') && !inDictationInput) return;
+
+      const key = e.key;
+
+      if (key === ' ' || key === 'Spacebar') {
+        e.preventDefault();
+        playAudio();
+        return;
+      }
+
+      const isJk = key === 'j' || key === 'J' || key === 'k' || key === 'K';
+      if (inDictationInput && !showResult && isJk) return;
+
+      if (key === 'ArrowRight' || key === 'j' || key === 'J') {
+        e.preventDefault();
+        if (!showResult) setShowResult(true);
+        else onNextRemember();
+        return;
+      }
+      if (key === 'ArrowLeft' || key === 'k' || key === 'K') {
+        e.preventDefault();
+        if (!showResult) setShowResult(true);
+        else if (currentIndex > 0) onPrevRemember();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [
+    isOpen,
+    loading,
+    completed,
+    cards,
+    currentIndex,
+    showResult,
+    playAudio,
+    onNextRemember,
+    onPrevRemember,
+  ]);
 
   if (!isOpen) return null;
 
@@ -1138,7 +1199,8 @@ function DictationModal({
               <audio ref={audioRef} controls src={currentCard.audioUrl} className="h-8 w-48 md:w-64" />
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end gap-0.5">
+            <div className="flex items-center gap-4">
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-600">
               {currentIndex + 1} / {cards.length}
             </span>
@@ -1166,6 +1228,10 @@ function DictationModal({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
+            </div>
+            <span className="text-[10px] text-gray-400 max-w-[min(100vw-2rem,28rem)] text-right leading-tight">
+              快捷键：← / K、→ / J 未出结果时先显示对比，再按上一题 / 下一题（记「记得」）· 空格 播放；输入框内仍可用 J / K 打字
+            </span>
           </div>
         </div>
 

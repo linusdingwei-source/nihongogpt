@@ -14,18 +14,11 @@ export async function GET(
   try {
     const session = await auth();
     const userId = await getUserId(session, request);
-    
-    if (!userId) {
-      return NextResponse.json(
-        errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
-        { status: 401 }
-      );
-    }
 
     const { id } = params;
 
     const deck = await prisma.deck.findFirst({
-      where: { id, userId },
+      where: { id },
       include: {
         _count: {
           select: { cards: true },
@@ -40,6 +33,20 @@ export async function GET(
       );
     }
 
+    const isOwner = !!userId && deck.userId === userId;
+    if (!isOwner && !deck.isPublic) {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      return NextResponse.json(
+        errorResponse(ErrorCodes.FORBIDDEN, 'Forbidden'),
+        { status: 403 }
+      );
+    }
+
     const deckWithSignedUrl = {
       id: deck.id,
       name: deck.name,
@@ -47,6 +54,9 @@ export async function GET(
       cardCount: deck._count.cards,
       createdAt: deck.createdAt,
       updatedAt: deck.updatedAt,
+      isPublic: deck.isPublic,
+      description: deck.description,
+      viewerIsOwner: isOwner,
     };
 
     return NextResponse.json(

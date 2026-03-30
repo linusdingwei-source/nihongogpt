@@ -32,6 +32,7 @@ model User {
   collectedDecks CollectedDeck[]
   sources        Source[]
   sourceFolders  SourceFolder[]
+  apiKeys        ApiKey[] // MCP API keys
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -257,4 +258,20 @@ model SourceFolder {
   @@index([userId])
   @@index([parentId])
   @@index([deckId])
+}
+
+// MCP API Key for external agent access
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String // User-friendly name for the key
+  keyHash    String    @unique // SHA-256 hash of the actual key
+  keyPrefix  String // First 8 chars for identification (e.g., "nkg_xxxx")
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([keyHash])
 }

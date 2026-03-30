@@ -18,7 +18,8 @@ export function ChatPanel(props: WorkspaceViewProps) {
     handleSaveNote, handleChatFileDrop, handleChatPasteImage, handleGenerateCardsFromText,
     handleSaveInputAsSource, handleRetryFailedItems, sourcesLoading,
     cardLoading, isPdfGenerating, onCancelPdfGeneration,
-    isCardGenerating, onCancelCardGeneration, handleClearChatHistory
+    isCardGenerating, onCancelCardGeneration, handleClearChatHistory,
+    viewerIsDeckOwner
   } = props;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -72,20 +73,22 @@ export function ChatPanel(props: WorkspaceViewProps) {
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!viewerIsDeckOwner) return;
     dragCounter.current++;
     if (e.dataTransfer.types.includes('Files')) {
       setIsDragging(true);
     }
-  }, []);
+  }, [viewerIsDeckOwner]);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!viewerIsDeckOwner) return;
     dragCounter.current--;
     if (dragCounter.current === 0) {
       setIsDragging(false);
     }
-  }, []);
+  }, [viewerIsDeckOwner]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -97,12 +100,12 @@ export function ChatPanel(props: WorkspaceViewProps) {
     e.stopPropagation();
     setIsDragging(false);
     dragCounter.current = 0;
-    
+    if (!viewerIsDeckOwner) return;
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleChatFileDrop(files);
     }
-  }, [handleChatFileDrop]);
+  }, [handleChatFileDrop, viewerIsDeckOwner]);
 
   // 处理粘贴事件
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -253,6 +256,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                           <div className="mt-2">
                             <div className="flex items-center justify-between mb-1">
                               <div className="text-[10px] font-medium text-red-600 dark:text-red-400">失败详情:</div>
+                              {viewerIsDeckOwner && (
                               <button
                                 onClick={() => handleRetryFailedItems(message.data?.failedItems?.map((item: { text: string; type?: string }) => ({ text: item.text, type: item.type })) || [])}
                                 disabled={cardLoading}
@@ -260,6 +264,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                               >
                                 重试失败项
                               </button>
+                              )}
                             </div>
                             <div className="max-h-32 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
                               {message.data.failedItems.map((item: { text: string; type?: string; reason: string }, idx: number) => (
@@ -368,7 +373,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                 </div>
                 <div className="flex items-center gap-2 mt-1 px-1">
                   {/* 保存笔记按钮 - 只在分析结果消息上显示 */}
-                  {message.role === 'assistant' && (message.type === 'analysis') && (
+                  {viewerIsDeckOwner && message.role === 'assistant' && (message.type === 'analysis') && (
                     <button
                       onClick={() => {
                         if (message.data?.audioUrl && message.data?.timestamps) {
@@ -391,7 +396,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                     </button>
                   )}
                   {/* 生成闪卡按钮 - 在用户消息上显示（需要LLM分析） */}
-                  {message.role === 'user' && message.content.trim().length > 0 && (
+                  {viewerIsDeckOwner && message.role === 'user' && message.content.trim().length > 0 && (
                     <button
                       onClick={() => handleGenerateCardsFromText(message.content)}
                       disabled={cardLoading}
@@ -405,7 +410,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                     </button>
                   )}
                   {/* 生成闪卡按钮 - 在分析结果上显示（跳过LLM分析，直接用已有分析） */}
-                  {message.role === 'assistant' && message.type === 'analysis' && message.data?.originalText && (
+                  {viewerIsDeckOwner && message.role === 'assistant' && message.type === 'analysis' && message.data?.originalText && (
                     <button
                       onClick={() => handleGenerateCardsFromText(
                         message.data.originalText,
@@ -432,7 +437,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
       })
     )}
         {/* Standalone cancel buttons when generation in progress but not chatLoading */}
-        {!chatLoading && (isPdfGenerating || isCardGenerating) && (
+        {!chatLoading && viewerIsDeckOwner && (isPdfGenerating || isCardGenerating) && (
           <div className="flex justify-start mb-2">
             <div className="flex items-center gap-2">
               {isPdfGenerating && (
@@ -471,7 +476,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]" />
               </div>
               {/* Cancel button for PDF processing */}
-              {isPdfGenerating && (
+              {viewerIsDeckOwner && isPdfGenerating && (
                 <button
                   onClick={onCancelPdfGeneration}
                   className="text-xs px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1"
@@ -484,7 +489,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
                 </button>
               )}
               {/* Cancel button for card generation */}
-              {isCardGenerating && !isPdfGenerating && (
+              {viewerIsDeckOwner && isCardGenerating && !isPdfGenerating && (
                 <button
                   onClick={onCancelCardGeneration}
                   className="text-xs px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1"
@@ -527,8 +532,8 @@ export function ChatPanel(props: WorkspaceViewProps) {
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             onKeyDown={onKeyDown}
-            onPaste={handlePaste}
-            placeholder="输入日文句子或提问... (可粘贴文本、拖放图片/音频)"
+            onPaste={viewerIsDeckOwner ? handlePaste : undefined}
+            placeholder={viewerIsDeckOwner ? '输入日文句子或提问... (可粘贴文本、拖放图片/音频)' : '输入日文句子或提问...'}
             rows={1}
             className="w-full pl-4 pr-24 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none text-sm transition-all min-h-[48px] max-h-32"
             style={{ height: 'auto' }}
@@ -541,7 +546,7 @@ export function ChatPanel(props: WorkspaceViewProps) {
           {/* 按钮组 */}
           <div className="absolute right-2 bottom-2 flex items-center gap-1">
             {/* 保存为资源按钮 - 当有较长文本时显示 */}
-            {chatInput.trim().length >= 5 && (
+            {viewerIsDeckOwner && chatInput.trim().length >= 5 && (
               <button
                 onClick={handleSaveInputAsSource}
                 disabled={sourcesLoading}
@@ -574,7 +579,9 @@ export function ChatPanel(props: WorkspaceViewProps) {
           </div>
         </div>
         <p className="text-[10px] text-center text-gray-400 dark:text-gray-500 mt-2">
-          由 Qwen 提供支持 · 粘贴文本后点击绿色按钮保存为资源
+          {viewerIsDeckOwner
+            ? '由 Qwen 提供支持 · 粘贴文本后点击绿色按钮保存为资源'
+            : '由 Qwen 提供支持'}
         </p>
       </div>
     </div>

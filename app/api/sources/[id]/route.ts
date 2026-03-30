@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
 import { getSignedUrlForStorageUrl } from '@/lib/storage';
+import { viewerMayReadSource } from '@/lib/shared-deck-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,23 +17,14 @@ export async function GET(
     const session = await auth();
     const userId = await getUserId(session, request);
 
-    if (!userId) {
-      return NextResponse.json(
-        errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
-        { status: 401 }
-      );
-    }
-
     const { id } = await params;
-    console.log(`[GET /api/sources/${id}] Fetching source details`);
 
     const source = await prisma.source.findFirst({
-      where: {
-        id,
-        userId, // 确保只能访问自己的来源
-      },
+      where: { id },
       select: {
         id: true,
+        userId: true,
+        deckId: true,
         name: true,
         type: true,
         content: true, // 包含内容
@@ -50,6 +42,24 @@ export async function GET(
       return NextResponse.json(
         errorResponse(ErrorCodes.NOT_FOUND, 'Source not found'),
         { status: 404 }
+      );
+    }
+
+    const allowed = await viewerMayReadSource(userId, {
+      id: source.id,
+      userId: source.userId,
+      deckId: source.deckId,
+    });
+    if (!allowed) {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      return NextResponse.json(
+        errorResponse(ErrorCodes.FORBIDDEN, 'Forbidden'),
+        { status: 403 }
       );
     }
 

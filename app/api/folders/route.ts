@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getUserId } from '@/lib/anonymous-user';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
+import { resolveDeckScopedDataOwner } from '@/lib/shared-deck-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,27 +13,41 @@ export async function GET(request: NextRequest) {
     const session = await auth();
     const userId = await getUserId(session, request);
 
-    if (!userId) {
-      return NextResponse.json(
-        errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const deckId = searchParams.get('deckId');
 
-    console.log(`[GET /api/folders] Fetching folders for userId: ${userId}, deckId: ${deckId}`);
-
-    const where: any = { userId };
+    let dataOwnerUserId: string;
     if (deckId) {
-      where.deckId = {
-        equals: deckId
-      };
+      const resolved = await resolveDeckScopedDataOwner(userId, deckId);
+      if (!resolved.ok) {
+        const status = resolved.status;
+        const code =
+          status === 401
+            ? ErrorCodes.UNAUTHORIZED
+            : status === 403
+              ? ErrorCodes.FORBIDDEN
+              : ErrorCodes.NOT_FOUND;
+        const msg =
+          status === 401 ? 'Unauthorized' : status === 403 ? 'Forbidden' : 'Deck not found';
+        return NextResponse.json(errorResponse(code, msg), { status });
+      }
+      dataOwnerUserId = resolved.dataOwnerUserId;
+    } else {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      dataOwnerUserId = userId;
+    }
+
+    const where: Record<string, unknown> = { userId: dataOwnerUserId };
+    if (deckId) {
+      where.deckId = { equals: deckId };
     }
 
     try {
-      console.log('[GET /api/folders] Calling prisma.sourceFolder.findMany with:', JSON.stringify(where));
       const folders = await prisma.sourceFolder.findMany({
         where,
         orderBy: { name: 'asc' },
@@ -47,8 +62,6 @@ export async function GET(request: NextRequest) {
           },
         },
       });
-      console.log(`[GET /api/folders] Found ${folders.length} folders`);
-
       return NextResponse.json(
         successResponse({
           folders: folders.map(f => ({

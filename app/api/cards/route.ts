@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { successResponse, errorResponse, ErrorCodes } from '@/lib/api-response';
 import { getSignedUrlForStorageUrl } from '@/lib/storage';
+import { resolveDeckScopedDataOwner } from '@/lib/shared-deck-access';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,17 +12,44 @@ export async function GET(request: NextRequest) {
     
     // 获取用户 ID（支持登录用户和临时用户）
     const userId = await getUserId(session, request);
-    
-    if (!userId) {
-      return NextResponse.json(
-        errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
-        { status: 401 }
-      );
-    }
 
     const { searchParams } = new URL(request.url);
     const deckId = searchParams.get('deckId');
     const deckName = searchParams.get('deck');
+
+    let dataOwnerUserId: string;
+    if (deckId) {
+      const resolved = await resolveDeckScopedDataOwner(userId, deckId);
+      if (!resolved.ok) {
+        const status = resolved.status;
+        const code =
+          status === 401
+            ? ErrorCodes.UNAUTHORIZED
+            : status === 403
+              ? ErrorCodes.FORBIDDEN
+              : ErrorCodes.NOT_FOUND;
+        const msg =
+          status === 401 ? 'Unauthorized' : status === 403 ? 'Forbidden' : 'Deck not found';
+        return NextResponse.json(errorResponse(code, msg), { status });
+      }
+      dataOwnerUserId = resolved.dataOwnerUserId;
+    } else if (deckName) {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      dataOwnerUserId = userId;
+    } else {
+      if (!userId) {
+        return NextResponse.json(
+          errorResponse(ErrorCodes.UNAUTHORIZED, 'Unauthorized'),
+          { status: 401 }
+        );
+      }
+      dataOwnerUserId = userId;
+    }
     const sourceId = searchParams.get('sourceId');
     const category = searchParams.get('category') || 'WORD'; // WORD, SENTENCE, or NOTE
     const searchQuery = searchParams.get('search'); // 搜索关键词
@@ -41,7 +69,7 @@ export async function GET(request: NextRequest) {
         backContent?: { contains: string; mode: 'insensitive' };
       }>;
     } = {
-      userId,
+      userId: dataOwnerUserId,
     };
 
     // Filter by category: WORD shows "单词" cardType, SENTENCE shows non-"单词", NOTE uses category field

@@ -1,6 +1,7 @@
 import { prisma } from './prisma';
 import { randomUUID } from 'crypto';
 import { decode } from 'next-auth/jwt';
+import { getApiKeyFromRequest, validateApiKey } from './api-key-auth';
 
 const ANONYMOUS_INITIAL_CREDITS = 50;
 
@@ -247,7 +248,7 @@ export function getBearerTokenFromRequest(request: Request): string | null {
 }
 
 /**
- * 获取用户 ID（支持登录用户、Bearer Token 和临时用户）
+ * 获取用户 ID（支持登录用户、Bearer Token、API Key 和临时用户）
  * @param session NextAuth session
  * @param request NextRequest 对象
  * @returns 用户 ID 或 null
@@ -266,7 +267,16 @@ export async function getUserId(
     if (dbUser) {
       return sessionUserId;
     }
-    // 当作未登录，继续走 Bearer / 匿名，避免 OSS 路径用幽灵 id、写库时外键失败
+    // 当作未登录，继续走 Bearer / API Key / 匿名，避免 OSS 路径用幽灵 id、写库时外键失败
+  }
+
+  // 尝试从 API Key 获取用户 ID (MCP integration)
+  const apiKey = getApiKeyFromRequest(request);
+  if (apiKey) {
+    const userId = await validateApiKey(apiKey);
+    if (userId) {
+      return userId;
+    }
   }
 
   // 尝试从 Bearer Token 获取用户 ID

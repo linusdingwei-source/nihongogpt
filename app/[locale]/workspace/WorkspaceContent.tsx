@@ -29,6 +29,18 @@ interface Card {
   category?: string;
 }
 
+interface WorkspaceDeckDetails {
+  id: string;
+  name: string;
+  coverImageUrl?: string | null;
+  cardCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  isPublic?: boolean;
+  description?: string | null;
+  viewerIsOwner?: boolean;
+}
+
 interface Source {
   id: string;
   name: string;
@@ -107,13 +119,15 @@ export function WorkspacePageContent() {
   }, [searchParams]);
 
   // 根据 deckId 获取牌组详情
-  const [deckDetails, setDeckDetails] = useState<Deck | null>(null);
+  const [deckDetails, setDeckDetails] = useState<WorkspaceDeckDetails | null>(null);
   
   useEffect(() => {
     const fetchDeckDetails = async () => {
       if (!currentWorkspaceDeckId) return;
       try {
-        const response = await fetch(`/api/decks/${currentWorkspaceDeckId}`);
+        const { getAnonymousHeaders } = await import('@/hooks/useAnonymousUser');
+        const headers = getAnonymousHeaders();
+        const response = await fetch(`/api/decks/${currentWorkspaceDeckId}`, { headers });
         const data = await response.json();
         if (data.success && data.data.deck) {
           setDeckDetails(data.data.deck);
@@ -125,6 +139,12 @@ export function WorkspacePageContent() {
     };
     fetchDeckDetails();
   }, [currentWorkspaceDeckId]);
+
+  const viewerIsDeckOwner = useMemo(() => {
+    if (!currentWorkspaceDeckId) return true;
+    if (!deckDetails) return false;
+    return deckDetails.viewerIsOwner === true;
+  }, [currentWorkspaceDeckId, deckDetails]);
 
   // 卡片生成相关状态
   const [cardText, setCardText] = useState('');
@@ -2662,6 +2682,7 @@ export function WorkspacePageContent() {
       
       currentWorkspaceDeckName={currentWorkspaceDeckName}
       currentWorkspaceDeckId={currentWorkspaceDeckId}
+      viewerIsDeckOwner={viewerIsDeckOwner}
       credits={credits}
       paymentSuccess={paymentSuccess}
       setPaymentSuccess={setPaymentSuccess}
