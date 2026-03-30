@@ -6,6 +6,7 @@ import { Link, useRouter } from '@/i18n/routing';
 import { useSession } from 'next-auth/react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import UserMenu from '@/components/UserMenu';
+import AnkiImporter from '@/components/AnkiImporter';
 import { trackPageViewEvent, trackButtonClick } from '@/lib/analytics';
 
 interface Deck {
@@ -41,6 +42,7 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
 
   // 创建牌组弹窗
   const [showCreateDeckModal, setShowCreateDeckModal] = useState(false);
+  const [showAnkiImporter, setShowAnkiImporter] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
   /** 入库用的 OSS 永久 URL（非签名） */
   const [newDeckCoverStorageUrl, setNewDeckCoverStorageUrl] = useState('');
@@ -415,6 +417,18 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
 
             {/* 右侧控制 */}
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  trackButtonClick('IMPORT_ANKI', 'home_page');
+                  setShowAnkiImporter(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                导入 Anki
+              </button>
               <button
                 onClick={handleCreateDeck}
                 className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm font-medium"
@@ -1004,6 +1018,17 @@ export default function HomePageClient({ locale: _locale }: { locale: string }) 
             </div>
           </div>
         </div>
+      )}
+
+      {/* Anki 导入弹窗 */}
+      {showAnkiImporter && (
+        <AnkiImporter
+          onImportComplete={(result) => {
+            // 导入完成后刷新牌组列表
+            fetchDecks();
+          }}
+          onClose={() => setShowAnkiImporter(false)}
+        />
       )}
     </div>
   );
